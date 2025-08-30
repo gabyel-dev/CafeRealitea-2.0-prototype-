@@ -1,0 +1,327 @@
+import React, { useState, useEffect, useRef } from "react";
+import {
+  FiBarChart,
+  FiChevronDown,
+  FiChevronsRight,
+  FiDollarSign,
+  FiHome,
+  FiMonitor,
+  FiSettings,
+  FiShoppingCart,
+  FiTag,
+  FiUserPlus,
+  FiUsers,
+  FiUser, 
+  FiLogOut,
+} from "react-icons/fi";
+import { motion, AnimatePresence } from "framer-motion";
+import axios from "axios";
+import logout from "../Utility/logout";
+import { useNavigate } from "react-router-dom";
+
+export const Sidebar = ({ activeTab, setActiveTab }) => {
+  return (
+    <div className="flex bg-indigo-50   ">
+      <Sidebar2 activeTab={activeTab} setActiveTab={setActiveTab} />
+      <ExampleContent />
+    </div>
+  );
+};
+
+const api_name = import.meta.env.VITE_SERVER_API_NAME;
+
+const Sidebar2 = ({ activeTab, setActiveTab }) => {
+  const [open, setOpen] = useState(false); // Default closed on all screens
+  const [selected, setSelected] = useState("Dashboard");
+  const [role, setRole] = useState("");
+  const navigate = useNavigate();
+
+  // Set sidebar state based on screen size
+  useEffect(() => {
+    const checkScreenSize = () => {
+      // For medium screens and above, open the sidebar by default
+      if (window.innerWidth >= 768) {
+        setOpen(true);
+      } else {
+        setOpen(false);
+      }
+    };
+    
+    // Check on initial load
+    checkScreenSize();
+    
+    // Add event listener for window resize
+    window.addEventListener('resize', checkScreenSize);
+    
+    // Cleanup
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
+
+  //check user role and if user is loggedin
+  useEffect(() => {
+    axios.get(`${api_name}/user`, { withCredentials: true })
+    .then((res) => {
+      if (!res.data.logged_in) {
+          navigate('/');
+      }
+      setRole(res.data.role);
+    })
+  }, [])
+
+  return (
+    <>
+      {/* Toggle button (only visible on mobile) */}
+
+
+      <AnimatePresence>
+        {!open && (
+          <motion.button
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1, x: -10 }}
+          exit={{ opacity: 0, x: 10 }}
+          transition={{ duration: 0.4 }}
+          className={`px-3 fixed top-0 z-1 right-0 h-10 m-2 rounded-md bg-indigo-600 text-white md:hidden`}
+          onClick={() => setOpen(true)}
+          >
+            ☰
+          </motion.button>
+        )}
+      </AnimatePresence>
+
+      {/* Overlay for mobile */}
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-indigo-50 bg-opacity-40 -z-1 md:hidden"
+            onClick={() => setOpen(false)}
+          ></motion.div>
+        )}
+      </AnimatePresence>
+
+      <motion.nav
+        layout
+        className={`fixed md:sticky top-0 h-screen z-40
+        shrink-0 border-r border-slate-300 bg-white p-2
+        ${open ? "translate-x-0" : "-translate-x-full"} md:translate-x-0`}
+        style={{
+          width: open ? "225px" : "fit-content",
+        }}
+      >
+        <TitleSection open={open} />
+
+        <div className="space-y-1">
+          <Option Icon={FiHome} title="Dashboard" activeTab={activeTab} setActiveTab={setActiveTab} open={open} />
+          <Option Icon={FiDollarSign} title="Sales" activeTab={activeTab} setActiveTab={setActiveTab} open={open} notifs={3} />
+          <Option Icon={FiMonitor} title="Orders" activeTab={activeTab} setActiveTab={setActiveTab} open={open} />
+          <Option Icon={FiShoppingCart} title="Products" activeTab={activeTab} setActiveTab={setActiveTab} open={open} />
+          <Option Icon={FiUserPlus} title="Create Member" activeTab={activeTab} setActiveTab={setActiveTab} open={open} />
+          <Option Icon={FiUsers} title="Members" activeTab={activeTab} setActiveTab={setActiveTab} open={open} />
+          <Option Icon={FiSettings} title="Settings" activeTab={activeTab} setActiveTab={setActiveTab} open={open} />
+        </div>
+
+        <ToggleClose open={open} setOpen={setOpen} />
+      </motion.nav>
+    </>
+  );
+};
+
+const Option = ({ Icon, title, activeTab, setActiveTab, open, notifs }) => {
+  return (
+    <motion.button
+      layout
+      onClick={() => setActiveTab(title)}
+      className={`relative flex h-10 w-full items-center rounded-md transition-colors ${activeTab === title ? "bg-indigo-100 text-indigo-800" : "text-slate-500 hover:bg-slate-100"}`}
+    >
+      <motion.div
+        layout
+        className="grid h-full w-10 place-content-center text-lg"
+      >
+        <Icon />
+      </motion.div>
+      <AnimatePresence>
+        {open && (
+          <motion.span
+            key={title}
+            layout
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -10 }}
+            transition={{ duration: 0.15 }}
+            className="text-xs font-medium"
+          >
+            {title}
+          </motion.span>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {notifs && open && (
+          <motion.span
+            key={`notif-${title}`}
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{
+              opacity: 1,
+              scale: 1,
+            }}
+            exit={{ scale: 0, opacity: 0 }}
+            style={{ y: "-50%" }}
+            transition={{ duration: 0.15 }}
+            className="absolute right-2 top-1/2 size-4 rounded bg-indigo-500 text-xs text-white"
+          >
+            {notifs}
+          </motion.span>
+        )}
+      </AnimatePresence>
+    </motion.button>
+  );
+};
+
+const TitleSection = ({ open }) => {
+  const [userFirstname, setFirstname] = useState();
+  const [userLastname, setLastname] = useState();
+  const [userRole, setUserRole] = useState();
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const dropdownRef = useRef(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    axios.get(`${api_name}/user`, { withCredentials: true })
+      .then((res) => {
+        setFirstname(res.data.user?.first_name);
+        setLastname(res.data.user?.last_name);
+        setUserRole(res.data.user?.role);
+      });
+  }, []);
+
+  // Close dropdown on click outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  return (
+    <div className="mb-3 border-b border-slate-300 pb-3" ref={dropdownRef}>
+      <div 
+        onClick={() => setMenuOpen(!menuOpen)}
+        className="flex cursor-pointer items-center justify-between rounded-md transition-colors hover:bg-slate-100"
+      >
+        <div className="flex items-center gap-2">
+          <Logo />
+          {open && (
+            <motion.div
+              key="user-info"
+              layout
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -10 }}
+              transition={{ duration: 0.15 }}
+            >
+              <span className="block text-xs font-semibold text-slate-700">{userFirstname || "null user"}&nbsp;{userLastname}</span>
+              <span className="block text-xs text-slate-500">{userRole || "null role"}</span>
+            </motion.div>
+          )}
+        </div>
+        {open && <FiChevronDown className="mr-2 text-slate-700" />}
+      </div>
+
+      <AnimatePresence>
+        {menuOpen && (
+          <motion.div
+            onMouseLeave={() => setMenuOpen(false)}
+            key="dropdown"
+            initial={{ opacity: 0, y: -5 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -5 }}
+            className={open ? "absolute translate-y-0 translate-x-20 mt-2 w-48 bg-white shadow-lg border-1 border-slate-300 p-3 z-50 rounded-xl flex flex-col gap-2" : "absolute translate-y-0 translate-x-0 mt-2 w-48 bg-white shadow-lg p-3 z-50 rounded-xl flex flex-col gap-2"}
+          >
+            <button className="flex items-center gap-2 text-sm text-slate-700 hover:text-indigo-600">
+              <FiUser className="w-4 h-4" /> Profile
+            </button>
+            <button className="flex items-center gap-2 text-sm text-slate-700 hover:text-indigo-600">
+              <FiSettings className="w-4 h-4" /> Account Settings
+            </button>
+            <button 
+              onClick={() => logout(navigate)}
+              className="flex items-center gap-2 text-sm text-slate-700 hover:text-red-600"
+            >
+              <FiLogOut className="w-4 h-4" /> Logout
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+const Logo = () => {
+  return (
+    <motion.div
+      layout
+      className="grid size-10 shrink-0 place-content-center rounded-md bg-indigo-600"
+    >
+      <svg
+        width="24"
+        height="24"
+        viewBox="0 0 50 39"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        className="fill-slate-50"
+      >
+        <path
+          d="M16.4992 2H37.5808L22.0816 24.9729H1L16.4992 2Z"
+          stopColor="#000000"
+        ></path>
+        <path
+          d="M17.4224 27.102L11.4192 36H33.5008L49 13.0271H32.7024L23.2064 27.102H17.4224Z"
+          stopColor="#000000"
+        ></path>
+      </svg>
+    </motion.div>
+  );
+};
+
+const ToggleClose = ({ open, setOpen }) => {
+  return (
+    <motion.button
+      layout
+      onClick={() => setOpen((pv) => !pv)}
+      className="absolute bottom-0 left-0 right-0 border-t border-slate-300 transition-colors hover:bg-slate-100"
+    >
+      <div className="flex items-center p-2">
+        <motion.div
+          layout
+          className="grid size-10 place-content-center text-lg text-slate-500"
+        >
+          <FiChevronsRight
+            className={`transition-transform ${open && "rotate-180"}`}
+          />
+        </motion.div>
+        <AnimatePresence>
+          {open && (
+            <motion.span
+              key="hide-text"
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -10 }}
+              transition={{ duration: 0.15 }}
+              className="text-xs font-medium text-slate-500"
+            >
+              Hide
+            </motion.span>
+          )}
+        </AnimatePresence>
+      </div>
+    </motion.button>
+  );
+};
+
+const ExampleContent = () => <div className="h-[200vh] w-full"></div>;
