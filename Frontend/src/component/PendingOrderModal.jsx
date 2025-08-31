@@ -109,7 +109,7 @@ export default function PendingOrdersModal({ onClose, notifications }) {
       exit={{ opacity: 0, y: 100 }}
       transition={{ duration: 0.3 }}
 
-      className="bg-indigo-50 text-slate-700 rounded-lg p-6 w-[30%] max-w-4xl max-h-[90vh] overflow-y-auto shadow-xl">
+      className="bg-indigo-50 text-slate-700 rounded-lg p-6 w-full lg:w-[30%] max-w-4xl max-h-[90vh] overflow-y-auto shadow-xl">
         {/* Header */}
         <div className="flex justify-between items-center mb-6 pb-4 border-b border-indigo-200">
           <h2 className="text-2xl font-bold text-slate-800">Pending Orders</h2>
