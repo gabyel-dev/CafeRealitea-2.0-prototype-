@@ -8,6 +8,7 @@ import { io } from "socket.io-client";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import SalesHistory from "../pages/sales/SalesHistory";
+import OrderManagementAdmin from "../pages/orders/orders";
 
 export default function MainLayout() {
   const [socketConnected, setSocketConnected] = useState(false);
@@ -123,7 +124,7 @@ export default function MainLayout() {
             <SalesHistory />
           </div>
           <div className={activeTab === "Orders" ? "block" : "hidden"}>
-            <h1>Orders Content</h1>
+            <OrderManagementAdmin />
           </div>
         </main>
       </div>
