@@ -253,7 +253,7 @@ export default function SalesHistory({ activeTab, setActiveTab }) {
 
     return (
         <>
-            <div className="lg:pt-4 py-4 lg:px-6 px-4 bg-indigo-50 min-h-screen">
+            <div className="lg:pt-4 py-4 px-4 bg-indigo-50 min-h-screen">
                 <div className="w-full mb-6">
                     <h1 className="text-2xl font-bold text-gray-800">
                         Sales History
@@ -265,7 +265,7 @@ export default function SalesHistory({ activeTab, setActiveTab }) {
 
                 {/* Stats Overview */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
-                    <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
+                    <div className="bg-white rounded-xl shadow-sm p-5 border ">
                         <div className="flex items-center">
                             <div className="p-3 rounded-lg bg-blue-50">
                                 <FiDollarSign className="text-xl text-blue-600" />
@@ -282,7 +282,7 @@ export default function SalesHistory({ activeTab, setActiveTab }) {
                         </div>
                     </div>
 
-                    <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
+                    <div className="bg-white rounded-xl shadow-sm p-5 border">
                         <div className="flex items-center">
                             <div className="p-3 rounded-lg bg-green-50">
                                 <FiShoppingBag className="text-xl text-green-600" />
@@ -298,7 +298,7 @@ export default function SalesHistory({ activeTab, setActiveTab }) {
                         </div>
                     </div>
 
-                    <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
+                    <div className="bg-white rounded-xl shadow-sm p-5 border ">
                         <div className="flex items-center">
                             <div className="p-3 rounded-lg bg-purple-50">
                                 <FiCreditCard className="text-xl text-purple-600" />
@@ -314,7 +314,7 @@ export default function SalesHistory({ activeTab, setActiveTab }) {
                         </div>
                     </div>
 
-                    <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
+                    <div className="bg-white rounded-xl shadow-sm p-5 border ">
                         <div className="flex items-center">
                             <div className="p-3 rounded-lg bg-orange-50">
                                 <FiBox className="text-xl text-orange-600" />
@@ -331,7 +331,7 @@ export default function SalesHistory({ activeTab, setActiveTab }) {
                 </div>
 
                 {/* Filters Section */}
-                <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-100 mb-6">
+                <div className="bg-white rounded-xl shadow-sm p-5 border  mb-6">
                     <div className="flex flex-col md:flex-row md:items-center justify-between mb-5">
                         <h2 className="text-lg font-semibold text-gray-800 flex items-center">
                             <FiFilter className="mr-2 text-gray-500" />
