@@ -249,7 +249,6 @@ const Sidebar2 = ({ activeTab, setActiveTab }) => {
           <Option Icon={FiDollarSign} title="Sales" activeTab={activeTab} setActiveTab={setActiveTab} open={open} notifs={3} />
           <Option Icon={FiMonitor} title="Orders" activeTab={activeTab} setActiveTab={setActiveTab} open={open} />
           <Option Icon={FiShoppingCart} title="Products" activeTab={activeTab} setActiveTab={setActiveTab} open={open} />
-          <Option Icon={FiUserPlus} title="Create Member" activeTab={activeTab} setActiveTab={setActiveTab} open={open} />
           <Option Icon={FiUsers} title="Members" activeTab={activeTab} setActiveTab={setActiveTab} open={open} />
           <Option Icon={FiSettings} title="Settings" activeTab={activeTab} setActiveTab={setActiveTab} open={open} />
         </div>
@@ -289,24 +288,6 @@ const Option = ({ Icon, title, activeTab, setActiveTab, open, notifs }) => {
         )}
       </AnimatePresence>
 
-      <AnimatePresence>
-        {notifs && open && (
-          <motion.span
-            key={`notif-${title}`}
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{
-              opacity: 1,
-              scale: 1,
-            }}
-            exit={{ scale: 0, opacity: 0 }}
-            style={{ y: "-50%" }}
-            transition={{ duration: 0.15 }}
-            className="absolute right-2 top-1/2 size-4 rounded bg-indigo-500 text-xs text-white"
-          >
-            {notifs}
-          </motion.span>
-        )}
-      </AnimatePresence>
     </motion.button>
   );
 };

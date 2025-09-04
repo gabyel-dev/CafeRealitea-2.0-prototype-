@@ -156,8 +156,8 @@ function getPercentageChange(current, previous) {
           <div className="card-body p-6">
             <div className="flex justify-between items-start">
               <div className="w-full">
-                <div className="flex justify-between">
-                  <h3 className="text-sm font-medium text-gray-500">Avg. Order Value</h3> 
+                <div className="flex justify-between ">
+                  <h3 className="text-sm font-medium text-gray-500">Avg. Order Val</h3> 
                 <div className={`badge badge-lg gap-1 ${percentChange.avgOrder >= 0 ? "badge-success" : "badge-error"}`}>
                 {percentChange.avgOrder >= 0 ? "↑" : "↓"} {percentChange.avgOrder.toFixed(1)}%
               </div>

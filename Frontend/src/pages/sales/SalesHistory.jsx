@@ -258,7 +258,7 @@ export default function SalesHistory({ activeTab, setActiveTab }) {
                     <h1 className="text-2xl font-bold text-gray-800">
                         Sales History
                     </h1>
-                    <p className="text-sm text-gray-600 mt-1">
+                    <p className="text-sm text-gray-500 mt-1">
                         View and manage all sales records
                     </p>
                 </div>

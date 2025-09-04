@@ -10,6 +10,7 @@ import {
   FaMoneyBillWave,
   FaCreditCard
 } from "react-icons/fa";
+import { io } from "socket.io-client";
 
 import { motion, AnimatePresence } from "framer-motion";
 import PendingOrdersModal from "../../component/PendingOrderModal";
@@ -21,8 +22,10 @@ export default function OrderManagementAdmin({ activeTab, setActiveTab }) {
   const [loading, setLoading] = useState(true);
   const [categories, setCategories] = useState([]);
   const [itemsAdded, setItemsAdded] = useState([]);
-  const [notifications, setNotifications] = useState([]);
+  const [notifications, setNotifications] = useState();
   const [showNotifications, setShowNotifications] = useState(false);
+
+  const socketRef = useState(null)
 
   useEffect(() => {
     axios.get("https://caferealitea.onrender.com/items")
@@ -50,6 +53,80 @@ export default function OrderManagementAdmin({ activeTab, setActiveTab }) {
 
 
 }, [notifications ]);
+
+
+
+useEffect(() => {
+  socketRef.current = io("https://caferealitea.onrender.com", {
+    withCredentials: true,
+  });
+
+  // fetch initial pending orders count
+  const fetchInitial = async () => {
+    try {
+      const res = await fetch("https://caferealitea.onrender.com/pending-orders", {
+        credentials: "include",
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          setNotifications(data.length); // set initial count
+        }
+      }
+    } catch (err) {
+      console.error("Error fetching initial notifications:", err);
+    }
+  };
+
+  fetchInitial();
+
+  // listen for new pending order events
+  socketRef.current.on("new_pending_order", (data) => {
+    console.log("Received socket event:", data);
+
+    // if backend sends the new total count
+    if (typeof data.count === "number") {
+      setNotifications(data.count);
+    } 
+    // if backend just emits a message per order
+    else {
+      setNotifications((prev) => prev + 1);
+    }
+  });
+  
+  socketRef.current.on("order_cancelled", (data) => {
+    console.log("Received socket event:", data);
+
+    // if backend sends the new total count
+    if (typeof data.count === "number") {
+      setNotifications(data.count);
+    } 
+    // if backend just emits a message per order
+    else {
+      setNotifications((prev) => prev - 1);
+    }
+  });
+
+  socketRef.current.on("order_confirmed", (data) => {
+    console.log("Received socket event:", data);
+
+    // if backend sends the new total count
+    if (typeof data.count === "number") {
+      setNotifications(data.count);
+    } 
+    // if backend just emits a message per order
+    else {
+      setNotifications((prev) => prev - 1);
+    }
+  });
+
+  // cleanup on unmount
+  return () => {
+    if (socketRef.current) {
+      socketRef.current.disconnect();
+    }
+  };
+}, []);
 
   useEffect(() => {
     document.title = "Café Realitea - Order Management";
@@ -92,10 +169,10 @@ export default function OrderManagementAdmin({ activeTab, setActiveTab }) {
         {/* Header with Notification Bell */}
         <div className="flex flex-col sm:flex-row sm:items-center mb-6 sm:mb-8 ">
           <div className="flex-1">
-            <h1 className="text-xl sm:text-2xl lg:text-2xl font-bold text-gray-800">
+            <h1 className="text-2xl font-bold text-gray-800">
               Order Management
             </h1>
-            <p className="text-gray-500 text-sm sm:text-base">
+            <p className="text-sm text-gray-500 mt-1">
               Create and manage customer orders
             </p>
           </div>
@@ -109,7 +186,7 @@ export default function OrderManagementAdmin({ activeTab, setActiveTab }) {
                 <FaBell />
                 View Pending Orders
                 {notifications > 0 && (
-                    <div className="badge badge-secondary ml-2">{notifications}</div>
+                    <div className="badge   badge-neutral ml-2">{notifications}</div>
                 )}
                 </button>
             </div>

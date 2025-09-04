@@ -9,6 +9,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import SalesHistory from "../pages/sales/SalesHistory";
 import OrderManagementAdmin from "../pages/orders/orders";
+import UsersManagement from "../pages/members/members";
 
 export default function MainLayout() {
   const [socketConnected, setSocketConnected] = useState(false);
@@ -125,6 +126,10 @@ export default function MainLayout() {
           </div>
           <div className={activeTab === "Orders" ? "block" : "hidden"}>
             <OrderManagementAdmin />
+          </div>
+
+          <div className={activeTab === "Members" ? "block" : "hidden"}>
+            <UsersManagement />
           </div>
         </main>
       </div>
