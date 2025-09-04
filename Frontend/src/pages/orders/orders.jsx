@@ -30,6 +30,28 @@ export default function OrderManagementAdmin({ activeTab, setActiveTab }) {
   }, []);
 
   useEffect(() => {
+  const fetchNotifications = async () => {
+    try {
+      const res = await fetch("https://caferealitea.onrender.com/pending-orders", {
+        credentials: "include",
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          setNotifications(data.length); // store count
+        }
+      }
+    } catch (err) {
+      console.error("Error fetching notifications:", err);
+    }
+  };
+
+  fetchNotifications();
+
+
+}, [notifications ]);
+
+  useEffect(() => {
     document.title = "Café Realitea - Order Management";
     setLoading(true);
 
@@ -66,11 +88,11 @@ export default function OrderManagementAdmin({ activeTab, setActiveTab }) {
   return (
     <div className="bg-indigo-50 flex flex-col lg:flex-row min-h-screen">
 
-      <div className="w-full text-gray-800 pt-4 px-4">
+      <div className="w-full text-gray-800 pt-4 lg:px-4">
         {/* Header with Notification Bell */}
-        <div className="flex flex-col sm:flex-row sm:items-center mb-6 sm:mb-8 px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col sm:flex-row sm:items-center mb-6 sm:mb-8 ">
           <div className="flex-1">
-            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800">
+            <h1 className="text-xl sm:text-2xl lg:text-2xl font-bold text-gray-800">
               Order Management
             </h1>
             <p className="text-gray-500 text-sm sm:text-base">
@@ -79,22 +101,24 @@ export default function OrderManagementAdmin({ activeTab, setActiveTab }) {
           </div>
           
           {(userData?.role === 'Admin' || userData?.role === 'System Administrator') && (
-            <button
+            <div className="hidden md:block">
+              <button
                 onClick={() => setShowNotifications(true)}
-                className="btn btn-primary gap-2 mt-3 sm:mt-0 flex items-center"
+                className="btn btn-primary gap-2 mt-3 sm:mt-0 flex items-center "
                 >
                 <FaBell />
                 View Pending Orders
-                {notifications.length > 0 && (
-                    <div className="badge badge-secondary ml-2">{notifications.length}</div>
+                {notifications > 0 && (
+                    <div className="badge badge-secondary ml-2">{notifications}</div>
                 )}
                 </button>
+            </div>
 
           )}
         </div>
 
         {/* Main content */}
-        <div className="flex flex-col lg:flex-row px-4 sm:px-6 lg:px-8 gap-6 pb-6 lg:pb-8">
+        <div className="flex flex-col lg:flex-row gap-6 pb-6 lg:pb-8">
           <CreateOrder
             categories={categories}
             setItemsAdded={setItemsAdded}
@@ -203,7 +227,7 @@ function CreateOrder({ categories, setItemsAdded, itemsAdded }) {
             .filter(cat => !activeCategory || cat.category_id === activeCategory)
             .map((cat) => (
               <div key={cat.category_id} className="space-y-4">
-                <h2 className="font-semibold text-lg text-gray-700 border-b pb-2">
+                <h2 className="font-semibold text-lg text-gray-700  pb-2">
                   {cat.category_name}
                 </h2>
                 <div className="space-y-3">
@@ -212,7 +236,7 @@ function CreateOrder({ categories, setItemsAdded, itemsAdded }) {
                       key={item.id}
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      className="card bg-white-100 shadow-sm cursor-pointer border border-gray-200"
+                      className="card bg-white-100 shadow-sm hover:bg-blue-100 hover:border-1 hover:border-blue-700 cursor-pointer border border-gray-200"
                       onClick={() => addItem(item)}
                     >
                       <div className="card-body p-4">
@@ -375,7 +399,7 @@ function OrderSummary({ itemsAdded, setItemsAdded }) {
   };
 
   return (
-    <div className="w-full lg:w-[40%] bg-white shadow-md rounded-lg sticky top-4">
+    <div className="w-full h-fit lg:w-[40%] bg-white shadow-md rounded-lg sticky top-0">
       <header className="w-full border-b border-gray-200 p-6">
         <h1 className="text-gray-800 font-semibold text-xl">
           Order Summary

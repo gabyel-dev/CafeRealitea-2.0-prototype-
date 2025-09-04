@@ -3,15 +3,19 @@ import { FaTimes, FaCheck,  FaUser, FaReceipt, FaCreditCard, FaCalendar } from "
 import { AnimatePresence, motion } from "framer-motion";
 import { FiRefreshCw } from "react-icons/fi";
 
-export default function PendingOrdersModal({ onClose, notifications }) {
+export default function PendingOrdersModal({ onClose, updateNotifications  }) {
   const [pendingOrders, setPendingOrders] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  
 
   useEffect(() => {
     fetchPendingOrders();
+
+    
   }, []);
+
 
   const fetchPendingOrders = async () => {
     try {
@@ -27,8 +31,10 @@ export default function PendingOrdersModal({ onClose, notifications }) {
       
       const data = await response.json();
       
+      
       if (Array.isArray(data)) {
         setPendingOrders(data);
+        
       } else {
         console.error('Expected array but got:', data);
         setPendingOrders([]);
@@ -154,9 +160,9 @@ export default function PendingOrdersModal({ onClose, notifications }) {
           <AnimatePresence>
           <motion.div
           initial={{ opacity: 0, y: 10}}
-      animate={{ opacity: 1, y: 0}}
-      exit={{ opacity: 0, y: 100 }}
-      transition={{ duration: 0.3 }}
+          animate={{ opacity: 1, y: 0}}
+          exit={{ opacity: 0, y: 100 }}
+          transition={{ duration: 0.3 }}
            className="bg-white rounded-lg p-6 shadow-sm">
             <h3 className="text-xl font-semibold mb-6 text-slate-800 border-b pb-3 flex items-center gap-2">
               <FaReceipt className="text-indigo-600" />

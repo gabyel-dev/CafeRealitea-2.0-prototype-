@@ -18,10 +18,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import logout from "../Utility/logout";
 import { useNavigate } from "react-router-dom";
+import { FaBell } from "react-icons/fa";
+import PendingOrdersModal from "../component/PendingOrderModal";
+import { io } from "socket.io-client"
 
 export const Sidebar = ({ activeTab, setActiveTab }) => {
   return (
-    <div className="flex bg-indigo-50   ">
+    <div className="flex bg-indigo-50">
       <Sidebar2 activeTab={activeTab} setActiveTab={setActiveTab} />
       <ExampleContent />
     </div>
@@ -35,6 +38,86 @@ const Sidebar2 = ({ activeTab, setActiveTab }) => {
   const [selected, setSelected] = useState("Dashboard");
   const [role, setRole] = useState("");
   const navigate = useNavigate();
+  const sidebarRef = useRef(null); // 👈 sidebar reference
+  const socketRef = useRef(null);
+
+
+  const [notifications, setNotifications] = useState([]);
+  const [showNotifications, setShowNotifications] = useState(false);
+
+
+  useEffect(() => {
+  socketRef.current = io("https://caferealitea.onrender.com", {
+    withCredentials: true,
+  });
+
+  // fetch initial pending orders count
+  const fetchInitial = async () => {
+    try {
+      const res = await fetch("https://caferealitea.onrender.com/pending-orders", {
+        credentials: "include",
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          setNotifications(data.length); // set initial count
+        }
+      }
+    } catch (err) {
+      console.error("Error fetching initial notifications:", err);
+    }
+  };
+
+  fetchInitial();
+
+  // listen for new pending order events
+  socketRef.current.on("new_pending_order", (data) => {
+    console.log("Received socket event:", data);
+
+    // if backend sends the new total count
+    if (typeof data.count === "number") {
+      setNotifications(data.count);
+    } 
+    // if backend just emits a message per order
+    else {
+      setNotifications((prev) => prev + 1);
+    }
+  });
+  
+  socketRef.current.on("order_cancelled", (data) => {
+    console.log("Received socket event:", data);
+
+    // if backend sends the new total count
+    if (typeof data.count === "number") {
+      setNotifications(data.count);
+    } 
+    // if backend just emits a message per order
+    else {
+      setNotifications((prev) => prev - 1);
+    }
+  });
+
+  socketRef.current.on("order_confirmed", (data) => {
+    console.log("Received socket event:", data);
+
+    // if backend sends the new total count
+    if (typeof data.count === "number") {
+      setNotifications(data.count);
+    } 
+    // if backend just emits a message per order
+    else {
+      setNotifications((prev) => prev - 1);
+    }
+  });
+
+  // cleanup on unmount
+  return () => {
+    if (socketRef.current) {
+      socketRef.current.disconnect();
+    }
+  };
+}, []);
+
 
   // Set sidebar state based on screen size
   useEffect(() => {
@@ -57,6 +140,23 @@ const Sidebar2 = ({ activeTab, setActiveTab }) => {
     return () => window.removeEventListener('resize', checkScreenSize);
   }, []);
 
+  // Collapse sidebar if clicking outside (on mobile only)
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        window.innerWidth < 768 && // only mobile
+        open &&
+        sidebarRef.current &&
+        !sidebarRef.current.contains(event.target)
+      ) {
+        setOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [open]);
+
   //check user role and if user is loggedin
   useEffect(() => {
     axios.get(`${api_name}/user`, { withCredentials: true })
@@ -71,22 +171,53 @@ const Sidebar2 = ({ activeTab, setActiveTab }) => {
   return (
     <>
       {/* Toggle button (only visible on mobile) */}
-
-
       <AnimatePresence>
-        {!open && (
-          <motion.button
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1, x: -10 }}
-          exit={{ opacity: 0, x: 10 }}
-          transition={{ duration: 0.4 }}
-          className={`px-3 fixed top-0 z-1 right-0 h-10 m-2 rounded-md bg-indigo-600 text-white md:hidden`}
-          onClick={() => setOpen(true)}
-          >
-            ☰
-          </motion.button>
-        )}
-      </AnimatePresence>
+  {!open && (
+    <div
+      className="fixed top-0 right-0 z-10 m-2 flex h-10 items-center gap-2 rounded-md text-white md:hidden"
+    >
+      <motion.button
+      initial={{ opacity: 0 }}
+        animate={{ opacity: 1, x: -10 }}
+        exit={{ opacity: 0, x: 10 }}
+        transition={{ duration: 0.4 }}
+  onClick={() => setShowNotifications(true)}
+  className="relative flex items-center text-indigo-600 text-xl"
+>
+  <FaBell />
+  {notifications > 0 && (
+    <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] text-white">
+      {notifications}
+    </span>
+  )}
+</motion.button>
+
+
+      {/* Spacer pushes hamburger to the right */}
+      <div className="flex-1" />
+
+      {/* Hamburger Button */}
+      <motion.button
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1, x: -10 }}
+        exit={{ opacity: 0, x: 10 }}
+        transition={{ duration: 0.4 }}
+        onClick={() => setOpen(true)}
+        className="bg-indigo-600 px-3 py-2 rounded-md"
+      >
+        ☰
+      </motion.button>
+    </div>
+  )}
+</AnimatePresence>
+
+    {showNotifications && (
+      <PendingOrdersModal 
+        onClose={() => setShowNotifications(false)} 
+        updateNotifications={setNotifications}
+      />
+    )}
+
 
       {/* Overlay for mobile */}
       <AnimatePresence>
@@ -102,6 +233,7 @@ const Sidebar2 = ({ activeTab, setActiveTab }) => {
       </AnimatePresence>
 
       <motion.nav
+        ref={sidebarRef} // 👈 attach ref
         layout
         className={`fixed md:sticky top-0 h-screen z-40
         shrink-0 border-r border-slate-300 bg-white p-2

@@ -71,7 +71,7 @@ function getPercentageChange(current, previous) {
   
 
   return (
-    <div className="p-4 bg-indigo-50 min-h-screen">
+    <div className="md:p-4 pt-4 md:pt-4 bg-indigo-50 min-h-screen">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8  ">
         <div onClick={() => setActiveTab("Dashboard")} className="cursor-pointer mb-4 md:mb-0">
