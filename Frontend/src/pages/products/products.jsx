@@ -17,6 +17,7 @@ import {
   FiCoffee,
   FiShoppingBag
 } from "react-icons/fi";
+import { FaPlus } from "react-icons/fa";
 
 export default function ProductPage({ activeTab, setActiveTab }) {
     const navigate = useNavigate();
@@ -148,7 +149,7 @@ export default function ProductPage({ activeTab, setActiveTab }) {
 
     return (
         <>
-            <div className="lg:pt-4 py-4 px-4 bg-indigo-50 min-h-screen">
+            <div className="lg:pt-4 lg:py-4 lg:px-4 bg-indigo-50 min-h-screen">
                 <div className="w-full mb-6 flex justify-between items-center">
                     <div>
                         <h1 className="text-2xl font-bold text-gray-800">
@@ -158,9 +159,11 @@ export default function ProductPage({ activeTab, setActiveTab }) {
                             Browse and manage all products in your menu
                         </p>
                     </div>
-                    <button className="btn btn-primary">
-                        <FiPlus className="mr-2" />
-                        Add New Product
+                    <button className="btn btn-primary md:block items-center hidden">
+                        <div className="flex items-center">
+                            <FiPlus className="mr-2" />
+                            Add New Product
+                        </div>
                     </button>
                 </div>
 
@@ -271,6 +274,15 @@ export default function ProductPage({ activeTab, setActiveTab }) {
                     <p className="text-sm text-gray-600">
                         Showing {filteredProducts.length} of {allProducts.length} products
                     </p>
+
+                    <button className="btn btn-sm btn-neutral block items-center md:hidden text-white-600 text-sm">
+                        <div className="flex items-center gap-2">
+                            <FiPlus className="translate-y-0 font-semibold" />
+                            <h1 className="pr-2">
+                                Add Product
+                            </h1>
+                        </div>
+                    </button>
                 </div>
 
                 {/* Product List */}
