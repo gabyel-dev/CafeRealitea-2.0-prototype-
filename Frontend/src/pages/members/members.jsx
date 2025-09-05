@@ -1,208 +1,234 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import axios from "axios";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { 
-  FaUsers, 
-  FaUser, 
-  FaSearch, 
-  FaCrown, 
-  FaUserShield, 
-  FaUserTie, 
-  FaPlus, 
-  FaEye,
-  FaUserPlus,
-  FaCircle,
-  FaFilter,
-  FaSort,
-  FaEllipsisV,
-  FaEdit,
-  FaTrash,
-  FaEnvelope,
-  FaPhone,
-  FaCalendar
+  FaUsers, FaUser, FaSearch, FaCrown, FaUserShield, FaUserTie, FaUserPlus,
+  FaEye, FaEdit, FaTrash, FaEllipsisV, FaSort
 } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import DeleteUser from "../../component/DeleteUserModal";
+import { io } from "socket.io-client";
 
 export default function UsersManagement() {
-    const [users, setUsers] = useState([]);
-    const [filteredUsers, setFilteredUsers] = useState([]);
-    const [searchTerm, setSearchTerm] = useState("");
-    const [roleFilter, setRoleFilter] = useState("all");
-    const [statusFilter, setStatusFilter] = useState("all");
-    const [sortBy, setSortBy] = useState("name");
-    const [sortOrder, setSortOrder] = useState("asc");
-    const [role, setRole] = useState("");
-    const navigate = useNavigate();
-    const [isOnline, setIsOnline] = useState({});
-    const [isLoading, setIsLoading] = useState(true);
-    const [selectedUser, setSelectedUser] = useState(null);
-    const [showUserMenu, setShowUserMenu] = useState(null);
-    const [showFormDelete, setShowFormDelete] = useState(false)
-    const [userDetails, setUserDetails] = useState({});
+  const [users, setUsers] = useState([]);
+  const [filteredUsers, setFilteredUsers] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [roleFilter, setRoleFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [sortBy, setSortBy] = useState("name");
+  const [sortOrder, setSortOrder] = useState("asc");
+  const [currentUser, setCurrentUser] = useState(null);
+  const [isOnline, setIsOnline] = useState({});
+  const [isLoading, setIsLoading] = useState(true);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [showFormDelete, setShowFormDelete] = useState(false);
+  const [onlineStatusError, setOnlineStatusError] = useState(false);
+  const [role, setRole] = useState('');
+
+  const socketRef = useRef(null);
+  const navigate = useNavigate();
+
+  // -------------------- CHECK LOGIN --------------------
+  useEffect(() => {
+    axios.get('https://caferealitea.onrender.com/user', { withCredentials: true })
+      .then(res => {
+        const { logged_in, role, id } = res.data;
+        setRole(role);
+        if (!logged_in || !role) navigate('/');
+        else setCurrentUser({ id, role });
+      })
+      .catch(() => navigate('/'));
+  }, [navigate]);
+
+  // -------------------- SOCKET + FETCH USERS --------------------
+  useEffect(() => {
+  if (!currentUser) return;
+
+  console.log("Initializing socket connection for user:", currentUser.id);
+  
+  const socket = io('https://caferealitea.onrender.com', {
+    withCredentials: true,
+    transports: ['websocket', 'polling'],
+  });
+  socketRef.current = socket;
+
+  // Add error handling for socket connection
+  socket.on('connect_error', (error) => {
+    console.error('Socket connection error:', error);
+    setOnlineStatusError(true);
+  });
+
+  socket.on('connect', () => {
+    console.log("Socket connected, emitting user_online");
+    socket.emit('user_online', { user_id: String(currentUser.id) }); // Ensure user_id is string
+  });
+
+  socket.on('disconnect', (reason) => {
+    console.log('Socket disconnected:', reason);
+  });
+
+  // Add listener for user_status_change
+  socket.on('user_status_change', data => {
+    console.log('User status changed:', data);
+    setIsOnline(prev => ({ ...prev, [data.user_id]: data.is_online }));
+  });
 
 
-    const handleUserDeleted = (id) => {
-        setUsers((prev) => prev.filter((u) => u.id !== id));
-        setFilteredUsers((prev) => prev.filter((u) => u.id !== id));
-    };
+  const fetchUsers = async () => {
+  setIsLoading(true);
+  try {
+    const [usersRes, onlineRes] = await Promise.all([
+      axios.get('https://caferealitea.onrender.com/users_account', { withCredentials: true }),
+      axios.get('https://caferealitea.onrender.com/online_users', { withCredentials: true })
+    ]);
 
+    const usersData = usersRes.data;
+    setUsers(usersData);
+    setFilteredUsers(usersData);
 
-    // Check session/role
-    useEffect(() => {
-        axios.get('https://caferealitea.onrender.com/user', { withCredentials: true })
-            .then((res) => {
-                const { logged_in, role } = res.data;
-                if (!logged_in || role === "") {
-                    navigate('/');
-                } else {
-                    setRole(res.data.role)
-                }
-            })
-            .catch(() => navigate('/'));
-    }, [navigate]);
+    // ✅ Corrected online status map
+    const onlineMap = {};
+    usersData.forEach(u => {
+      onlineMap[u.id] = onlineRes.data.online_users.includes(String(u.id));
+    });
+    setIsOnline(onlineMap);
 
+    // Ensure current user is marked online
     
 
-    // Fetch all users
-    useEffect(() => {
-        document.title = "Café Realitea - User Management";
-        setIsLoading(true);
-        axios.get('https://caferealitea.onrender.com/users_account', { withCredentials: true })
-            .then((res) => {
-                setUsers(res.data);
-                setFilteredUsers(res.data);
-                
-                const status = {};
-                res.data.forEach(user => {
-                  status[user.id] = user.token !== null;
-                });
-                setIsOnline(status);
-                setIsLoading(false);
-            })
-            .catch((err) => {
-                console.error(err);
-                setIsLoading(false);
-            });
-    }, []);
+    setIsLoading(false);
+    setOnlineStatusError(false);
+  } catch (err) {
+    console.error('Error fetching users or online status:', err);
+    setIsLoading(false);
+    setOnlineStatusError(true);
+  }
+};
 
-    // Filter and sort users
-    useEffect(() => {
-        let result = [...users];
-        
-        // Apply search filter
-        if (searchTerm) {
-            result = result.filter(user => 
-                user.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                user.last_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                user.email.toLowerCase().includes(searchTerm.toLowerCase())
-            );
-        }
-        
-        // Apply role filter
-        if (roleFilter !== "all") {
-            result = result.filter(user => user.role === roleFilter);
-        }
-        
-        // Apply status filter
-        if (statusFilter !== "all") {
-            result = result.filter(user => 
-                statusFilter === "online" ? isOnline[user.id] : !isOnline[user.id]
-            );
-        }
-        
-        // Apply sorting
-        result.sort((a, b) => {
-            let aValue, bValue;
-            
-            switch(sortBy) {
-                case "name":
-                    aValue = `${a.first_name} ${a.last_name}`;
-                    bValue = `${b.first_name} ${b.last_name}`;
-                    break;
-                case "role":
-                    aValue = a.role;
-                    bValue = b.role;
-                    break;
-                case "status":
-                    aValue = isOnline[a.id] ? 1 : 0;
-                    bValue = isOnline[b.id] ? 1 : 0;
-                    break;
-                case "date":
-                    aValue = new Date(a.created_at || 0);
-                    bValue = new Date(b.created_at || 0);
-                    break;
-                default:
-                    aValue = a[sortBy];
-                    bValue = b[sortBy];
-            }
-            
-            if (aValue < bValue) return sortOrder === "asc" ? -1 : 1;
-            if (aValue > bValue) return sortOrder === "asc" ? 1 : -1;
-            return 0;
-        });
-        
-        setFilteredUsers(result);
-    }, [searchTerm, roleFilter, statusFilter, sortBy, sortOrder, users, isOnline]);
 
-    const handleSort = (field) => {
-        if (sortBy === field) {
-            setSortOrder(sortOrder === "asc" ? "desc" : "asc");
-        } else {
-            setSortBy(field);
-            setSortOrder("asc");
-        }
-    };
+  fetchUsers();
 
-    const getRoleIcon = (role) => {
-        switch(role) {
-            case "Admin": return <FaUserTie className="text-blue-500" />;
-            case "System Administrator": return <FaUserShield className="text-indigo-600" />;
-            default: return <FaCrown className="text-purple-500" />;
-        }
-    };
+  // Visibility change handling
+  const handleVisibilityChange = () => {
+    if (!socketRef.current) return;
+    if (document.visibilityState === "visible") {
+      socketRef.current.emit('user_online', { user_id: currentUser.id });
+      setIsOnline(prev => ({ ...prev, [currentUser.id]: true }));
+    } else {
+      socketRef.current.emit('user_offline', { user_id: currentUser.id });
+      setIsOnline(prev => ({ ...prev, [currentUser.id]: false }));
+    }
+  };
+  document.addEventListener('visibilitychange', handleVisibilityChange);
 
-    const getRoleColor = (role) => {
-        switch(role) {
-            case "Admin": return "bg-blue-100 text-blue-800";
-            case "System Administrator": return "bg-indigo-100 text-indigo-800";
-            default: return "bg-purple-100 text-purple-800";
-        }
-    };
+  // Cleanup function (single return)
+   return () => {   
+    if (socket) {
+      socket.emit('user_offline', { user_id: currentUser.id });
+      socket.disconnect();
+    }
+  };
+}, [currentUser]);
 
-    const getStatusColor = (isOnline) => {
-        return isOnline ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800";
-    };
 
-    const formatDate = (dateString) => {
-        if (!dateString) return "N/A";
-        const options = { year: 'numeric', month: 'short', day: 'numeric' };
-        return new Date(dateString).toLocaleDateString(undefined, options);
-    };
+  // -------------------- FILTER & SORT --------------------
+  useEffect(() => {
+    let result = [...users];
 
-    return (
-        <div className="min-h-screen bg-indigo-50 lg:p-4 ">
+    if (searchTerm) {
+      result = result.filter(u => 
+        u.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        u.last_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        u.email.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
 
-            {showFormDelete && (
-                <DeleteUser showForm={setShowFormDelete} id={selectedUser.id} onDeleted={handleUserDeleted} />
-            )}
-            
-            {/* Header Section */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-                <div>
-                    <h1 className="text-2xl font-bold text-gray-800">User Management</h1>
-                    <p className="text-sm text-gray-500 mt-1">Manage your team members and their permissions</p>
-                </div>
-                
-                <div className="mt-4 md:mt-0">
-                    <button
-                        className={`btn gap-2 ${["System Administrator"].includes(role) 
-                            ? "btn-primary" 
-                            : "cursor-not-allowed"}`}
-                    >
-                        <FaUserPlus />
-                        Add New User
-                    </button>
+    if (roleFilter !== 'all') result = result.filter(u => u.role === roleFilter);
+    if (statusFilter !== 'all') result = result.filter(u => 
+      statusFilter === 'online' ? isOnline[u.id] ?? false : !(isOnline[u.id] ?? false)
+    );
+
+    result.sort((a, b) => {
+      let aVal, bVal;
+      switch(sortBy) {
+        case 'name':
+          aVal = `${a.first_name} ${a.last_name}`.toLowerCase();
+          bVal = `${b.first_name} ${b.last_name}`.toLowerCase();
+          break;
+        case 'role':
+          aVal = a.role;
+          bVal = b.role;
+          break;
+        case 'status':
+          aVal = isOnline[a.id] ? 1 : 0;
+          bVal = isOnline[b.id] ? 1 : 0;
+          break;
+        default:
+          aVal = a[sortBy];
+          bVal = b[sortBy];
+      }
+      if (aVal < bVal) return sortOrder === 'asc' ? -1 : 1;
+      if (aVal > bVal) return sortOrder === 'asc' ? 1 : -1;
+      return 0;
+    });
+
+    setFilteredUsers(result);
+  }, [users, searchTerm, roleFilter, statusFilter, sortBy, sortOrder, isOnline]);
+
+  const handleSort = (field) => {
+    if (sortBy === field) setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    else {
+      setSortBy(field);
+      setSortOrder('asc');
+    }
+  };
+
+  const handleUserDeleted = (id) => {
+    setUsers(prev => prev.filter(u => u.id !== id));
+    setFilteredUsers(prev => prev.filter(u => u.id !== id));
+  };
+
+  const getRoleIcon = (role) => {
+    switch(role) {
+      case "Admin": return <FaUserTie className="text-blue-500" />;
+      case "System Administrator": return <FaUserShield className="text-indigo-600" />;
+      default: return <FaCrown className="text-purple-500" />;
+    }
+  };
+
+  const getRoleColor = (role) => {
+    switch(role) {
+      case "Admin": return "bg-blue-100 text-blue-800";
+      case "System Administrator": return "bg-indigo-100 text-indigo-800";
+      default: return "bg-purple-100 text-purple-800";
+    }
+  };
+
+  const getStatusColor = (online) => online ? "bg-green-100 text-green-800 border border-green-200" : "bg-gray-100 text-gray-800 border border-gray-200";
+
+  return (
+    <div className="min-h-screen bg-indigo-50 lg:p-4">
+      {showFormDelete && selectedUser && (
+        <DeleteUser showForm={setShowFormDelete} id={selectedUser.id} onDeleted={handleUserDeleted} />
+      )}
+
+      {/* Header */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+        <div className="flex items-center gap-4 mb-4">
+          <h1 className="text-2xl font-bold text-gray-800">User Management</h1>
+          <div className="flex items-center gap-2 text-sm text-gray-500">
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+            <span>{Object.values(isOnline).filter(Boolean).length} users online</span>
+            {onlineStatusError && <span className="text-xs text-orange-500">(Limited status info)</span>}
+          </div>
+        </div>
+        <div className="mt-4 md:mt-0">
+          <button
+            className={`btn gap-2 ${["System Administrator"].includes(role) ? "btn-primary" : "cursor-not-allowed opacity-50"}`}
+            disabled={!["System Administrator"].includes(role)}
+          >
+            <FaUserPlus /> Add New User
+          </button>
                 </div>
             </div>
 
@@ -211,7 +237,7 @@ export default function UsersManagement() {
                 <div className={`stats shadow cursor-pointer transition-all hover:shadow-md ${
                         roleFilter === "all" ? "ring-2 ring-indigo-200 bg-indigo-50" : "bg-white"
                     }`}
-                    onClick={() => setRoleFilter(roleFilter === "Staff" ? "all" : "Staff")}>
+                    onClick={() => setRoleFilter(roleFilter === "all" ? "all" : "all")}>
                     <div className="stat">
                         <div className="stat-figure text-primary">
                             <FaUsers className="text-2xl" />
@@ -286,7 +312,6 @@ export default function UsersManagement() {
                                     placeholder="Search users by name, email..." 
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                    
                                 />
                                 {searchTerm && (
                                     <button 
@@ -400,9 +425,7 @@ export default function UsersManagement() {
                                                     <div className="flex items-center gap-3">
                                                         <div className="">
                                                             <div className=" rounded-full w-12 h-12 bg-indigo-100 text-indigo-600 flex items-center  justify-center">
-
-                                                                    <FaUser className="text-xl " />
-
+                                                                <FaUser className="text-xl " />
                                                             </div>
                                                         </div>
                                                         <div>
@@ -422,10 +445,12 @@ export default function UsersManagement() {
                                                     </div>
                                                 </td>
                                                 <td>
-                                                    <div className={`flex items-center w-fit gap-2 px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(isOnline[user.id])}`}>
-                                                        <FaCircle className={isOnline[user.id] ? "text-green-500 text-xs" : "text-gray-400 text-xs"} />
-                                                        {isOnline[user.id] ? "Online" : "Offline"}
-                                                    </div>
+                                                    <div className={`flex items-center w-fit gap-2 px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(isOnline[user.id] ?? false)}`}>
+  <div className={`w-2 h-2 rounded-full ${isOnline[user.id] ? "bg-green-500 animate-pulse" : "bg-gray-400"}`}></div>
+  <span>{isOnline[user.id] ? "Online" : "Offline"}</span>
+  {isOnline[user.id] && <span className="text-xs text-green-600">• Live</span>}
+</div>
+
                                                 </td>
     
                                                 <td>
@@ -445,48 +470,44 @@ export default function UsersManagement() {
                                                             <FaEye />
                                                             View
                                                         </Link>
-                                                       <td>
-    
-    {/* Dropdown Menu */}
-    <div className="dropdown dropdown-left">
-      <div 
-        tabIndex={0} 
-        role="button" 
-        className={`btn btn-ghost btn-sm ${['Admin', 'Staff'].includes(role) ? 'cursor-not-allowed opacity-50' : ''}`}
-        onClick={(e) => {
-          if (['Admin', 'Staff'].includes(role)) {
-            e.preventDefault();
-            e.stopPropagation();
-          }
-        }}
-      >
-        <FaEllipsisV />
-      </div>
-      
-      {!['Admin', 'Staff'].includes(role) && (
-        <ul 
-          tabIndex={0} 
-          className="dropdown-content z-[1] menu p-2 shadow-lg bg-white border border-indigo-100 rounded-box w-40"
-        >
-          <li><a><FaEdit className="text-yellow-500" /> Edit Role</a></li>
-          <li>
-            <a 
-              className="text-red-500"
-              onClick={(e) => {
-                e.stopPropagation();
-                setSelectedUser(user);
-                setShowFormDelete(true);
-              }}
-            >
-              <FaTrash /> Delete
-            </a>
-          </li>
-        </ul>
-      )}
-    </div>
-  
-</td>
-
+                                                       
+                                                        {/* Dropdown Menu */}
+                                                        <div className="dropdown dropdown-left">
+                                                            <div 
+                                                                tabIndex={0} 
+                                                                role="button" 
+                                                                className={`btn btn-ghost btn-sm ${['Admin', 'Staff'].includes(role) ? 'cursor-not-allowed opacity-50' : ''}`}
+                                                                onClick={(e) => {
+                                                                    if (['Admin', 'Staff'].includes(role)) {
+                                                                        e.preventDefault();
+                                                                        e.stopPropagation();
+                                                                    }
+                                                                }}
+                                                            >
+                                                                <FaEllipsisV />
+                                                            </div>
+                                                            
+                                                            {!['Admin', 'Staff'].includes(role) && (
+                                                                <ul 
+                                                                    tabIndex={0} 
+                                                                    className="dropdown-content z-[1] menu p-2 shadow-lg bg-white border border-indigo-100 rounded-box w-40"
+                                                                >
+                                                                    <li><a><FaEdit className="text-yellow-500" /> Edit Role</a></li>
+                                                                    <li>
+                                                                        <a 
+                                                                            className="text-red-500"
+                                                                            onClick={(e) => {
+                                                                                e.stopPropagation();
+                                                                                setSelectedUser(user);
+                                                                                setShowFormDelete(true);
+                                                                            }}
+                                                                        >
+                                                                            <FaTrash /> Delete
+                                                                        </a>
+                                                                    </li>
+                                                                </ul>
+                                                            )}
+                                                        </div>
                                                     </div>
                                                 </td>
                                             </motion.tr>

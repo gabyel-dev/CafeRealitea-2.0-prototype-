@@ -209,7 +209,7 @@ function getPercentageChange(current, previous) {
                 <div className="card-body text-slate-700">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
                     <h3 className="text-lg font-semibold">Profit Overview</h3>
-                    <button className="btn btn-neutral btn-sm">View All Data</button>
+                    <button disabled={['Admin', 'Staff'].includes(role)} onClick={() => setActiveTab('View All')} className="btn btn-neutral btn-sm">View All Data</button>
                 </div>
                 <div className="h-fit">
                     <Profit className="text-slate-700" />
