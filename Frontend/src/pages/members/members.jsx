@@ -184,7 +184,7 @@ export default function UsersManagement() {
         <div className="min-h-screen bg-indigo-50 lg:p-4 ">
 
             {showFormDelete && (
-                <DeleteUser showForm={setShowFormDelete} id={selectedUser.id} userDetails={selectedUser} onDeleted={handleUserDeleted} />
+                <DeleteUser showForm={setShowFormDelete} id={selectedUser.id} onDeleted={handleUserDeleted} />
             )}
             
             {/* Header Section */}
@@ -290,7 +290,7 @@ export default function UsersManagement() {
                                 />
                                 {searchTerm && (
                                     <button 
-                                        className="btn btn-ghost btn-xs btn-circle"
+                                        className="cursor-pointer hover:bg-gray-100 text-slate-700 btn-xs btn-circle"
                                         onClick={() => setSearchTerm("")}
                                     >
                                         ✕
@@ -301,7 +301,7 @@ export default function UsersManagement() {
 
                         <div className="flex gap-2">
                             <select 
-                                className="select select-bordered"
+                                className="select select-bordered cursor-pointer bg-white text-slate-700 border border-slate-300"
                                 value={roleFilter}
                                 onChange={(e) => setRoleFilter(e.target.value)}
                             >
@@ -312,7 +312,7 @@ export default function UsersManagement() {
                             </select>
 
                             <select 
-                                className="select select-bordered"
+                                className="select select-bordered cursor-pointer bg-white text-slate-700 border-slate-300"
                                 value={statusFilter}
                                 onChange={(e) => setStatusFilter(e.target.value)}
                             >
@@ -333,11 +333,11 @@ export default function UsersManagement() {
                         <div className="flex items-center gap-2 text-sm text-gray-500">
                             <span>{filteredUsers.length} results</span>
                             <div className="dropdown dropdown-bottom dropdown-end">
-                                <div tabIndex={0} role="button" className="btn btn-ghost btn-sm">
+                                <div tabIndex={0} role="button" className="flex items-center cursor-pointer gap-2">
                                     <FaSort />
                                     Sort
                                 </div>
-                                <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+                                <ul tabIndex={0} className="dropdown-content z-[1] menu p-2  bg-white border border-slate-300 shadow-lg rounded-box w-52">
                                     <li><a onClick={() => handleSort("name")}>Name {sortBy === "name" && (sortOrder === "asc" ? "↑" : "↓")}</a></li>
                                     <li><a onClick={() => handleSort("role")}>Role {sortBy === "role" && (sortOrder === "asc" ? "↑" : "↓")}</a></li>
                                     <li><a onClick={() => handleSort("status")}>Status {sortBy === "status" && (sortOrder === "asc" ? "↑" : "↓")}</a></li>
@@ -429,7 +429,7 @@ export default function UsersManagement() {
                                                 </td>
     
                                                 <td>
-                                                    <div className="flex gap-2">
+                                                    <div className="flex gap-2 items-center">
                                                         <Link
                                                             to={
                                                                 ["Admin", "System Administrator"].includes(role)
@@ -445,30 +445,47 @@ export default function UsersManagement() {
                                                             <FaEye />
                                                             View
                                                         </Link>
-                                                        <div className="dropdown dropdown-left">
-                                                    <div 
-                                                        tabIndex={0} 
-                                                        role="button" 
-                                                        className={`btn btn-ghost btn-sm ${['Admin', 'Staff'].includes(role) ? ' cursor-not-allowed opacity-90' : ''}`}
-                                                        onClick={(e) => {
-                                                        if (['Admin', 'Staff'].includes(role)) {
-                                                            e.preventDefault();
-                                                            e.stopPropagation(); // block dropdown from opening
-                                                        }
-                                                        }}
-                                                    >
-                                                        <FaEllipsisV />
-                                                    </div>
-
-                                                    {!['Admin', 'Staff'].includes(role) && (
-                                                        <ul className="dropdown-content z-[1] menu p-2 shadow-lg bg-white border border-indigo-100 rounded-box w-40">
-                                                        <li><a><FaEdit className="text-yellow-500" /> Edit Role</a></li>
-                                                        <li onClick={() => { setSelectedUser(user); setShowFormDelete(true); }}>
-                                                            <a className="text-red-500"><FaTrash /> Delete</a>
-                                                        </li>
-                                                        </ul>
-                                                    )}
-                                                    </div>
+                                                       <td>
+    
+    {/* Dropdown Menu */}
+    <div className="dropdown dropdown-left">
+      <div 
+        tabIndex={0} 
+        role="button" 
+        className={`btn btn-ghost btn-sm ${['Admin', 'Staff'].includes(role) ? 'cursor-not-allowed opacity-50' : ''}`}
+        onClick={(e) => {
+          if (['Admin', 'Staff'].includes(role)) {
+            e.preventDefault();
+            e.stopPropagation();
+          }
+        }}
+      >
+        <FaEllipsisV />
+      </div>
+      
+      {!['Admin', 'Staff'].includes(role) && (
+        <ul 
+          tabIndex={0} 
+          className="dropdown-content z-[1] menu p-2 shadow-lg bg-white border border-indigo-100 rounded-box w-40"
+        >
+          <li><a><FaEdit className="text-yellow-500" /> Edit Role</a></li>
+          <li>
+            <a 
+              className="text-red-500"
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelectedUser(user);
+                setShowFormDelete(true);
+              }}
+            >
+              <FaTrash /> Delete
+            </a>
+          </li>
+        </ul>
+      )}
+    </div>
+  
+</td>
 
                                                     </div>
                                                 </td>

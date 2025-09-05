@@ -265,7 +265,7 @@ export default function SalesHistory({ activeTab, setActiveTab }) {
 
                 {/* Stats Overview */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
-                    <div className="bg-white rounded-xl shadow-sm p-5 border ">
+                    <div className="bg-white rounded-xl shadow-md p-5 ">
                         <div className="flex items-center">
                             <div className="p-3 rounded-lg bg-blue-50">
                                 <FiDollarSign className="text-xl text-blue-600" />
@@ -282,7 +282,7 @@ export default function SalesHistory({ activeTab, setActiveTab }) {
                         </div>
                     </div>
 
-                    <div className="bg-white rounded-xl shadow-sm p-5 border">
+                    <div className="bg-white rounded-xl shadow-md p-5 ">
                         <div className="flex items-center">
                             <div className="p-3 rounded-lg bg-green-50">
                                 <FiShoppingBag className="text-xl text-green-600" />
@@ -298,7 +298,7 @@ export default function SalesHistory({ activeTab, setActiveTab }) {
                         </div>
                     </div>
 
-                    <div className="bg-white rounded-xl shadow-sm p-5 border ">
+                    <div className="bg-white rounded-xl shadow-md p-5  ">
                         <div className="flex items-center">
                             <div className="p-3 rounded-lg bg-purple-50">
                                 <FiCreditCard className="text-xl text-purple-600" />
@@ -314,7 +314,7 @@ export default function SalesHistory({ activeTab, setActiveTab }) {
                         </div>
                     </div>
 
-                    <div className="bg-white rounded-xl shadow-sm p-5 border ">
+                    <div className="bg-white rounded-xl shadow-md p-5 ">
                         <div className="flex items-center">
                             <div className="p-3 rounded-lg bg-orange-50">
                                 <FiBox className="text-xl text-orange-600" />
@@ -331,8 +331,8 @@ export default function SalesHistory({ activeTab, setActiveTab }) {
                 </div>
 
                 {/* Filters Section */}
-                <div className="bg-white rounded-xl shadow-sm p-5 border  mb-6">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between mb-5">
+                <div className="bg-white rounded-xl shadow-md p-5   mb-6">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between mb-5 ">
                         <h2 className="text-lg font-semibold text-gray-800 flex items-center">
                             <FiFilter className="mr-2 text-gray-500" />
                             Filters
@@ -343,7 +343,7 @@ export default function SalesHistory({ activeTab, setActiveTab }) {
                             <input
                                 type="text"
                                 placeholder="Search orders..."
-                                className="pl-10 pr-4 py-2 w-full border text-slate-700 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                className="pl-10 pr-4 py-2 w-full  text-slate-700 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />
@@ -358,7 +358,7 @@ export default function SalesHistory({ activeTab, setActiveTab }) {
                                 name="year"
                                 value={filters.year}
                                 onChange={handleFilterChange}
-                                className="w-full px-3 py-2 border text-slate-700 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                className="w-full px-3 py-2  text-slate-700  rounded-lg border border-slate-300"
                             >
                                 <option value="all">All Years</option>
                                 {availableYears.map(year => (
@@ -374,7 +374,7 @@ export default function SalesHistory({ activeTab, setActiveTab }) {
                                 name="month"
                                 value={filters.month}
                                 onChange={handleFilterChange}
-                                className="w-full px-3 py-2 border text-slate-700 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                className="w-full px-3 py-2  text-slate-700  rounded-lg border border-slate-300"
                                 disabled={filters.year === 'all'}
                             >
                                 <option value="all">All Months</option>
@@ -393,7 +393,7 @@ export default function SalesHistory({ activeTab, setActiveTab }) {
                                 name="orderType"
                                 value={orderTypeFilter}
                                 onChange={(e) => setOrderTypeFilter(e.target.value)}
-                                className="w-full px-3 py-2 border text-slate-700 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                className="w-full px-3 py-2 border text-slate-700  rounded-lg focus:ring-2 border border-slate-300"
                             >
                                 <option value="all">All Orders</option>
                                 <option value="Dine-in">Dine-in</option>
@@ -408,7 +408,7 @@ export default function SalesHistory({ activeTab, setActiveTab }) {
                                 name="paymentMethod"
                                 value={paymentFilter}
                                 onChange={(e) => setPaymentFilter(e.target.value)}
-                                className="w-full px-3 py-2 border text-slate-700 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                className="w-full px-3 py-2 border text-slate-700  border-slate-300 rounded-lg "
                             >
                                 <option value="all">All Methods</option>
                                 <option value="Cash">Cash</option>
@@ -420,7 +420,7 @@ export default function SalesHistory({ activeTab, setActiveTab }) {
                     <div className="flex justify-end">
                         <button
                             onClick={resetFilters}
-                            className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 flex items-center transition-colors"
+                            className="px-4 py-2 border border-slate-300  rounded-lg text-gray-700 hover:bg-gray-50 flex items-center transition-colors"
                         >
                             <FiRefreshCw className="mr-2" />
                             Reset All
@@ -442,11 +442,11 @@ export default function SalesHistory({ activeTab, setActiveTab }) {
 
                 {/* Sales List */}
                 {loading ? (
-                    <div className="flex justify-center items-center h-64 bg-white rounded-xl shadow-sm border border-gray-100">
+                    <div className="flex justify-center items-center h-64 bg-white rounded-xl shadow-md border border-gray-100">
                         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
                     </div>
                 ) : filteredData.length === 0 ? (
-                    <div className="bg-white rounded-xl shadow-sm p-8 text-center border border-gray-100">
+                    <div className="bg-white rounded-xl shadow-lg p-8 text-center">
                         <FiCalendar className="text-4xl text-gray-300 mx-auto mb-4" />
                         <h3 className="text-lg font-medium text-gray-700 mb-2">No sales records found</h3>
                         <p className="text-gray-500">Try adjusting your filters or check back later.</p>
@@ -460,7 +460,7 @@ export default function SalesHistory({ activeTab, setActiveTab }) {
                         )}
                     </div>
                 ) : (
-                    <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
+                    <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
                         <div className="overflow-x-auto">
                             <table className="w-full">
                                 <thead className="bg-gray-50">

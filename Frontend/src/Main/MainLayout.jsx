@@ -10,12 +10,14 @@ import "react-toastify/dist/ReactToastify.css";
 import SalesHistory from "../pages/sales/SalesHistory";
 import OrderManagementAdmin from "../pages/orders/orders";
 import UsersManagement from "../pages/members/members";
+import ProductPage from "../pages/products/products";
 
 export default function MainLayout() {
   const [socketConnected, setSocketConnected] = useState(false);
   const [activeTab, setActiveTab] = useState("Dashboard");
   const [userData, setUserData] = useState(null);
   const navigate = useNavigate();
+  
 
   useEffect(() => {
     let socket;
@@ -52,6 +54,18 @@ export default function MainLayout() {
         });
 
         socket.on("order_cancelled", (data) => {
+          toast.success(`${data.message}`, {
+            position: "top-right",
+            autoClose: 6000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            theme: "colored",
+          });
+        });
+
+        socket.on("notification", (data) => {
           toast.error(`${data.message}`, {
             position: "top-right",
             autoClose: 6000,
@@ -96,6 +110,9 @@ export default function MainLayout() {
 
     axios.get("https://caferealitea.onrender.com/user", { withCredentials: true })
       .then((res) => {
+        
+        console.log(res.data.role);
+        
         if (!res.data.logged_in || res.data.role === "") {
           navigate("/");
           return;
@@ -119,7 +136,7 @@ export default function MainLayout() {
           <ToastContainer />
           {/* Show only the active tab */}
           <div className={activeTab === "Dashboard" ? "block" : "hidden"}>
-            <Dashboard setActiveTab={setActiveTab} />
+            <Dashboard setActiveTab={setActiveTab }  />
           </div>
           <div className={activeTab === "Sales" ? "block" : "hidden"}>
             <SalesHistory />
@@ -130,6 +147,10 @@ export default function MainLayout() {
 
           <div className={activeTab === "Members" ? "block" : "hidden"}>
             <UsersManagement />
+          </div>
+
+          <div className={activeTab === "Products" ? "block" : "hidden"}>
+            <ProductPage />
           </div>
         </main>
       </div>

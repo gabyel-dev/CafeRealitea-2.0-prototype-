@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import Profit from "../../components/UI/Charts/PieChart"
 import Title from "../../components/UI/Title";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
 
 const socket = io('https://caferealitea.onrender.com')
@@ -9,6 +10,7 @@ const socket = io('https://caferealitea.onrender.com')
 // Main Dashboard Component
 export default function Dashboard({ setActiveTab }) {
   // Sample data
+  const navigate = useNavigate()
   const [timeRange, setTimeRange] = useState("monthly");
   const [topItems, setTopItems] = useState([])
   const [summary, setSummary] = useState(null);
@@ -18,6 +20,27 @@ export default function Dashboard({ setActiveTab }) {
     avgOrder: 0
   });
   const [recentOrder, setRecentOrder] = useState()
+  const [role, setRole] = useState('')
+
+   useEffect(() => {
+    document.title = "Café Realitea - Dashboard";
+
+    axios.get("https://caferealitea.onrender.com/user", { withCredentials: true })
+      .then((res) => {
+        console.log(res.data.role);
+        
+        if (!res.data.logged_in || res.data.role === "") {
+          navigate("/");
+          return;
+        }
+        setRole(res.data.role);
+      })
+      .catch((err) => {
+        console.error("Authentication check failed:", err);
+        navigate("/")
+      })
+   }, [])
+  
 
 function getPercentageChange(current, previous) {
   if (!previous || previous === 0) return 0; 
@@ -33,6 +56,7 @@ function getPercentageChange(current, previous) {
       .then((result) => setTopItems(result.data));
 
     // fetch recent orders
+    
     
 
     // fetch orders summary
@@ -318,17 +342,17 @@ function getPercentageChange(current, previous) {
       </div>
 
       {/* View All Link */}
-      <div className="mt-8 text-center">
-        <button 
-          onClick={() => setActiveTab("View All")} 
-          className="btn btn-neutral btn-wide btn-dash "
-        >
-          View Full Dashboard
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-          </svg>
-        </button>
-      </div>
+<div className={`${role === 'Admin' ? "hidden" : "block"} mt-8 text-center`}>
+    <button 
+      onClick={() => setActiveTab('View All')}
+      className="btn btn-neutral btn-wide"
+    >
+      View Full Dashboard 
+      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+      </svg>
+    </button> 
+    </div>
     </div>
   );
 }

@@ -2,7 +2,7 @@ import axios from "axios";
 import { useEffect, useState } from "react"; // Added useState import
 import { useNavigate } from "react-router-dom";
 
-export default function DeleteUser({ showForm, id, userDetails, onDeleted }) {
+export default function DeleteUser({ showForm, id, onDeleted }) {
     const navigate = useNavigate();
     const [isDeleting, setIsDeleting] = useState(false);
     const [details, setDetails] = useState(); // store fetched details
