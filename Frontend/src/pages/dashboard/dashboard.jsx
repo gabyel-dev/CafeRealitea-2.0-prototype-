@@ -8,7 +8,7 @@ import { io } from "socket.io-client";
 const socket = io('https://caferealitea.onrender.com')
 
 // Main Dashboard Component
-export default function Dashboard({ setActiveTab }) {
+export default function Dashboard({ setActiveTab, activeTab }) {
   // Sample data
   const navigate = useNavigate()
   const [timeRange, setTimeRange] = useState("monthly");
@@ -172,9 +172,6 @@ function getPercentageChange(current, previous) {
   </div>
 </div>
 
-{/* Stat Card 3 - Avg. Order Value */}
-
-
         {/* Stat Card 3 */}
         <div className="card bg-white shadow-md">
           <div className="card-body p-6">
@@ -230,7 +227,9 @@ function getPercentageChange(current, previous) {
                     <div className={`w-10 h-10 rounded-lg flex items-center justify-center mr-3 ${
                       index === 0 ? 'bg-blue-100 text-blue-600' : 
                       index === 1 ? 'bg-purple-100 text-purple-600' : 
-                      'bg-amber-100 text-amber-600'
+                      index === 2 ?  'bg-amber-100 text-amber-600': 
+                       'bg-gray-100 text-gray-600'
+                     
                     }`}>
                       <span className="font-bold">{index + 1}</span>
                     </div>
@@ -243,12 +242,15 @@ function getPercentageChange(current, previous) {
                 </div>
               ))}
             </div>
-            <button className="btn btn-primary btn-sm gap-2 self-center">
-              View All Products
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
+            <button
+  onClick={() => setActiveTab("Products")}
+  className="btn btn-primary btn-sm gap-2 self-center"
+>
+  View All Products
+  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+  </svg>
+</button>
           </div>
         </div>
       </div>

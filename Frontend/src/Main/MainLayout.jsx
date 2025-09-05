@@ -11,6 +11,8 @@ import SalesHistory from "../pages/sales/SalesHistory";
 import OrderManagementAdmin from "../pages/orders/orders";
 import UsersManagement from "../pages/members/members";
 import ProductPage from "../pages/products/products";
+import Profile from "../pages/profile/profile";
+import ViewAllData from "../pages/dashboard/view_all_data";
 
 export default function MainLayout() {
   const [socketConnected, setSocketConnected] = useState(false);
@@ -136,8 +138,13 @@ export default function MainLayout() {
           <ToastContainer />
           {/* Show only the active tab */}
           <div className={activeTab === "Dashboard" ? "block" : "hidden"}>
-            <Dashboard setActiveTab={setActiveTab }  />
+            <Dashboard setActiveTab={setActiveTab} activeTab={activeTab} />
           </div>
+
+          <div className={activeTab === "View All" ? "block" : "hidden"}>
+            <ViewAllData setActiveTab={setActiveTab} activeTab={activeTab} />
+          </div>
+
           <div className={activeTab === "Sales" ? "block" : "hidden"}>
             <SalesHistory />
           </div>
@@ -151,6 +158,10 @@ export default function MainLayout() {
 
           <div className={activeTab === "Products" ? "block" : "hidden"}>
             <ProductPage />
+          </div>
+
+          <div className={activeTab === "Profile" ? "block" : "hidden"}>
+            <Profile />
           </div>
         </main>
       </div>

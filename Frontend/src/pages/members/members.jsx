@@ -8,6 +8,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import DeleteUser from "../../component/DeleteUserModal";
 import { io } from "socket.io-client";
+import EditUserRole from "../../component/EditUserRoleModal";
 
 export default function UsersManagement() {
   const [users, setUsers] = useState([]);
@@ -22,6 +23,7 @@ export default function UsersManagement() {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState(null);
   const [showFormDelete, setShowFormDelete] = useState(false);
+  const [showFormEdit, setShowFormEdit] = useState(false)
   const [onlineStatusError, setOnlineStatusError] = useState(false);
   const [role, setRole] = useState('');
 
@@ -66,12 +68,12 @@ export default function UsersManagement() {
   socket.on('disconnect', (reason) => {
     console.log('Socket disconnected:', reason);
   });
-
+/* 
   // Add listener for user_status_change
   socket.on('user_status_change', data => {
     console.log('User status changed:', data);
     setIsOnline(prev => ({ ...prev, [data.user_id]: data.is_online }));
-  });
+  }); */
 
 
   const fetchUsers = async () => {
@@ -211,6 +213,11 @@ export default function UsersManagement() {
       {showFormDelete && selectedUser && (
         <DeleteUser showForm={setShowFormDelete} id={selectedUser.id} onDeleted={handleUserDeleted} />
       )}
+
+      {showFormEdit && selectedUser && (
+        <EditUserRole showForm={setShowFormEdit} id={selectedUser.id} />
+      )}
+
 
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
@@ -446,10 +453,10 @@ export default function UsersManagement() {
                                                 </td>
                                                 <td>
                                                     <div className={`flex items-center w-fit gap-2 px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(isOnline[user.id] ?? false)}`}>
-  <div className={`w-2 h-2 rounded-full ${isOnline[user.id] ? "bg-green-500 animate-pulse" : "bg-gray-400"}`}></div>
-  <span>{isOnline[user.id] ? "Online" : "Offline"}</span>
-  {isOnline[user.id] && <span className="text-xs text-green-600">• Live</span>}
-</div>
+                                                            <div className={`w-2 h-2 rounded-full ${isOnline[user.id] ? "bg-green-500 animate-pulse" : "bg-gray-400"}`}></div>
+                                                            <span>{isOnline[user.id] ? "Online" : "Offline"}</span>
+                                                            {isOnline[user.id] && <span className="text-xs text-green-600">• Live</span>}
+                                                            </div>
 
                                                 </td>
     
@@ -472,42 +479,53 @@ export default function UsersManagement() {
                                                         </Link>
                                                        
                                                         {/* Dropdown Menu */}
-                                                        <div className="dropdown dropdown-left">
+                                                       <div className="dropdown dropdown-left">
                                                             <div 
                                                                 tabIndex={0} 
                                                                 role="button" 
                                                                 className={`btn btn-ghost btn-sm ${['Admin', 'Staff'].includes(role) ? 'cursor-not-allowed opacity-50' : ''}`}
                                                                 onClick={(e) => {
-                                                                    if (['Admin', 'Staff'].includes(role)) {
-                                                                        e.preventDefault();
-                                                                        e.stopPropagation();
-                                                                    }
+                                                                if (['Admin', 'Staff'].includes(role)) {
+                                                                    e.preventDefault();
+                                                                    e.stopPropagation();
+                                                                }
                                                                 }}
                                                             >
                                                                 <FaEllipsisV />
                                                             </div>
                                                             
-                                                            {!['Admin', 'Staff'].includes(role) && (
+                                                            {showFormEdit || !showFormDelete && ['System Administrator'].includes(role) && (
                                                                 <ul 
-                                                                    tabIndex={0} 
-                                                                    className="dropdown-content z-[1] menu p-2 shadow-lg bg-white border border-indigo-100 rounded-box w-40"
+                                                                tabIndex={0} 
+                                                                className="dropdown-content z-[1] menu p-2 shadow-lg bg-white border border-indigo-100 rounded-box w-40"
                                                                 >
-                                                                    <li><a><FaEdit className="text-yellow-500" /> Edit Role</a></li>
-                                                                    <li>
-                                                                        <a 
-                                                                            className="text-red-500"
-                                                                            onClick={(e) => {
-                                                                                e.stopPropagation();
-                                                                                setSelectedUser(user);
-                                                                                setShowFormDelete(true);
-                                                                            }}
-                                                                        >
-                                                                            <FaTrash /> Delete
-                                                                        </a>
-                                                                    </li>
+                                                                <li>
+                                                                    <a
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        setSelectedUser(user);
+                                                                        setShowFormEdit(true);
+                                                                    }}
+                                                                    >
+                                                                    <FaEdit className="text-yellow-500" /> Edit Role
+                                                                    </a>
+                                                                </li>
+                                                                <li>
+                                                                    <a 
+                                                                    className="text-red-500"
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        setSelectedUser(user);
+                                                                        setShowFormDelete(true);
+                                                                    }}
+                                                                    >
+                                                                    <FaTrash /> Delete
+                                                                    </a>
+                                                                </li>
                                                                 </ul>
                                                             )}
-                                                        </div>
+                                                            </div>
+
                                                     </div>
                                                 </td>
                                             </motion.tr>

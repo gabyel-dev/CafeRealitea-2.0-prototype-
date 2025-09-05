@@ -2,11 +2,11 @@ import { useState, useEffect } from "react";
 import Loader from "../../components/UI/loaders/Loader"; // Adjust path as needed
 import Dashboard from "./dashboard";
 import ViewAll from "./view_all_data";
+import ProductPage from "../products/products";
 
-export default function MainDashboard() {
+export default function MainDashboard({ activeTab, setActiveTab }) {
   const [isLoading, setIsLoading] = useState(true);
   const [dashboardData, setDashboardData] = useState(null);
-  const [activeTab, setActiveTab] = useState("Dashboard");
 
   // Simulate data fetching
   useEffect(() => {
@@ -38,11 +38,7 @@ export default function MainDashboard() {
 
   return (
     <div className="bg-indigo-50 w-full min-h-screen ">
-      <div onClick={() => setActiveTab("Dashboard")}>
 
-      
-
-      </div>
         <main>
           <div className={activeTab === "Dashboard" ? "block bg-indigo-50 w-full h-screen" : "hidden"}>
             <Dashboard setActiveTab={setActiveTab} />
@@ -52,6 +48,10 @@ export default function MainDashboard() {
           className={activeTab === "View All" ? "block bg-indigo-50 w-full h-screen" : "hidden"}>
             <ViewAll setActiveTab={setActiveTab} />
           </div>
+
+          {/* <div className={activeTab === "Products" ? "block" : "hidden"}>
+            <ProductPage />
+          </div> */}
 
           
         </main>

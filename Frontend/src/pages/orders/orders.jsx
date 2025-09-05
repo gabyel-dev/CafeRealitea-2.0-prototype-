@@ -63,6 +63,7 @@ useEffect(() => {
 
   // fetch initial pending orders count
   const fetchInitial = async () => {
+    
     try {
       const res = await fetch("https://caferealitea.onrender.com/pending-orders", {
         credentials: "include",

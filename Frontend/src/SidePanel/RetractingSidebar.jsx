@@ -242,7 +242,7 @@ const Sidebar2 = ({ activeTab, setActiveTab }) => {
           width: open ? "225px" : "fit-content",
         }}
       >
-        <TitleSection open={open} />
+        <TitleSection open={open} setActiveTab={setActiveTab} />
 
         <div className="space-y-1">
           <Option Icon={FiHome} title="Dashboard" activeTab={activeTab} setActiveTab={setActiveTab} open={open} />
@@ -250,7 +250,6 @@ const Sidebar2 = ({ activeTab, setActiveTab }) => {
           <Option Icon={FiMonitor} title="Orders" activeTab={activeTab} setActiveTab={setActiveTab} open={open} />
           <Option Icon={FiShoppingCart} title="Products" activeTab={activeTab} setActiveTab={setActiveTab} open={open} />
           <Option Icon={FiUsers} title="Members" activeTab={activeTab} setActiveTab={setActiveTab} open={open} />
-          <Option Icon={FiSettings} title="Settings" activeTab={activeTab} setActiveTab={setActiveTab} open={open} />
         </div>
 
         <ToggleClose open={open} setOpen={setOpen} />
@@ -292,7 +291,7 @@ const Option = ({ Icon, title, activeTab, setActiveTab, open, notifs }) => {
   );
 };
 
-const TitleSection = ({ open }) => {
+const TitleSection = ({ open, setActiveTab }) => {
   const [userFirstname, setFirstname] = useState();
   const [userLastname, setLastname] = useState();
   const [userRole, setUserRole] = useState();
@@ -356,7 +355,9 @@ const TitleSection = ({ open }) => {
             exit={{ opacity: 0, y: -5 }}
             className={open ? "absolute translate-y-0 translate-x-20 mt-2 w-48 bg-white shadow-lg border-1 border-slate-300 p-3 z-50 rounded-xl flex flex-col gap-2" : "absolute translate-y-0 translate-x-0 mt-2 w-48 bg-white shadow-lg p-3 z-50 rounded-xl flex flex-col gap-2"}
           >
-            <button className="flex items-center gap-2 text-sm text-slate-700 hover:text-indigo-600">
+            <button 
+            onClick={() => setActiveTab("Profile")}
+            className="flex items-center gap-2 text-sm text-slate-700 hover:text-indigo-600">
               <FiUser className="w-4 h-4" /> Profile
             </button>
             <button className="flex items-center gap-2 text-sm text-slate-700 hover:text-indigo-600">

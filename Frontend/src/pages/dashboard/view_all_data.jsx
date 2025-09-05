@@ -187,7 +187,7 @@ const CustomTooltip = ({ active, payload, label, formatCurrency }) => {
 };
 
 // ----------------- Main Component -----------------
-export default function ViewAllData({ setActiveTab }) {
+export default function ViewAllData({ setActiveTab, activeTab }) {
   const [timeRange, setTimeRange] = useState("monthly");
   const [salesData, setSalesData] = useState([]);
   const [equipment, setEquipment] = useState([]);
@@ -570,7 +570,7 @@ export default function ViewAllData({ setActiveTab }) {
         <div className="card-body px-0 py-4">
           <h3 className="card-title text-lg mb-4 text-slate-700 px-4">Revenue vs Net Profit</h3>
           <div className="h-80">
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" className="outline-none">
               <LineChart
                 data={chartData}
                 margin={{
