@@ -240,7 +240,8 @@ export default function UsersManagement() {
             </div>
 
             {/* Stats Overview */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div className="hidden md:block">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                 <div className={`stats shadow cursor-pointer transition-all hover:shadow-md ${
                         roleFilter === "all" ? "ring-2 ring-indigo-200 bg-indigo-50" : "bg-white"
                     }`}
@@ -304,6 +305,7 @@ export default function UsersManagement() {
                         </div>
                     </div>
                 </div>
+            </div>
             </div>
 
             {/* Filters and Search */}
