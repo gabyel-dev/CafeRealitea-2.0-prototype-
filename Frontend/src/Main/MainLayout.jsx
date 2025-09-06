@@ -1,25 +1,38 @@
 import { useState, useEffect } from "react";
 import { Sidebar } from "../SidePanel/RetractingSidebar";
 import Loader from "../components/UI/loaders/Loader";
-import Dashboard from "../pages/dashboard/MainDashboard";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { io } from "socket.io-client";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import SalesHistory from "../pages/sales/SalesHistory";
-import OrderManagementAdmin from "../pages/orders/orders";
-import UsersManagement from "../pages/members/members";
-import ProductPage from "../pages/products/products";
-import Profile from "../pages/profile/profile";
-import ViewAllData from "../pages/dashboard/view_all_data";
+import { Suspense, lazy } from "react";
+
+// Lazy load components
+const Dashboard = lazy(() => import("../pages/dashboard/MainDashboard"));
+const ViewAllData = lazy(() => import("../pages/dashboard/view_all_data"));
+const SalesHistory = lazy(() => import("../pages/sales/SalesHistory"));
+const OrderManagementAdmin = lazy(() => import("../pages/orders/orders"));
+const UsersManagement = lazy(() => import("../pages/members/members"));
+const ProductPage = lazy(() => import("../pages/products/products"));
+const Profile = lazy(() => import("../pages/profile/profile"));
 
 export default function MainLayout() {
   const [socketConnected, setSocketConnected] = useState(false);
   const [activeTab, setActiveTab] = useState("Dashboard");
   const [userData, setUserData] = useState(null);
+  const [loadedTabs, setLoadedTabs] = useState(new Set(["Dashboard"])); // Track loaded tabs
   const navigate = useNavigate();
-  
+
+  // Function to handle tab changes
+  const handleTabChange = (tabName) => {
+    setActiveTab(tabName);
+    
+    // Add the tab to loaded tabs if it hasn't been loaded yet
+    if (!loadedTabs.has(tabName)) {
+      setLoadedTabs(prev => new Set([...prev, tabName]));
+    }
+  };
 
   useEffect(() => {
     let socket;
@@ -112,7 +125,6 @@ export default function MainLayout() {
 
     axios.get("https://caferealitea.onrender.com/user", { withCredentials: true })
       .then((res) => {
-        
         console.log(res.data.role);
         
         if (!res.data.logged_in || res.data.role === "") {
@@ -127,42 +139,35 @@ export default function MainLayout() {
       })
   }, [navigate]);
 
+  // Render component only if it's loaded (active or previously loaded)
+  const renderComponent = (tabName, Component) => {
+    
+    return (
+      <div style={{ display: activeTab === tabName ? "block" : "none" }}>
+        <Component setActiveTab={setActiveTab} activeTab={activeTab} />
+      </div>
+    );
+  };
+
   return (
     <div className="flex h-screen overflow-hidden">
       {/* Sidebar */}
-      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+      <Sidebar activeTab={activeTab} setActiveTab={handleTabChange} />
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col overflow-hidden">
         <main className="flex-1 overflow-y-auto p-4 bg-indigo-50">
           <ToastContainer />
-          {/* Show only the active tab */}
-          <div className={activeTab === "Dashboard" ? "block" : "hidden"}>
-            <Dashboard setActiveTab={setActiveTab} activeTab={activeTab} />
-          </div>
-
-          <div className={activeTab === "View All" ? "block" : "hidden"}>
-            <ViewAllData setActiveTab={setActiveTab} activeTab={activeTab} />
-          </div>
-
-          <div className={activeTab === "Sales" ? "block" : "hidden"}>
-            <SalesHistory />
-          </div>
-          <div className={activeTab === "Orders" ? "block" : "hidden"}>
-            <OrderManagementAdmin />
-          </div>
-
-          <div className={activeTab === "Members" ? "block" : "hidden"}>
-            <UsersManagement />
-          </div>
-
-          <div className={activeTab === "Products" ? "block" : "hidden"}>
-            <ProductPage />
-          </div>
-
-          <div className={activeTab === "Profile" ? "block" : "hidden"}>
-            <Profile />
-          </div>
+          
+          <Suspense fallback={<Loader />}>
+            {renderComponent("Dashboard", Dashboard)}
+            {renderComponent("View All", ViewAllData)}
+            {renderComponent("Sales", SalesHistory)}
+            {renderComponent("Orders", OrderManagementAdmin)}
+            {renderComponent("Members", UsersManagement)}
+            {renderComponent("Products", ProductPage)}
+            {renderComponent("Profile", Profile)}
+          </Suspense>
         </main>
       </div>
     </div>

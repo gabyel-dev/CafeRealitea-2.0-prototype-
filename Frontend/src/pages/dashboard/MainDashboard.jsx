@@ -1,12 +1,32 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import Loader from "../../components/UI/loaders/Loader"; // Adjust path as needed
-import Dashboard from "./dashboard";
-import ViewAll from "./view_all_data";
 import ProductPage from "../products/products";
+
+const ViewAll = lazy(() => import("./view_all_data"))
+const Dashboard = lazy(() => import("./dashboard"))
 
 export default function MainDashboard({ activeTab, setActiveTab }) {
   const [isLoading, setIsLoading] = useState(true);
   const [dashboardData, setDashboardData] = useState(null);
+  const [loadedTabs, setLoadedTabs] = useState(new Set(["Dashboard"])); // Track loaded tabs
+
+  const handleTabChange = (tabName) => {
+    setActiveTab(tabName);
+    
+    // Add the tab to loaded tabs if it hasn't been loaded yet
+    if (!loadedTabs.has(tabName)) {
+      setLoadedTabs(prev => new Set([...prev, tabName]));
+    }
+  };
+
+  const renderComponent = (tabName, Component) => {
+    
+    return (
+      <div style={{ display: activeTab === tabName ? "block" : "none" }}>
+        <Component setActiveTab={setActiveTab} activeTab={activeTab} />
+      </div>
+    );
+  };
 
   // Simulate data fetching
   useEffect(() => {
@@ -40,18 +60,10 @@ export default function MainDashboard({ activeTab, setActiveTab }) {
     <div className="bg-indigo-50 w-full min-h-screen ">
 
         <main>
-          <div className={activeTab === "Dashboard" ? "block bg-indigo-50 w-full h-screen" : "hidden"}>
-            <Dashboard setActiveTab={setActiveTab} />
-          </div>
-
-          <div 
-          className={activeTab === "View All" ? "block bg-indigo-50 w-full h-screen" : "hidden"}>
-            <ViewAll setActiveTab={setActiveTab} />
-          </div>
-
-          {/* <div className={activeTab === "Products" ? "block" : "hidden"}>
-            <ProductPage />
-          </div> */}
+          <Suspense fallback={<Loader />}>
+            {renderComponent('Dashboard', Dashboard)}
+            {renderComponent('View All', ViewAll)}
+          </Suspense>
 
           
         </main>

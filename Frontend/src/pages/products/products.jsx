@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
@@ -24,17 +24,21 @@ export default function ProductPage({ activeTab, setActiveTab }) {
     const [categories, setCategories] = useState([]);
     const [allProducts, setAllProducts] = useState([]);
     const [filteredProducts, setFilteredProducts] = useState([]);
+    const [displayedProducts, setDisplayedProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [categoryFilter, setCategoryFilter] = useState('all');
     const [searchQuery, setSearchQuery] = useState('');
     const [sortConfig, setSortConfig] = useState({ key: null, direction: 'descending' });
+
+    const PRODUCTS_PER_PAGE = 10;
+    const [page, setPage] = useState(1);
+    const loadMoreRef = useRef(null);
 
     useEffect(() => {
         axios.get('https://caferealitea.onrender.com/items')
             .then((res) => {
                 setCategories(res.data);
                 
-                // Flatten all products into a single array with category info
                 const products = res.data.flatMap(category => 
                     category.items.map(item => ({
                         ...item,
@@ -73,12 +77,10 @@ export default function ProductPage({ activeTab, setActiveTab }) {
     const applyFilters = () => {
         let result = [...allProducts];
         
-        // Apply category filter
         if (categoryFilter !== 'all') {
             result = result.filter(item => item.category === categoryFilter);
         }
         
-        // Apply search filter
         if (searchQuery) {
             const query = searchQuery.toLowerCase();
             result = result.filter(item => 
@@ -88,7 +90,6 @@ export default function ProductPage({ activeTab, setActiveTab }) {
             );
         }
         
-        // Apply sorting
         if (sortConfig.key) {
             result.sort((a, b) => {
                 if (a[sortConfig.key] < b[sortConfig.key]) {
@@ -102,6 +103,8 @@ export default function ProductPage({ activeTab, setActiveTab }) {
         }
         
         setFilteredProducts(result);
+        setPage(1);
+        setDisplayedProducts(result.slice(0, PRODUCTS_PER_PAGE));
     };
 
     const handleSort = (key) => {
@@ -126,25 +129,47 @@ export default function ProductPage({ activeTab, setActiveTab }) {
         }).format(amount);
     };
 
-    // Calculate statistics
     const totalProducts = filteredProducts.length;
     const uniqueCategories = [...new Set(filteredProducts.map(item => item.category))].length;
     const averagePrice = totalProducts > 0 
         ? filteredProducts.reduce((sum, product) => sum + parseFloat(product.price || 0), 0) / totalProducts 
         : 0;
 
-    // Get category icon
     const getCategoryIcon = (categoryName) => {
         if (categoryName.includes('Coffee')) return <FiCoffee />;
         if (categoryName.includes('Milktea')) return <FiShoppingBag />;
         return <FiBox />;
     };
 
-    // Get sort indicator
     const getSortIndicator = (key) => {
         if (sortConfig.key !== key) return null;
         return sortConfig.direction === 'ascending' ? 
             <FiChevronUp className="ml-1" /> : <FiChevronDown className="ml-1" />;
+    };
+
+    // Lazy load more products when sentinel enters viewport
+    useEffect(() => {
+        if (!loadMoreRef.current) return;
+        const observer = new IntersectionObserver(
+            (entries) => {
+                if (entries[0].isIntersecting) {
+                    loadMore();
+                }
+            },
+            { threshold: 1 }
+        );
+        observer.observe(loadMoreRef.current);
+        return () => observer.disconnect();
+    }, [displayedProducts, filteredProducts]);
+
+    const loadMore = () => {
+        const start = page * PRODUCTS_PER_PAGE;
+        const end = start + PRODUCTS_PER_PAGE;
+        const more = filteredProducts.slice(start, end);
+        if (more.length > 0) {
+            setDisplayedProducts(prev => [...prev, ...more]);
+            setPage(prev => prev + 1);
+        }
     };
 
     return (
@@ -272,7 +297,7 @@ export default function ProductPage({ activeTab, setActiveTab }) {
                 {/* Results Count */}
                 <div className="mb-4 flex justify-between items-center">
                     <p className="text-sm text-gray-600">
-                        Showing {filteredProducts.length} of {allProducts.length} products
+                        Showing {displayedProducts.length} of {allProducts.length} products
                     </p>
 
                     <button className="btn btn-sm btn-neutral block items-center md:hidden text-white-600 text-sm">
@@ -290,7 +315,7 @@ export default function ProductPage({ activeTab, setActiveTab }) {
                     <div className="flex justify-center items-center h-64 bg-white rounded-xl shadow-md border border-gray-100">
                         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
                     </div>
-                ) : filteredProducts.length === 0 ? (
+                ) : displayedProducts.length === 0 ? (
                     <div className="bg-white rounded-xl shadow-lg p-8 text-center">
                         <FiBox className="text-4xl text-gray-300 mx-auto mb-4" />
                         <h3 className="text-lg font-medium text-gray-700 mb-2">No products found</h3>
@@ -341,7 +366,7 @@ export default function ProductPage({ activeTab, setActiveTab }) {
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
-                                    {filteredProducts.map((product) => (
+                                    {displayedProducts.map((product) => (
                                         <tr key={product.id} className="hover:bg-gray-50">
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center">
@@ -378,11 +403,17 @@ export default function ProductPage({ activeTab, setActiveTab }) {
                                     ))}
                                 </tbody>
                             </table>
+                            <div ref={loadMoreRef} className="h-4"></div>
+                            {displayedProducts.length < filteredProducts.length && (
+                                <div className="flex justify-center py-4">
+                                    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+                                </div>
+                            )}
                         </div>
                     </div>
                 )}
 
-                {/* Category Cards View (Alternative Layout) */}
+                {/* Category Cards View */}
                 <div className="mt-8">
                     <h2 className="text-xl font-bold text-gray-800 mb-4">Browse by Category</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
