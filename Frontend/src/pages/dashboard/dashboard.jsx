@@ -1,34 +1,38 @@
 import { useState, useEffect } from "react";
-import Profit from "../../components/UI/Charts/PieChart"
+import Profit from "../../components/UI/Charts/PieChart";
 import Title from "../../components/UI/Title";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
+import { FiBox, FiPlus } from "react-icons/fi";
 
-const socket = io('https://caferealitea.onrender.com')
+const socket = io('https://caferealitea.onrender.com');
 
 // Main Dashboard Component
 export default function Dashboard({ setActiveTab, activeTab }) {
-  // Sample data
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+
+  // State variables
   const [timeRange, setTimeRange] = useState("monthly");
-  const [topItems, setTopItems] = useState([])
+  const [topItems, setTopItems] = useState([]);
   const [summary, setSummary] = useState(null);
   const [percentChange, setPercentChange] = useState({
     sales: 0,
     orders: 0,
-    avgOrder: 0
+    avgOrder: 0,
   });
-  const [recentOrder, setRecentOrder] = useState()
-  const [role, setRole] = useState('')
+  const [recentOrder, setRecentOrder] = useState();
+  const [role, setRole] = useState("");
 
-   useEffect(() => {
+  // Check authentication and role
+  useEffect(() => {
     document.title = "Café Realitea - Dashboard";
 
-    axios.get("https://caferealitea.onrender.com/user", { withCredentials: true })
+    axios
+      .get("https://caferealitea.onrender.com/user", { withCredentials: true })
       .then((res) => {
         console.log(res.data.role);
-        
+
         if (!res.data.logged_in || res.data.role === "") {
           navigate("/");
           return;
@@ -37,65 +41,57 @@ export default function Dashboard({ setActiveTab, activeTab }) {
       })
       .catch((err) => {
         console.error("Authentication check failed:", err);
-        navigate("/")
-      })
-   }, [])
-  
+        navigate("/");
+      });
+  }, []);
 
-function getPercentageChange(current, previous) {
-  if (!previous || previous === 0) return 0; 
-  return ((current - previous) / previous) * 100;
-}
+  // Helper function to calculate percentage change
+  function getPercentageChange(current, previous) {
+    if (!previous || previous === 0) return 0;
+    return ((current - previous) / previous) * 100;
+  }
 
-
-    useEffect(() => {
+  // Fetch dashboard data
+  useEffect(() => {
     const api = import.meta.env.VITE_SERVER_API_NAME;
 
-    // fetch top items
-    axios.get(`${api}/top_items`)
-      .then((result) => setTopItems(result.data));
+    // Fetch top items
+    axios.get(`${api}/top_items`).then((result) => setTopItems(result.data));
 
-    // fetch recent orders
-    
-    
+    // Fetch orders summary
+    axios.get(`${api}/orders/months`).then((res) => {
+      const data = res.data;
 
-    // fetch orders summary
-    axios.get(`${api}/orders/months`)
-      .then((res) => {
-        const data = res.data;
+      // Sort by year + month
+      data.sort((a, b) => (a.year === b.year ? a.month - b.month : a.year - b.year));
 
-        // sort by year+month
-        data.sort((a, b) =>
-          a.year === b.year ? a.month - b.month : a.year - b.year
-        );
+      const latest = data[data.length - 1];
+      const prev = data.length > 1 ? data[data.length - 2] : null;
 
-        const latest = data[data.length - 1];
-        const prev = data.length > 1 ? data[data.length - 2] : null;
+      if (latest) {
+        setSummary({
+          sales: latest.total_sales,
+          orders: latest.total_orders,
+          avgOrder: latest.total_sales / latest.total_orders,
+        });
 
-        if (latest) {
-          setSummary({
-            sales: latest.total_sales,
-            orders: latest.total_orders,
-            avgOrder: latest.total_sales / latest.total_orders
+        if (prev) {
+          setPercentChange({
+            sales: getPercentageChange(latest.total_sales, prev.total_sales),
+            orders: getPercentageChange(latest.total_orders, prev.total_orders),
+            avgOrder: getPercentageChange(
+              latest.total_sales / latest.total_orders,
+              prev.total_sales / prev.total_orders
+            ),
           });
-
-          if (prev) {
-            setPercentChange({
-              sales: getPercentageChange(latest.total_sales, prev.total_sales),
-              orders: getPercentageChange(latest.total_orders, prev.total_orders),
-              avgOrder: getPercentageChange(
-                latest.total_sales / latest.total_orders,
-                prev.total_sales / prev.total_orders
-              )
-            });
-          }
         }
-      });
+      }
+    });
   }, []);
   
 
   return (
-    <div className="md:p-4 pt-4 md:pt-4 bg-indigo-50 min-h-screen">
+    <div className="md:p-4 pt-0 md:pt-4 bg-indigo-50 min-h-screen">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8  ">
         <div onClick={() => setActiveTab("Dashboard")} className="cursor-pointer mb-4 md:mb-0">
@@ -121,7 +117,7 @@ function getPercentageChange(current, previous) {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
         {/* Stat Card 1 */}
    {/* Stat Card 1 - Monthly Sales */}
 <div className="card bg-white shadow-md">
@@ -130,7 +126,7 @@ function getPercentageChange(current, previous) {
       <div>
         <h3 className="text-sm font-medium text-gray-500">Monthly Sales</h3>
         <p className="text-2xl font-bold mt-1 text-gray-700">
-          ₱{summary?.sales?.toLocaleString() ?? "-"}
+          ₱{summary?.sales?.toLocaleString() ?? "0"}
         </p>
       </div>
       <div className={`badge badge-lg gap-1 ${percentChange.sales >= 0 ? "badge-success" : "badge-error"}`}>
@@ -162,7 +158,7 @@ function getPercentageChange(current, previous) {
           </div>
         </div>
         <p className="text-2xl font-bold mt-1 text-gray-700">
-          {summary?.orders ?? "-"}
+          {summary?.orders ?? "0"}
         </p>
       </div>
     </div>
@@ -186,7 +182,7 @@ function getPercentageChange(current, previous) {
                 
                 <p className="text-2xl font-bold mt-1 text-gray-700">
                   
-                ₱{summary?.avgOrder?.toFixed(2) ?? "-"}
+                ₱{summary?.avgOrder?.toFixed(2) ?? "0"}
               </p>
               
               </div>
@@ -220,28 +216,40 @@ function getPercentageChange(current, previous) {
         <div className="card bg-white h-fit text-slate-700  shadow-md">
           <div className="card-body">
             <h3 className="card-title text-lg mb-6">Top Selling Items</h3>
-            <div className="space-y-5 pb-10">
-              {topItems.slice(0, 4).map((item, index) => (
-                <div key={item.item_id} className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center mr-3 ${
-                      index === 0 ? 'bg-blue-100 text-blue-600' : 
-                      index === 1 ? 'bg-purple-100 text-purple-600' : 
-                      index === 2 ?  'bg-amber-100 text-amber-600': 
-                       'bg-gray-100 text-gray-600'
-                     
-                    }`}>
-                      <span className="font-bold">{index + 1}</span>
-                    </div>
-                    <div>
-                      <p className="font-medium">{item.product_name}</p>
-                      <p className="text-xs text-gray-500">{item.total_quantity} sold</p>
-                    </div>
-                  </div>
-                  <span className="font-semibold">₱ {item.total_sales}</span>
+           {topItems.length <= 0 ? (
+              <div className="flex flex-col items-center justify-center py-4 mb-4 px-4 text-center bg-gray-50 rounded-lg border border-dashed border-gray-300">
+                <div className="mb-4 p-4 bg-blue-50 rounded-full">
+                  <FiBox className="h-8 w-8 text-blue-500" />
                 </div>
-              ))}
-            </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No top items yet</h3>
+                <p className="text-gray-500 max-w-md mb-4">
+                  When you start making sales, your top performing items will appear here.
+                  Start by adding products to your inventory.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-5 pb-10">
+                {topItems.slice(0, 4).map((item, index) => (
+                  <div key={item.item_id} className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center mr-3 ${
+                        index === 0 ? 'bg-blue-100 text-blue-600' : 
+                        index === 1 ? 'bg-purple-100 text-purple-600' : 
+                        index === 2 ?  'bg-amber-100 text-amber-600': 
+                        'bg-gray-100 text-gray-600'
+                      }`}>
+                        <span className="font-bold">{index + 1}</span>
+                      </div>
+                      <div>
+                        <p className="font-medium">{item.product_name}</p>
+                        <p className="text-xs text-gray-500">{item.total_quantity} sold</p>
+                      </div>
+                    </div>
+                    <span className="font-semibold">₱ {item.total_sales}</span>
+                  </div>
+                ))}
+              </div>
+            )}
             <button
   onClick={() => setActiveTab("Products")}
   className="btn btn-primary btn-sm gap-2 self-center"

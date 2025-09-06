@@ -53,7 +53,7 @@ export default function MainLayout() {
 
           if (userData?.id) {
             socket.emit("register_user", { user_id: userData.id });
-          }
+          } 
         });
 
         socket.on("new_pending_order", (data) => {

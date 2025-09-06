@@ -21,6 +21,7 @@ import { useNavigate } from "react-router-dom";
 import { FaBell } from "react-icons/fa";
 import PendingOrdersModal from "../component/PendingOrderModal";
 import { io } from "socket.io-client"
+import Loader from "../components/UI/loaders/Loader";
 
 export const Sidebar = ({ activeTab, setActiveTab }) => {
   return (
@@ -176,17 +177,17 @@ const Sidebar2 = ({ activeTab, setActiveTab }) => {
     <div
       className="fixed top-0 right-0 z-10 m-2 flex h-10 items-center gap-2 rounded-md text-white md:hidden"
     >
-      <motion.button
+      <motion.button 
       initial={{ opacity: 0 }}
         animate={{ opacity: 1, x: -10 }}
         exit={{ opacity: 0, x: 10 }}
         transition={{ duration: 0.4 }}
   onClick={() => setShowNotifications(true)}
-  className="relative flex items-center text-indigo-600 text-xl"
+  className="relative flex items-center text-indigo-600 text-xl "
 >
-  <FaBell />
+  <FaBell className="" />
   {notifications > 0 && (
-    <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] text-white">
+    <span className="absolute shadow-md shadow-gray-600/100  -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] text-white">
       {notifications}
     </span>
   )}
@@ -194,7 +195,7 @@ const Sidebar2 = ({ activeTab, setActiveTab }) => {
 
 
       {/* Spacer pushes hamburger to the right */}
-      <div className="flex-1" />
+      <div className="flex-1 " />
 
       {/* Hamburger Button */}
       <motion.button
@@ -203,7 +204,7 @@ const Sidebar2 = ({ activeTab, setActiveTab }) => {
         exit={{ opacity: 0, x: 10 }}
         transition={{ duration: 0.4 }}
         onClick={() => setOpen(true)}
-        className="bg-indigo-600 px-3 py-2 rounded-md"
+        className="bg-indigo-600 px-3 py-2 rounded-md shadow-md shadow-gray-600/50 z-20"
       >
         ☰
       </motion.button>
@@ -296,6 +297,7 @@ const TitleSection = ({ open, setActiveTab }) => {
   const [userLastname, setLastname] = useState();
   const [userRole, setUserRole] = useState();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [loading, setLoading] = useState(false)
 
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
@@ -364,7 +366,7 @@ const TitleSection = ({ open, setActiveTab }) => {
               <FiSettings className="w-4 h-4" /> Account Settings
             </button>
             <button 
-              onClick={() => logout(navigate)}
+              onClick={() => logout(navigate, setLoading)}
               className="flex items-center gap-2 text-sm text-slate-700 hover:text-red-600"
             >
               <FiLogOut className="w-4 h-4" /> Logout

@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import axios from "axios";
-import { FiPlus, FiEdit, FiTrash2, FiDollarSign, FiBox, FiPackage } from "react-icons/fi";
+import { FiPlus, FiEdit, FiTrash2, FiDollarSign } from "react-icons/fi";
 import {
   LineChart,
   Line,
@@ -10,14 +10,13 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer
-} from 'recharts';
+} from "recharts";
 import { IoIosArrowForward } from "react-icons/io";
 
 // ----------------- Equipment Modal -----------------
 function EquipmentModal({ isOpen, onClose, onSave, editing }) {
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
-  
 
   useEffect(() => {
     if (editing) {
@@ -39,19 +38,42 @@ function EquipmentModal({ isOpen, onClose, onSave, editing }) {
   return (
     <div className="modal modal-open">
       <div className="modal-box">
-        <h3 className="font-bold text-lg mb-4">{editing ? "Edit Equipment" : "Add Equipment"}</h3>
+        <h3 className="font-bold text-lg mb-4">
+          {editing ? "Edit Equipment" : "Add Equipment"}
+        </h3>
         <form onSubmit={handleSubmit}>
           <div className="form-control mb-4">
-            <label className="label"><span className="label-text">Name</span></label>
-            <input type="text" className="input input-bordered" value={name} onChange={e=>setName(e.target.value)} required/>
+            <label className="label">
+              <span className="label-text">Name</span>
+            </label>
+            <input
+              type="text"
+              className="input input-bordered"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+            />
           </div>
           <div className="form-control mb-6">
-            <label className="label"><span className="label-text">Price (₱)</span></label>
-            <input type="number" step="0.01" className="input input-bordered" value={price} onChange={e=>setPrice(e.target.value)} required/>
+            <label className="label">
+              <span className="label-text">Price (₱)</span>
+            </label>
+            <input
+              type="number"
+              step="0.01"
+              className="input input-bordered"
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+              required
+            />
           </div>
           <div className="modal-action">
-            <button type="button" className="btn btn-ghost" onClick={onClose}>Cancel</button>
-            <button type="submit" className="btn btn-primary">{editing ? "Update" : "Add"}</button>
+            <button type="button" className="btn btn-ghost" onClick={onClose}>
+              Cancel
+            </button>
+            <button type="submit" className="btn btn-primary">
+              {editing ? "Update" : "Add"}
+            </button>
           </div>
         </form>
       </div>
@@ -84,19 +106,42 @@ function GrossProfitModal({ isOpen, onClose, onSave, editing }) {
   return (
     <div className="modal modal-open">
       <div className="modal-box">
-        <h3 className="font-bold text-lg mb-4">{editing ? "Edit Gross Profit" : "Add Gross Profit"}</h3>
+        <h3 className="font-bold text-lg mb-4">
+          {editing ? "Edit Gross Profit" : "Add Gross Profit"}
+        </h3>
         <form onSubmit={handleSubmit}>
           <div className="form-control mb-4">
-            <label className="label"><span className="label-text">Name</span></label>
-            <input type="text" className="input input-bordered" value={name} onChange={e=>setName(e.target.value)} required/>
+            <label className="label">
+              <span className="label-text">Name</span>
+            </label>
+            <input
+              type="text"
+              className="input input-bordered"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+            />
           </div>
           <div className="form-control mb-6">
-            <label className="label"><span className="label-text">Amount (₱)</span></label>
-            <input type="number" step="0.01" className="input input-bordered" value={amount} onChange={e=>setAmount(e.target.value)} required/>
+            <label className="label">
+              <span className="label-text">Amount (₱)</span>
+            </label>
+            <input
+              type="number"
+              step="0.01"
+              className="input input-bordered"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              required
+            />
           </div>
           <div className="modal-action">
-            <button type="button" className="btn btn-ghost" onClick={onClose}>Cancel</button>
-            <button type="submit" className="btn btn-primary">{editing ? "Update" : "Add"}</button>
+            <button type="button" className="btn btn-ghost" onClick={onClose}>
+              Cancel
+            </button>
+            <button type="submit" className="btn btn-primary">
+              {editing ? "Update" : "Add"}
+            </button>
           </div>
         </form>
       </div>
@@ -119,11 +164,11 @@ function PackagingModal({ isOpen, onClose, onSave, category, costs }) {
     Milktea: ["Cup", "Straw", "Logo", "Paper"],
     "Coffee Hot": ["Cup", "Lid"],
     "Coffee Cold": ["Cup", "Straw"],
-    "Fruit Soda": ["Cup", "Lid"],
+    "Fruit Soda": ["Cup", "Lid"]
   };
 
   const handleChange = (item, value) => {
-    setLocalCosts(prev => ({ ...prev, [item]: parseFloat(value) || 0 }));
+    setLocalCosts((prev) => ({ ...prev, [item]: parseFloat(value) || 0 }));
   };
 
   const handleSubmit = (e) => {
@@ -137,27 +182,37 @@ function PackagingModal({ isOpen, onClose, onSave, category, costs }) {
         <h3 className="font-bold text-lg mb-4">{category} Packaging Costs</h3>
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 mb-6">
-            {itemsPerCategory[category]?.map(item => (
+            {itemsPerCategory[category]?.map((item) => (
               <div key={item} className="form-control">
-                <label className="label"><span className="label-text">{item} Cost (₱)</span></label>
-                <input type="number" step="0.01" className="input input-bordered"
-                  value={localCosts[item] || 0} onChange={e=>handleChange(item, e.target.value)} required/>
+                <label className="label">
+                  <span className="label-text">{item} Cost (₱)</span>
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  className="input input-bordered"
+                  value={localCosts[item] || 0}
+                  onChange={(e) => handleChange(item, e.target.value)}
+                  required
+                />
               </div>
             ))}
           </div>
           <div className="modal-action">
-            <button type="button" className="btn btn-ghost" onClick={onClose}>Cancel</button>
-                <button 
-                type="submit" 
-                className="btn btn-primary"
-                disabled={savingPackaging}
-                >
-                {savingPackaging ? (
-                    <span className="loading loading-spinner"></span>
-                ) : (
-                    "Save"
-                )}
-                </button>
+            <button type="button" className="btn btn-ghost" onClick={onClose}>
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={savingPackaging}
+            >
+              {savingPackaging ? (
+                <span className="loading loading-spinner"></span>
+              ) : (
+                "Save"
+              )}
+            </button>
           </div>
         </form>
       </div>
@@ -165,16 +220,16 @@ function PackagingModal({ isOpen, onClose, onSave, category, costs }) {
   );
 }
 
-// Custom Tooltip Component
+// ----------------- Custom Tooltip -----------------
 const CustomTooltip = ({ active, payload, label, formatCurrency }) => {
   if (active && payload && payload.length) {
     return (
       <div className="custom-tooltip bg-white p-3 border border-gray-200 rounded shadow-md">
         <p className="label text-slate-700 font-semibold">{`Period: ${label}`}</p>
         {payload.map((entry, index) => (
-          <p 
-            key={`item-${index}`} 
-            className="intro" 
+          <p
+            key={`item-${index}`}
+            className="intro"
             style={{ color: entry.color }}
           >
             {`${entry.name.toUpperCase()}: ${formatCurrency(entry.value)}`}
@@ -196,7 +251,7 @@ export default function ViewAllData({ setActiveTab, activeTab }) {
     Milktea: { Cup: 5, Straw: 2, Logo: 1, Paper: 0.5 },
     "Coffee Hot": { Cup: 6, Lid: 1.5 },
     "Coffee Cold": { Cup: 7, Straw: 2 },
-    "Fruit Soda": { Cup: 5, Lid: 2 },
+    "Fruit Soda": { Cup: 5, Lid: 2 }
   });
   const [netProfit, setNetProfit] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -213,29 +268,15 @@ export default function ViewAllData({ setActiveTab, activeTab }) {
 
   const [savingPackaging, setSavingPackaging] = useState(false);
 
+  const api = import.meta.env.VITE_SERVER_API_NAME;
+
   // Fetch sales data
   useEffect(() => {
     const fetchSales = async () => {
       setLoading(true);
       setError(null);
       try {
-        const api = import.meta.env.VITE_SERVER_API_NAME;
-        let endpoint;
-        
-        switch(timeRange) {
-          case "daily":
-            endpoint = `${api}/summaries/daily`;
-            break;
-          case "monthly":
-            endpoint = `${api}/summaries/monthly`;
-            break;
-          case "yearly":
-            endpoint = `${api}/summaries/yearly`;
-            break;
-          default:
-            endpoint = `${api}/summaries/monthly`;
-        }
-        
+        let endpoint = `${api}/summaries/${timeRange}`;
         const res = await axios.get(endpoint);
         setSalesData(Array.isArray(res.data) ? res.data : []);
       } catch (err) {
@@ -249,15 +290,16 @@ export default function ViewAllData({ setActiveTab, activeTab }) {
     fetchSales();
   }, [timeRange]);
 
-  // Fetch equipment costs
+  // Fetch equipment costs (filtered)
   useEffect(() => {
     const fetchEquipment = async () => {
       try {
-        const api = import.meta.env.VITE_SERVER_API_NAME;
-        const res = await axios.get(`${api}/equipment`);
-        // Ensure prices are numbers
-        const equipmentData = Array.isArray(res.data) 
-          ? res.data.map(item => ({ ...item, price: parseFloat(item.price) || 0 }))
+        const res = await axios.get(`${api}/equipment/${timeRange}`);
+        const equipmentData = Array.isArray(res.data)
+          ? res.data.map((item) => ({
+              ...item,
+              price: parseFloat(item.price) || 0
+            }))
           : [];
         setEquipment(equipmentData);
       } catch (err) {
@@ -266,17 +308,18 @@ export default function ViewAllData({ setActiveTab, activeTab }) {
       }
     };
     fetchEquipment();
-  }, []);
+  }, [timeRange]);
 
-  // Fetch gross profit items
+  // Fetch gross profit (filtered)
   useEffect(() => {
     const fetchGrossProfit = async () => {
       try {
-        const api = import.meta.env.VITE_SERVER_API_NAME;
-        const res = await axios.get(`${api}/gross-profit`);
-        // Ensure amounts are numbers
-        const grossProfitData = Array.isArray(res.data) 
-          ? res.data.map(item => ({ ...item, amount: parseFloat(item.amount) || 0 }))
+        const res = await axios.get(`${api}/gross-profit/${timeRange}`);
+        const grossProfitData = Array.isArray(res.data)
+          ? res.data.map((item) => ({
+              ...item,
+              amount: parseFloat(item.amount) || 0
+            }))
           : [];
         setGrossProfit(grossProfitData);
       } catch (err) {
@@ -285,21 +328,21 @@ export default function ViewAllData({ setActiveTab, activeTab }) {
       }
     };
     fetchGrossProfit();
-  }, []);
+  }, [timeRange]);
 
   // Fetch packaging costs
   useEffect(() => {
     const fetchPackagingCosts = async () => {
       try {
-        const api = import.meta.env.VITE_SERVER_API_NAME;
         const res = await axios.get(`${api}/packaging-costs`);
         if (Array.isArray(res.data)) {
           const transformedCosts = {};
-          res.data.forEach(item => {
+          res.data.forEach((item) => {
             if (!transformedCosts[item.category]) {
               transformedCosts[item.category] = {};
             }
-            transformedCosts[item.category][item.item] = parseFloat(item.cost) || 0;
+            transformedCosts[item.category][item.item] =
+              parseFloat(item.cost) || 0;
           });
           setPackagingCosts(transformedCosts);
         }
@@ -310,40 +353,84 @@ export default function ViewAllData({ setActiveTab, activeTab }) {
     fetchPackagingCosts();
   }, []);
 
-  // Calculate net profit
-  useEffect(() => {
-    const totalEquipment = equipment.reduce((sum, e) => {
-      const itemPrice = parseFloat(e.price) || 0;
-      return sum + itemPrice;
-    }, 0);
+  // Calculate net profit with time-range specific filtering
+useEffect(() => {
+  const calculateNetProfit = () => {
+    if (!salesData.length) return [];
     
-    const totalGross = grossProfit.reduce((sum, g) => {
-      const amount = parseFloat(g.amount) || 0;
-      return sum + amount;
-    }, 0);
+    return salesData.map((sale) => {
+      // Filter equipment costs by date if needed
+      const totalEquipment = equipment.reduce(
+        (sum, e) => sum + (parseFloat(e.price) || 0),
+        0
+      );
 
-    const net = salesData.map(s => ({
-      ...s,
-      net_profit: (s.revenue || 0) - totalEquipment - totalGross - (s.packaging_cost || 0)
-    }));
-    setNetProfit(net);
-  }, [salesData, equipment, grossProfit]);
+      // Filter gross profit by the same time period as the sale
+      let periodGrossProfit = 0;
+      
+      if (timeRange === "daily") {
+        // For daily view, get gross profit for this specific day
+        const saleDate = new Date(sale.day);
+        periodGrossProfit = grossProfit
+          .filter(g => {
+            const gDate = new Date(g.updated_at);
+            // Compare year, month, and day separately
+            return gDate.getFullYear() === saleDate.getFullYear() && 
+                   gDate.getMonth() === saleDate.getMonth() && 
+                   gDate.getDate() === saleDate.getDate();
+          })
+          .reduce((sum, g) => sum + (parseFloat(g.amount) || 0), 0);
+      } 
+      else if (timeRange === "monthly") {
+        // For monthly view, get gross profit for this specific month
+        const saleDate = new Date(sale.year, sale.month - 1);
+        periodGrossProfit = grossProfit
+          .filter(g => {
+            const gDate = new Date(g.updated_at);
+            return gDate.getFullYear() === saleDate.getFullYear() && 
+                   gDate.getMonth() === saleDate.getMonth();
+          })
+          .reduce((sum, g) => sum + (parseFloat(g.amount) || 0), 0);
+      }
+      else if (timeRange === "yearly") {
+        // For yearly view, get gross profit for this specific year
+        periodGrossProfit = grossProfit
+          .filter(g => new Date(g.updated_at).getFullYear() === sale.year)
+          .reduce((sum, g) => sum + (parseFloat(g.amount) || 0), 0);
+      }
 
-  // Debug equipment data
-  useEffect(() => {
-    console.log("Equipment data:", equipment);
-  }, [equipment]);
+      return {
+        ...sale,
+        gross_profit: periodGrossProfit,
+        net_profit: (sale.revenue || 0) - totalEquipment - periodGrossProfit - (sale.packaging_cost || 0)
+      };
+    });
+  };
+
+  setNetProfit(calculateNetProfit());
+}, [salesData, equipment, grossProfit, timeRange]);
 
   // ----------------- Handlers -----------------
   const saveEquipment = async (item) => {
     try {
-      const api = import.meta.env.VITE_SERVER_API_NAME;
       if (editingEquipment) {
-        const res = await axios.put(`${api}/equipment/${editingEquipment.id}`, item);
-        setEquipment(equipment.map(e => e.id === editingEquipment.id ? {...res.data, price: parseFloat(res.data.price) || 0} : e));
+        const res = await axios.put(
+          `${api}/equipment/${editingEquipment.id}`,
+          item
+        );
+        setEquipment(
+          equipment.map((e) =>
+            e.id === editingEquipment.id
+              ? { ...res.data, price: parseFloat(res.data.price) || 0 }
+              : e
+          )
+        );
       } else {
         const res = await axios.post(`${api}/equipment`, item);
-        setEquipment([...equipment, {...res.data, price: parseFloat(res.data.price) || 0}]);
+        setEquipment([
+          ...equipment,
+          { ...res.data, price: parseFloat(res.data.price) || 0 }
+        ]);
       }
       setEquipmentModal(false);
       setEditingEquipment(null);
@@ -354,9 +441,8 @@ export default function ViewAllData({ setActiveTab, activeTab }) {
 
   const deleteEquipment = async (id) => {
     try {
-      const api = import.meta.env.VITE_SERVER_API_NAME;
       await axios.delete(`${api}/equipment/${id}`);
-      setEquipment(equipment.filter(x => x.id !== id));
+      setEquipment(equipment.filter((x) => x.id !== id));
     } catch (err) {
       console.error("Error deleting equipment:", err);
     }
@@ -364,13 +450,24 @@ export default function ViewAllData({ setActiveTab, activeTab }) {
 
   const saveGross = async (item) => {
     try {
-      const api = import.meta.env.VITE_SERVER_API_NAME;
       if (editingGross) {
-        const res = await axios.put(`${api}/gross-profit/${editingGross.id}`, item);
-        setGrossProfit(grossProfit.map(g => g.id === editingGross.id ? {...res.data, amount: parseFloat(res.data.amount) || 0} : g));
+        const res = await axios.put(
+          `${api}/gross-profit/${editingGross.id}`,
+          item
+        );
+        setGrossProfit(
+          grossProfit.map((g) =>
+            g.id === editingGross.id
+              ? { ...res.data, amount: parseFloat(res.data.amount) || 0 }
+              : g
+          )
+        );
       } else {
         const res = await axios.post(`${api}/gross-profit`, item);
-        setGrossProfit([...grossProfit, {...res.data, amount: parseFloat(res.data.amount) || 0}]);
+        setGrossProfit([
+          ...grossProfit,
+          { ...res.data, amount: parseFloat(res.data.amount) || 0 }
+        ]);
       }
       setGrossModal(false);
       setEditingGross(null);
@@ -382,22 +479,19 @@ export default function ViewAllData({ setActiveTab, activeTab }) {
   const savePackaging = async (category, costs) => {
     setSavingPackaging(true);
     try {
-      const api = import.meta.env.VITE_SERVER_API_NAME;
-      
       const res = await axios.post(`${api}/packaging-costs/update`, {
         category: category,
         costs: costs
       });
-      
+
       if (res.status === 200) {
-        setPackagingCosts(prev => ({ ...prev, [category]: costs }));
+        setPackagingCosts((prev) => ({ ...prev, [category]: costs }));
         setPackagingModal(false);
         setEditingCategory(null);
         alert("Packaging costs updated successfully!");
       } else {
         throw new Error("Failed to update packaging costs");
       }
-      
     } catch (err) {
       console.error("Error saving packaging:", err);
       alert("Failed to save packaging costs. Please try again.");
@@ -408,9 +502,8 @@ export default function ViewAllData({ setActiveTab, activeTab }) {
 
   const deleteGrossProfit = async (id) => {
     try {
-      const api = import.meta.env.VITE_SERVER_API_NAME;
       await axios.delete(`${api}/gross-profit/${id}`);
-      setGrossProfit(grossProfit.filter(x => x.id !== id));
+      setGrossProfit(grossProfit.filter((x) => x.id !== id));
     } catch (err) {
       console.error("Error deleting gross profit:", err);
     }
@@ -418,34 +511,83 @@ export default function ViewAllData({ setActiveTab, activeTab }) {
 
   // Format currency
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-PH', {
-      style: 'currency',
-      currency: 'PHP'
+    return new Intl.NumberFormat("en-PH", {
+      style: "currency",
+      currency: "PHP"
     }).format(amount || 0);
   };
 
-  // Calculate totals
-  const totalEquipmentCost = equipment.reduce((sum, item) => {
-    const itemPrice = parseFloat(item.price) || 0;
-    return sum + itemPrice;
-  }, 0);
-  
-  const totalGrossProfit = grossProfit.reduce((sum, item) => {
-    const amount = parseFloat(item.amount) || 0;
-    return sum + amount;
-  }, 0);
-  
-  const totalPackagingCost = salesData.reduce((sum, sale) => sum + (parseFloat(sale.packaging_cost) || 0), 0);
-  const totalSales = salesData.reduce((sum, sale) => sum + (parseFloat(sale.revenue) || 0), 0);
-  const totalNetProfit = totalSales - totalEquipmentCost - totalGrossProfit - totalPackagingCost;
+  // Calculate totals with time-range filtering
+  const totalEquipmentCost = useMemo(() => {
+    return equipment.reduce(
+      (sum, item) => sum + (parseFloat(item.price) || 0),
+      0
+    );
+  }, [equipment]);
+
+  const totalGrossProfit = useMemo(() => {
+    if (timeRange === "daily") {
+      // Get gross profit for today only
+      const today = new Date().toDateString();
+      return grossProfit
+        .filter(g => new Date(g.created_at).toDateString() === today)
+        .reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
+    }
+    else if (timeRange === "monthly") {
+      // Get gross profit for current month
+      const now = new Date();
+      return grossProfit
+        .filter(g => {
+          const gDate = new Date(g.created_at);
+          return gDate.getFullYear() === now.getFullYear() && 
+                 gDate.getMonth() === now.getMonth();
+        })
+        .reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
+    }
+    else if (timeRange === "yearly") {
+      // Get gross profit for current year
+      const currentYear = new Date().getFullYear();
+      return grossProfit
+        .filter(g => new Date(g.created_at).getFullYear() === currentYear)
+        .reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
+    }
+    
+    // Default: return all gross profit
+    return grossProfit.reduce(
+      (sum, item) => sum + (parseFloat(item.amount) || 0),
+      0
+    );
+  }, [grossProfit, timeRange]);
+
+  const totalPackagingCost = useMemo(() => {
+    return salesData.reduce(
+      (sum, sale) => sum + (parseFloat(sale.packaging_cost) || 0),
+      0
+    );
+  }, [salesData]);
+
+  const totalSales = useMemo(() => {
+    return salesData.reduce(
+      (sum, sale) => sum + (parseFloat(sale.revenue) || 0),
+      0
+    );
+  }, [salesData]);
+
+  const totalNetProfit = useMemo(() => {
+    return totalSales - totalEquipmentCost - totalGrossProfit - totalPackagingCost;
+  }, [totalSales, totalEquipmentCost, totalGrossProfit, totalPackagingCost]);
 
   // Prepare data for Recharts chart
-  const chartData = netProfit.map(item => ({
-    name: timeRange === "daily" ? `Day ${item.day}` : 
-           timeRange === "monthly" ? `Month ${item.month}` : 
-           `Year ${item.year}`,
+  const chartData = netProfit.map((item) => ({
+    name:
+      timeRange === "daily"
+        ? `Day ${item.day}`
+        : timeRange === "monthly"
+        ? `Month ${item.month}`
+        : `Year ${item.year}`,
     revenue: parseFloat(item.revenue) || 0,
     packaging_cost: parseFloat(item.packaging_cost) || 0,
+    gross_profit: parseFloat(item.gross_profit) || 0,
     net_profit: parseFloat(item.net_profit) || 0
   }));
 
@@ -472,24 +614,24 @@ export default function ViewAllData({ setActiveTab, activeTab }) {
       )}
 
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
- <div className=" ">
-  <div className="flex items-center">
-    <div 
-      onClick={() => setActiveTab("Dashboard")}
-      className="cursor-pointer transition-colors duration-200 rounded-md hover:text-slate-500"
-    >
-      <h1 className="text-lg lg:text-2xl  font-bold text-slate-700">Dashboard Overview</h1>
-    </div>
-    <div className="mx-2 text-gray-400 translate-y-0.5">
-      <IoIosArrowForward />
-    </div>
-    <h2 className="text-xs lg:text-lg font-medium translate-y-0.5 text-blue-600">Financial Overview</h2>
-  </div>
-  
-  <div className="flex items-center mt-0">
-    <p className="text-xs sm:text-sm text-gray-500">Administrator view of all financial metrics</p>
-  </div>
-</div>
+        <div className=" ">
+          <div className="flex items-center">
+            <div 
+              onClick={() => setActiveTab("Dashboard")}
+              className="cursor-pointer transition-colors duration-200 rounded-md hover:text-slate-500"
+            >
+              <h1 className="text-lg lg:text-2xl  font-bold text-slate-700">Dashboard Overview</h1>
+            </div>
+            <div className="mx-2 text-gray-400 translate-y-0.5">
+              <IoIosArrowForward />
+            </div>
+            <h2 className="text-xs lg:text-lg font-medium translate-y-0.5 text-blue-600">Financial Overview</h2>
+          </div>
+          
+          <div className="flex items-center mt-0">
+            <p className="text-xs sm:text-sm text-gray-500">Administrator view of all financial metrics</p>
+          </div>
+        </div>
 
         <select 
           className="select w-fit select-bordered select-sm mt-4 md:mt-0" 
@@ -568,7 +710,7 @@ export default function ViewAllData({ setActiveTab, activeTab }) {
       {/* Chart */}
       <div className="card bg-white shadow mb-6">
         <div className="card-body px-0 py-4">
-          <h3 className="card-title text-lg mb-4 text-slate-700 px-4">Revenue vs Net Profit</h3>
+          <h3 className="card-title text-lg mb-4 text-slate-700 px-4">Financial Overview</h3>
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%" className="outline-none">
               <LineChart
@@ -593,18 +735,28 @@ export default function ViewAllData({ setActiveTab, activeTab }) {
                   stroke="#8884d8" 
                   activeDot={{ r: 8 }} 
                   strokeWidth={2}
+                  name="Revenue"
                 />
                 <Line 
                   type="monotone" 
                   dataKey="net_profit" 
                   stroke="#82ca9d" 
                   strokeWidth={2}
+                  name="Net Profit"
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="gross_profit" 
+                  stroke="#ffc658" 
+                  strokeWidth={2}
+                  name="Gross Profit"
                 />
                 <Line 
                   type="monotone" 
                   dataKey="packaging_cost" 
                   stroke="#ff7300" 
                   strokeWidth={2}
+                  name="Packaging Cost"
                 />
               </LineChart>
             </ResponsiveContainer>
@@ -627,7 +779,7 @@ export default function ViewAllData({ setActiveTab, activeTab }) {
               </button>
             </div>
             <div className="overflow-x-auto">
-              <table className="table table-zebra table-sm w-full ">
+              <table className="table  table-sm w-full ">
                 <thead className="text-slate-700">
                   <tr>
                     <th>Name</th>
@@ -687,11 +839,12 @@ export default function ViewAllData({ setActiveTab, activeTab }) {
               </button>
             </div>
             <div className="overflow-x-auto">
-              <table className="table table-zebra table-sm w-full">
+              <table className="table  table-sm w-full">
                 <thead className="text-slate-700">
                   <tr>
                     <th>Name</th>
                     <th>Amount</th>
+                    <th>Date</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
@@ -700,6 +853,7 @@ export default function ViewAllData({ setActiveTab, activeTab }) {
                     <tr key={g.id}>
                       <td>{g.name}</td>
                       <td>{formatCurrency(parseFloat(g.amount) || 0)}</td>
+                      <td>{new Date(g.created_at).toLocaleDateString()}</td>
                       <td>
                         <div className="flex gap-2">
                           <button 
@@ -720,8 +874,8 @@ export default function ViewAllData({ setActiveTab, activeTab }) {
                   ))}
                   {grossProfit.length === 0 && (
                     <tr>
-                      <td colSpan="3" className="text-center text-gray-500 py-4">
-                        No gross profit items added
+                      <td colSpan="4" className="text-center text-gray-500 py-4">
+                        No gross profit items for selected period
                       </td>
                     </tr>
                   )}
@@ -730,6 +884,9 @@ export default function ViewAllData({ setActiveTab, activeTab }) {
             </div>
             <div className="mt-4 pt-2 border-t border-gray-200">
               <p className="font-semibold">Total: {formatCurrency(totalGrossProfit)}</p>
+              <p className="text-sm text-gray-500">
+                Filtered by: {timeRange === "daily" ? "Today" : timeRange === "monthly" ? "This Month" : "This Year"}
+              </p>
             </div>
           </div>
         </div>
@@ -778,8 +935,7 @@ export default function ViewAllData({ setActiveTab, activeTab }) {
         </div>
       </div>
 
-      {/* Modals */}
-      <EquipmentModal
+       <EquipmentModal
         isOpen={equipmentModal}
         onClose={() => {
           setEquipmentModal(false);

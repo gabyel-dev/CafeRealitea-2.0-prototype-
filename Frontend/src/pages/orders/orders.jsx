@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef  } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { 
@@ -11,10 +12,7 @@ import {
   FaCreditCard
 } from "react-icons/fa";
 import { io } from "socket.io-client";
-
-import { motion, AnimatePresence } from "framer-motion";
 import PendingOrdersModal from "../../component/PendingOrderModal";
-import { Link } from "react-router-dom";
 
 export default function OrderManagementAdmin({ activeTab, setActiveTab }) {
   const navigate = useNavigate();
@@ -22,120 +20,26 @@ export default function OrderManagementAdmin({ activeTab, setActiveTab }) {
   const [loading, setLoading] = useState(true);
   const [categories, setCategories] = useState([]);
   const [itemsAdded, setItemsAdded] = useState([]);
-  const [notifications, setNotifications] = useState();
+  const [notifications, setNotifications] = useState(0);
   const [showNotifications, setShowNotifications] = useState(false);
 
-  const socketRef = useState(null)
+  const socketRef = useRef(null);
 
+  // Fetch categories
   useEffect(() => {
     axios.get("https://caferealitea.onrender.com/items")
-      .then((res) => setCategories(res.data));
+      .then((res) => setCategories(res.data))
+      .catch((err) => console.error("Error fetching categories:", err));
   }, []);
 
-  useEffect(() => {
-  const fetchNotifications = async () => {
-    try {
-      const res = await fetch("https://caferealitea.onrender.com/pending-orders", {
-        credentials: "include",
-      });
-      if (res.ok) {
-        const data = await res.json();
-        if (Array.isArray(data)) {
-          setNotifications(data.length); // store count
-        }
-      }
-    } catch (err) {
-      console.error("Error fetching notifications:", err);
-    }
-  };
-
-  fetchNotifications();
-
-
-}, [notifications ]);
-
-
-
-useEffect(() => {
-  socketRef.current = io("https://caferealitea.onrender.com", {
-    withCredentials: true,
-  });
-
-  // fetch initial pending orders count
-  const fetchInitial = async () => {
-    
-    try {
-      const res = await fetch("https://caferealitea.onrender.com/pending-orders", {
-        credentials: "include",
-      });
-      if (res.ok) {
-        const data = await res.json();
-        if (Array.isArray(data)) {
-          setNotifications(data.length); // set initial count
-        }
-      }
-    } catch (err) {
-      console.error("Error fetching initial notifications:", err);
-    }
-  };
-
-  fetchInitial();
-
-  // listen for new pending order events
-  socketRef.current.on("new_pending_order", (data) => {
-    console.log("Received socket event:", data);
-
-    // if backend sends the new total count
-    if (typeof data.count === "number") {
-      setNotifications(data.count);
-    } 
-    // if backend just emits a message per order
-    else {
-      setNotifications((prev) => prev + 1);
-    }
-  });
-  
-  socketRef.current.on("order_cancelled", (data) => {
-    console.log("Received socket event:", data);
-
-    // if backend sends the new total count
-    if (typeof data.count === "number") {
-      setNotifications(data.count);
-    } 
-    // if backend just emits a message per order
-    else {
-      setNotifications((prev) => prev - 1);
-    }
-  });
-
-  socketRef.current.on("order_confirmed", (data) => {
-    console.log("Received socket event:", data);
-
-    // if backend sends the new total count
-    if (typeof data.count === "number") {
-      setNotifications(data.count);
-    } 
-    // if backend just emits a message per order
-    else {
-      setNotifications((prev) => prev - 1);
-    }
-  });
-
-  // cleanup on unmount
-  return () => {
-    if (socketRef.current) {
-      socketRef.current.disconnect();
-    }
-  };
-}, []);
-
+  // Initialize user data & authentication
   useEffect(() => {
     document.title = "Café Realitea - Order Management";
     setLoading(true);
 
     axios.get("https://caferealitea.onrender.com/user", { withCredentials: true })
       .then((res) => {
-        if (!res.data.logged_in || res.data.role === "") {
+        if (!res.data.logged_in || !res.data.role) {
           navigate("/");
           return;
         }
@@ -145,14 +49,44 @@ useEffect(() => {
         console.error("Authentication check failed:", err);
         navigate("/");
       })
-      .finally(() => {
-        setLoading(false);
-      });
+      .finally(() => setLoading(false));
   }, [navigate]);
 
-  const viewPendingOrders = () => {
-    setShowNotifications(true);
-  };
+  // Fetch initial pending orders count and set up Socket.IO
+  useEffect(() => {
+    const fetchInitialNotifications = async () => {
+      try {
+        const res = await fetch("https://caferealitea.onrender.com/pending-orders", {
+          credentials: "include",
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data)) setNotifications(data.length);
+        }
+      } catch (err) {
+        console.error("Error fetching initial notifications:", err);
+      }
+    };
+
+    fetchInitialNotifications();
+
+    // Initialize socket
+    socketRef.current = io("https://caferealitea.onrender.com", { withCredentials: true });
+
+    const updateNotifications = (data, increment = 0) => {
+      if (typeof data.count === "number") setNotifications(data.count);
+      else setNotifications((prev) => prev + increment);
+    };
+
+    socketRef.current.on("new_pending_order", (data) => updateNotifications(data, 1));
+    socketRef.current.on("order_cancelled", (data) => updateNotifications(data, -1));
+    socketRef.current.on("order_confirmed", (data) => updateNotifications(data, -1));
+
+    // Cleanup
+    return () => socketRef.current.disconnect();
+  }, []);
+
+  const viewPendingOrders = () => setShowNotifications(true);
 
   if (loading) {
     return (
@@ -166,7 +100,7 @@ useEffect(() => {
   return (
     <div className="bg-indigo-50 flex flex-col lg:flex-row min-h-screen">
 
-      <div className="w-full text-gray-800 pt-4 lg:px-4">
+      <div className="w-full text-gray-800 md:pt-4 lg:px-4">
         {/* Header with Notification Bell */}
         <div className="flex flex-col sm:flex-row sm:items-center mb-6 sm:mb-8 ">
           <div className="flex-1">
@@ -187,7 +121,7 @@ useEffect(() => {
                 <FaBell />
                 View Pending Orders
                 {notifications > 0 && (
-                    <div className="badge   badge-neutral ml-2">{notifications}</div>
+                    <div className="badge badge-neutral ml-2">{notifications}</div>
                 )}
                 </button>
             </div>

@@ -215,7 +215,7 @@ export default function UsersManagement() {
 
 
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center p-4 md:p-0">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center pb-4 md:p-0">
         <div className="flex items-center gap-4">
           <h1 className="text-2xl font-bold md:mb-4 text-gray-800">User Management</h1>
           <div className="flex items-center gap-2 text-sm text-gray-500">

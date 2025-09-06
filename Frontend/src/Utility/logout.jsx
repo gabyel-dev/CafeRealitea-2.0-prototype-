@@ -8,7 +8,7 @@ const logout = async (navigate, setLoading) => {
     const res = await axios.post(`${api_name}/logout`, {}, { 
       withCredentials: true 
     });
-    
+       
     console.log('Logged out successfully');
     <Loader />
     
