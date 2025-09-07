@@ -10,6 +10,7 @@ const logout = async (navigate, setLoading) => {
     });
        
     console.log('Logged out successfully');
+    window.location.href = '/';
     <Loader />
     
     // Clear any client-side storage
