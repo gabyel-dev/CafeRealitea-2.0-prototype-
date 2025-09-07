@@ -12,6 +12,7 @@ import {
   ResponsiveContainer
 } from "recharts";
 import { IoIosArrowForward } from "react-icons/io";
+import Profit from "../../components/UI/Charts/PieChart";
 
 // ----------------- Equipment Modal -----------------
 function EquipmentModal({ isOpen, onClose, onSave, editing }) {
@@ -242,7 +243,7 @@ const CustomTooltip = ({ active, payload, label, formatCurrency }) => {
 };
 
 // ----------------- Main Component -----------------
-export default function ViewAllData({ setActiveTab, activeTab }) {
+export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate  }) {
   const [timeRange, setTimeRange] = useState("monthly");
   const [salesData, setSalesData] = useState([]);
   const [equipment, setEquipment] = useState([]);
@@ -267,6 +268,10 @@ export default function ViewAllData({ setActiveTab, activeTab }) {
   const [editingCategory, setEditingCategory] = useState(null);
 
   const [savingPackaging, setSavingPackaging] = useState(false);
+
+
+
+  
 
   const api = import.meta.env.VITE_SERVER_API_NAME;
 
@@ -354,6 +359,7 @@ export default function ViewAllData({ setActiveTab, activeTab }) {
   }, []);
 
   // Calculate net profit with time-range specific filtering
+// Calculate net profit with time-range specific filtering
 useEffect(() => {
   const calculateNetProfit = () => {
     if (!salesData.length) return [];
@@ -369,24 +375,26 @@ useEffect(() => {
       let periodGrossProfit = 0;
       
       if (timeRange === "daily") {
-        // For daily view, get gross profit for this specific day
-        const saleDate = new Date(sale.day);
+        // For daily view, we need to match the sale date with gross profit dates
+        // Assuming sale.day is in format "YYYY-MM-DD" or similar
+        const saleDateStr = sale.day; // This should be the date string from your sales data
+        
         periodGrossProfit = grossProfit
           .filter(g => {
-            const gDate = new Date(g.updated_at);
-            // Compare year, month, and day separately
-            return gDate.getFullYear() === saleDate.getFullYear() && 
-                   gDate.getMonth() === saleDate.getMonth() && 
-                   gDate.getDate() === saleDate.getDate();
+            // Convert both dates to the same format for comparison
+            const gDate = new Date(g.created_at || g.updated_at);
+            const gDateStr = gDate.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+            
+            return gDateStr === saleDateStr;
           })
           .reduce((sum, g) => sum + (parseFloat(g.amount) || 0), 0);
-      } 
+      }
       else if (timeRange === "monthly") {
         // For monthly view, get gross profit for this specific month
         const saleDate = new Date(sale.year, sale.month - 1);
         periodGrossProfit = grossProfit
           .filter(g => {
-            const gDate = new Date(g.updated_at);
+            const gDate = new Date(g.created_at || g.updated_at);
             return gDate.getFullYear() === saleDate.getFullYear() && 
                    gDate.getMonth() === saleDate.getMonth();
           })
@@ -395,7 +403,7 @@ useEffect(() => {
       else if (timeRange === "yearly") {
         // For yearly view, get gross profit for this specific year
         periodGrossProfit = grossProfit
-          .filter(g => new Date(g.updated_at).getFullYear() === sale.year)
+          .filter(g => new Date(g.created_at || g.updated_at).getFullYear() === sale.year)
           .reduce((sum, g) => sum + (parseFloat(g.amount) || 0), 0);
       }
 
@@ -409,6 +417,7 @@ useEffect(() => {
 
   setNetProfit(calculateNetProfit());
 }, [salesData, equipment, grossProfit, timeRange]);
+
 
   // ----------------- Handlers -----------------
   const saveEquipment = async (item) => {
@@ -525,39 +534,47 @@ useEffect(() => {
     );
   }, [equipment]);
 
-  const totalGrossProfit = useMemo(() => {
-    if (timeRange === "daily") {
-      // Get gross profit for today only
-      const today = new Date().toDateString();
-      return grossProfit
-        .filter(g => new Date(g.created_at).toDateString() === today)
-        .reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
-    }
-    else if (timeRange === "monthly") {
-      // Get gross profit for current month
-      const now = new Date();
-      return grossProfit
-        .filter(g => {
-          const gDate = new Date(g.created_at);
-          return gDate.getFullYear() === now.getFullYear() && 
-                 gDate.getMonth() === now.getMonth();
-        })
-        .reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
-    }
-    else if (timeRange === "yearly") {
-      // Get gross profit for current year
-      const currentYear = new Date().getFullYear();
-      return grossProfit
-        .filter(g => new Date(g.created_at).getFullYear() === currentYear)
-        .reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
-    }
-    
-    // Default: return all gross profit
-    return grossProfit.reduce(
-      (sum, item) => sum + (parseFloat(item.amount) || 0),
-      0
-    );
-  }, [grossProfit, timeRange]);
+ const totalGrossProfit = useMemo(() => {
+  if (timeRange === "daily") {
+    // For daily view, we need to sum gross profit for each day in the sales data
+    // This ensures we match the same dates as in the sales data
+    const salesDates = salesData.map(sale => sale.day);
+    return grossProfit
+      .filter(g => {
+        const gDate = new Date(g.created_at || g.updated_at);
+        const gDateStr = gDate.toISOString().split('T')[0];
+        return salesDates.includes(gDateStr);
+      })
+      .reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
+  }
+  else if (timeRange === "monthly") {
+    // Get gross profit for months in sales data
+    const salesMonths = salesData.map(sale => `${sale.year}-${sale.month}`);
+    return grossProfit
+      .filter(g => {
+        const gDate = new Date(g.created_at || g.updated_at);
+        const gMonth = `${gDate.getFullYear()}-${gDate.getMonth() + 1}`;
+        return salesMonths.includes(gMonth);
+      })
+      .reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
+  }
+  else if (timeRange === "yearly") {
+    // Get gross profit for years in sales data
+    const salesYears = salesData.map(sale => sale.year);
+    return grossProfit
+      .filter(g => {
+        const gYear = new Date(g.created_at || g.updated_at).getFullYear();
+        return salesYears.includes(gYear);
+      })
+      .reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
+  }
+  
+  // Default: return all gross profit
+  return grossProfit.reduce(
+    (sum, item) => sum + (parseFloat(item.amount) || 0),
+    0
+  );
+}, [grossProfit, timeRange, salesData]);
 
   const totalPackagingCost = useMemo(() => {
     return salesData.reduce(
@@ -590,6 +607,20 @@ useEffect(() => {
     gross_profit: parseFloat(item.gross_profit) || 0,
     net_profit: parseFloat(item.net_profit) || 0
   }));
+
+
+    useEffect(() => {
+  if (onDataUpdate) {
+    onDataUpdate({
+      totalSales,
+      totalNetProfit,
+      totalEquipmentCost,
+      totalGrossProfit,
+      totalPackagingCost,
+    });
+  }
+}, [totalSales, totalNetProfit, totalEquipmentCost, totalGrossProfit, totalPackagingCost, onDataUpdate]);
+
 
   if (loading) {
     return (
@@ -708,61 +739,79 @@ useEffect(() => {
       </div>
 
       {/* Chart */}
-      <div className="card bg-white shadow mb-6">
-        <div className="card-body px-0 py-4">
-          <h3 className="card-title text-lg mb-4 text-slate-700 px-4">Financial Overview</h3>
-          <div className="h-80">
-            <ResponsiveContainer width="100%" height="100%" className="outline-none">
-              <LineChart
-                data={chartData}
-                margin={{
-                  top: 5,
-                  right: 30,
-                  left: 20,
-                  bottom: 5,
-                }}
-              >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis 
-                  tickFormatter={(value) => `₱${value.toLocaleString()}`}
-                />
-                <Tooltip content={<CustomTooltip formatCurrency={formatCurrency} />} />
-                <Legend />
-                <Line 
-                  type="monotone" 
-                  dataKey="revenue" 
-                  stroke="#8884d8" 
-                  activeDot={{ r: 8 }} 
-                  strokeWidth={2}
-                  name="Revenue"
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="net_profit" 
-                  stroke="#82ca9d" 
-                  strokeWidth={2}
-                  name="Net Profit"
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="gross_profit" 
-                  stroke="#ffc658" 
-                  strokeWidth={2}
-                  name="Gross Profit"
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="packaging_cost" 
-                  stroke="#ff7300" 
-                  strokeWidth={2}
-                  name="Packaging Cost"
-                />
-              </LineChart>
-            </ResponsiveContainer>
+// Replace your chart section with this:
+<div className="card bg-white shadow mb-6">
+  <div className="card-body px-0 py-4">
+    <h3 className="card-title text-lg mb-4 text-slate-700 px-4">Financial Overview</h3>
+    <div 
+  className="h-80 min-h-[320px] min-w-[300px] relative"
+  style={{ 
+    width: '100% !important', 
+    height: '20rem !important',
+    minWidth: '300px !important',
+    minHeight: '320px !important'
+  }}
+>
+      {chartData.length > 0 ? (
+        <ResponsiveContainer width="100%" height="100%" className="outline-none">
+          <LineChart
+            data={chartData}
+            margin={{
+              top: 5,
+              right: 30,
+              left: 20,
+              bottom: 5,
+            }}
+          >
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="name" />
+            <YAxis 
+              tickFormatter={(value) => `₱${value.toLocaleString()}`}
+            />
+            <Tooltip content={<CustomTooltip formatCurrency={formatCurrency} />} />
+            <Legend />
+            <Line 
+              type="monotone" 
+              dataKey="revenue" 
+              stroke="#8884d8" 
+              activeDot={{ r: 8 }} 
+              strokeWidth={2}
+              name="Revenue"
+            />
+            <Line 
+              type="monotone" 
+              dataKey="net_profit" 
+              stroke="#82ca9d" 
+              strokeWidth={2}
+              name="Net Profit"
+            />
+            <Line 
+              type="monotone" 
+              dataKey="gross_profit" 
+              stroke="#ffc658" 
+              strokeWidth={2}
+              name="Gross Profit"
+            />
+            <Line 
+              type="monotone" 
+              dataKey="packaging_cost" 
+              stroke="#ff7300" 
+              strokeWidth={2}
+              name="Packaging Cost"
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      ) : (
+        <div className="flex items-center justify-center h-full">
+          <div className="text-center">
+            <div className="loading loading-spinner text-primary mb-2"></div>
+            <p className="text-sm text-gray-500">Loading chart data...</p>
           </div>
         </div>
-      </div>
+      )}
+    </div>
+  </div>
+</div>
 
       {/* Cost Management Sections */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
@@ -885,7 +934,7 @@ useEffect(() => {
             <div className="mt-4 pt-2 border-t border-gray-200">
               <p className="font-semibold">Total: {formatCurrency(totalGrossProfit)}</p>
               <p className="text-sm text-gray-500">
-                Filtered by: {timeRange === "daily" ? "Today" : timeRange === "monthly" ? "This Month" : "This Year"}
+                Filtered by: {timeRange === "daily" ? "daily" : timeRange === "monthly" ? "This Month" : "This Year"}
               </p>
             </div>
           </div>

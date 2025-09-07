@@ -9,7 +9,7 @@ import { FiBox, FiPlus } from "react-icons/fi";
 const socket = io('https://caferealitea.onrender.com');
 
 // Main Dashboard Component
-export default function Dashboard({ setActiveTab, activeTab }) {
+export default function Dashboard({ setActiveTab, activeTab, totals, financialData }) {
   const navigate = useNavigate();
 
   // State variables
@@ -23,6 +23,26 @@ export default function Dashboard({ setActiveTab, activeTab }) {
   });
   const [recentOrder, setRecentOrder] = useState();
   const [role, setRole] = useState("");
+
+  const [profitData, setProfitData] = useState({
+    gross: 0,
+    net: 0,
+    equipments: 0,
+    packaging_cost: 0
+  });
+
+  useEffect(() => {
+    if (financialData) {
+  setProfitData({
+    gross: financialData.totalGrossProfit,
+    net: financialData.totalNetProfit,
+    equipments: financialData.totalEquipmentCost,
+    packaging_cost: financialData.totalPackagingCost
+  });
+}
+
+
+  }, [financialData]);
 
   // Check authentication and role
   useEffect(() => {
@@ -205,7 +225,13 @@ export default function Dashboard({ setActiveTab, activeTab }) {
                     <button disabled={['Admin', 'Staff'].includes(role)} onClick={() => setActiveTab('View All')} className="btn btn-neutral btn-sm">View All Data</button>
                 </div>
                 <div className="h-fit">
-                    <Profit className="text-slate-700" />
+                   <Profit 
+                gross={profitData.gross} 
+                net={profitData.net} 
+                equipments={profitData.equipments} 
+                packaging_cost={profitData.packaging_cost} 
+                className="text-slate-700" 
+              /> 
                 </div>
                 </div>
             </div>

@@ -9,6 +9,20 @@ export default function MainDashboard({ activeTab, setActiveTab }) {
   const [isLoading, setIsLoading] = useState(true);
   const [dashboardData, setDashboardData] = useState(null);
   const [loadedTabs, setLoadedTabs] = useState(new Set(["Dashboard"])); // Track loaded tabs
+  const [financialData, setFinancialData] = useState(null);
+
+  const handleFinancialDataUpdate = (data) => {
+  setFinancialData(data);
+
+  const totals = {
+    sales: data?.totalSales || 0,
+    orders: data?.totalOrders || 0,
+    revenue: data?.totalRevenue || 0,
+  };
+
+  setDashboardData(prev => ({ ...prev, financialTotals: totals }));
+};
+
 
   const handleTabChange = (tabName) => {
     setActiveTab(tabName);
@@ -20,13 +34,26 @@ export default function MainDashboard({ activeTab, setActiveTab }) {
   };
 
   const renderComponent = (tabName, Component) => {
-    
     return (
       <div style={{ display: activeTab === tabName ? "block" : "none" }}>
-        <Component setActiveTab={setActiveTab} activeTab={activeTab} />
+        {tabName === 'Dashboard' ? (
+          <Dashboard 
+            setActiveTab={setActiveTab} 
+            activeTab={activeTab}
+            totals={dashboardData?.financialTotals || {}}
+            financialData={financialData} // Pass the full financial data if needed
+          />
+        ) : (
+          <ViewAll 
+            setActiveTab={setActiveTab} 
+            activeTab={activeTab}
+            onDataUpdate={handleFinancialDataUpdate} // Pass callback to receive data
+          />
+        )}
       </div>
     );
   };
+
 
   // Simulate data fetching
   useEffect(() => {
