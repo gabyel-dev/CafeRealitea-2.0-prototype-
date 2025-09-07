@@ -298,6 +298,7 @@ const TitleSection = ({ open, setActiveTab }) => {
   const [userRole, setUserRole] = useState();
   const [menuOpen, setMenuOpen] = useState(false);
   const [loading, setLoading] = useState(false)
+  const [id, setId] = useState()
 
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
@@ -308,6 +309,7 @@ const TitleSection = ({ open, setActiveTab }) => {
         setFirstname(res.data.user?.first_name);
         setLastname(res.data.user?.last_name);
         setUserRole(res.data.user?.role);
+        setId(res.data.user?.id)
       });
   }, []);
 
@@ -329,7 +331,17 @@ const TitleSection = ({ open, setActiveTab }) => {
         className="flex cursor-pointer items-center justify-between rounded-md transition-colors hover:bg-slate-100"
       >
         <div className="flex items-center gap-2">
-          <Logo />
+          <div className="w-[35px] h-[35px] border-1 border-indigo-600 mr-1 p-[1.5px] rounded-full overflow-hidden flex items-center justify-center">
+          <img 
+            src={`https://caferealitea.onrender.com/profile-image/${id}`} 
+            alt="profile" 
+            className="w-full h-full object-cover rounded-full"
+            onError={(e) => {
+              // Fallback if image fails to load
+              e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='currentColor'%3E%3Cpath fill-rule='evenodd' d='M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z' clip-rule='evenodd' /%3E%3C/svg%3E";
+            }}
+          />
+        </div>
           {open && (
             <motion.div
               key="user-info"

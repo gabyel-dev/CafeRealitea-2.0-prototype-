@@ -444,8 +444,16 @@ export default function UsersManagement() {
                         <td>
                           <div className="flex items-center gap-3">
                             <div className="">
-                              <div className=" rounded-full w-12 h-12 bg-indigo-100 text-indigo-600 flex items-center  justify-center">
-                                <FaUser className="text-xl " />
+                              <div className="w-[35px] h-[35px] border-1 border-indigo-600 mr-1 p-[1.5px] rounded-full overflow-hidden flex items-center justify-center">
+                                <img 
+                                  src={`https://caferealitea.onrender.com/profile-image/${user.id}`} 
+                                  alt="profile" 
+                                  className="w-full h-full object-cover rounded-full"
+                                  onError={(e) => {
+                                    // Fallback if image fails to load
+                                    e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='currentColor'%3E%3Cpath fill-rule='evenodd' d='M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z' clip-rule='evenodd' /%3E%3C/svg%3E";
+                                  }}
+                                />
                               </div>
                             </div>
                             <div>
