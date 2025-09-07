@@ -13,7 +13,7 @@ const Profit = ({ gross, net, equipments, packaging_cost }) => {
           animationEnabled: true,
           backgroundColor: "transparent",
           title: {
-            text: "Monthly Profit (Percentage Share)",
+            text: "Monthly Profit",
             fontFamily: "Inter, sans-serif",
             fontSize: 20,
             fontColor: "#1F2937", // slate-800 text
