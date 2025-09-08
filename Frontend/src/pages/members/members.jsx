@@ -44,6 +44,22 @@ export default function UsersManagement({ setActiveTab, activeTab, setSelectedUs
     }
   };
 
+ 
+  useEffect(() => {
+  const handleClickOutside = (e) => {
+    // ✅ If the clicked element isn't inside the menu, close it
+    if (openMenuId && !e.target.closest(".user-menu")) {
+      setOpenMenuId(null);
+    }
+  };
+
+  document.addEventListener("mousedown", handleClickOutside);
+
+  return () => {
+    document.removeEventListener("mousedown", handleClickOutside);
+  };
+}, [openMenuId]);
+
 
 
   const socketRef = useRef(null);
@@ -464,7 +480,10 @@ export default function UsersManagement({ setActiveTab, activeTab, setSelectedUs
                       >
                         <td>
                           <div className="flex items-center gap-3">
-                            <div className="">
+                            <div className="cursor-pointer"
+                            onMouseEnter={() => setOpenMenuId(user.id)}
+                              onMouseLeave={() => setOpenMenuId(null)
+                            }>
                               <div className="w-[35px] h-[35px] border-1 border-indigo-600 mr-1 p-[1.5px] rounded-full overflow-hidden flex items-center justify-center">
                                 <img 
                                 onClick={() => toggleMenu(user.id)}
@@ -478,18 +497,27 @@ export default function UsersManagement({ setActiveTab, activeTab, setSelectedUs
                                 />
 
                                 
-                              </div>
+                              </div 
+                              >
                                 {openMenuId === user.id && (
                                     <AnimatePresence>
                                       <motion.div
-                                      className="absolute border-1 bg-white border-slate-300 shadow-black/40 rounded-md   p-2">
+                                      initial={{ opacity: 0, y: -5 }}
+                                      animate={{ opacity: 1, y: 0 }}
+                                      exit={{ opacity: 0, y: -5 }}
+                                      transition={{ duration: 0.15 }}
+                                      onClick={(e) => e.stopPropagation()}
+                                      onMouseEnter={() => setOpenMenuId(user.id)}
+                                      onMouseLeave={() => setOpenMenuId(null)}
+                                      className="absolute user-menu border-1 bg-white border-slate-300 shadow-black/40 rounded-md   p-2">
                                         <ul>
                                          <li className="flex gap-2 items-center hover:bg-gray-100 py-1 px-3 rounded-sm w-[200px]">
                                               <FaUser />
                                               <button
+                                              
                                                 onClick={() => {
                                                   handleViewProfile(user.id);
-                                                  setOpenMenuId(null); // Close the menu after clicking
+                            
                                                 }}
                                               >
                                                 View Profile

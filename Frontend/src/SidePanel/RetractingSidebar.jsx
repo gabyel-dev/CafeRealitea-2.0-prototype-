@@ -325,7 +325,9 @@ const TitleSection = ({ open, setActiveTab }) => {
   }, []);
 
   return (
-    <div className="mb-3 border-b border-slate-300 pb-3" ref={dropdownRef}>
+    <div 
+    onMouseEnter={() => setMenuOpen(true)}
+    className="mb-3 border-b border-slate-300 pb-3" ref={dropdownRef}>
       <div 
         onClick={() => setMenuOpen(!menuOpen)}
         className="flex cursor-pointer items-center justify-between rounded-md transition-colors hover:bg-slate-100"
@@ -362,6 +364,7 @@ const TitleSection = ({ open, setActiveTab }) => {
       <AnimatePresence>
         {menuOpen && (
           <motion.div
+            
             onMouseLeave={() => setMenuOpen(false)}
             key="dropdown"
             initial={{ opacity: 0, y: -5 }}
@@ -390,32 +393,6 @@ const TitleSection = ({ open, setActiveTab }) => {
   );
 };
 
-const Logo = () => {
-  return (
-    <motion.div
-      layout
-      className="grid size-10 shrink-0 place-content-center rounded-md bg-indigo-600"
-    >
-      <svg
-        width="24"
-        height="24"
-        viewBox="0 0 50 39"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        className="fill-slate-50"
-      >
-        <path
-          d="M16.4992 2H37.5808L22.0816 24.9729H1L16.4992 2Z"
-          stopColor="#000000"
-        ></path>
-        <path
-          d="M17.4224 27.102L11.4192 36H33.5008L49 13.0271H32.7024L23.2064 27.102H17.4224Z"
-          stopColor="#000000"
-        ></path>
-      </svg>
-    </motion.div>
-  );
-};
 
 const ToggleClose = ({ open, setOpen }) => {
   return (
