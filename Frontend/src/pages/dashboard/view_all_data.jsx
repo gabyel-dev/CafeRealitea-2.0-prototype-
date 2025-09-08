@@ -739,7 +739,6 @@ useEffect(() => {
       </div>
 
       {/* Chart */}
-// Replace your chart section with this:
 <div className="card bg-white shadow mb-6">
   <div className="card-body px-0 py-4">
     <h3 className="card-title text-lg mb-4 text-slate-700 px-4">Financial Overview</h3>
