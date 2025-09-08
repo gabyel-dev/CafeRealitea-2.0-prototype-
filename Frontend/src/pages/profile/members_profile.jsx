@@ -64,7 +64,7 @@ export default function MemberProfile({ setActiveTab, activeTab, userId }) {
 
 
   return (
-    <div className="bg-indigo-50 min-h-screen p-6">
+    <div className="bg-indigo-50 min-h-screen p-0">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
         <div>
@@ -77,7 +77,7 @@ export default function MemberProfile({ setActiveTab, activeTab, userId }) {
         <div className="mt-4 md:mt-0">
           <button 
             className="btn btn-outline btn-primary gap-2"
-            onClick={() => window.history.back()}
+            onClick={() => setActiveTab("Members")}
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
