@@ -110,7 +110,6 @@ export default function UsersManagement({ setActiveTab, activeTab, setSelectedUs
   });
 
   const fetchUsers = async () => {
-  setIsLoading(true);
   try {
     const [usersRes, onlineRes] = await Promise.all([
       axios.get('https://caferealitea.onrender.com/users_account', { withCredentials: true }),
@@ -472,7 +471,7 @@ export default function UsersManagement({ setActiveTab, activeTab, setSelectedUs
                     {filteredUsers.map((user) => (
                       <motion.tr
                         key={user.id}
-                        initial={{ opacity: 0 }}
+                        initial={{ opacity: 0 }}  
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.2 }}

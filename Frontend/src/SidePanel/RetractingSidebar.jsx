@@ -25,7 +25,7 @@ import Loader from "../components/UI/loaders/Loader";
 
 export const Sidebar = ({ activeTab, setActiveTab }) => {
   return (
-    <div className="flex bg-indigo-50">
+    <div className="flex bg-indigo-50 shadow-2xl shadow-black/20 z-1000">
       <Sidebar2 activeTab={activeTab} setActiveTab={setActiveTab} />
       <ExampleContent />
     </div>
