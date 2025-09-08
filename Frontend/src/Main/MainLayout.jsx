@@ -16,6 +16,9 @@ const OrderManagementAdmin = lazy(() => import("../pages/orders/orders"));
 const UsersManagement = lazy(() => import("../pages/members/members"));
 const ProductPage = lazy(() => import("../pages/products/products"));
 const Profile = lazy(() => import("../pages/profile/profile"));
+const memberProfile = lazy(() => import("../pages/profile/members_profile"));
+const MemberProfileWrapper = lazy(() => import("../pages/profile/MemberProfileWrapper"));
+
 
 export default function MainLayout() {
   const [socketConnected, setSocketConnected] = useState(false);
@@ -164,9 +167,10 @@ export default function MainLayout() {
             {renderComponent("View All", ViewAllData)}
             {renderComponent("Sales", SalesHistory)}
             {renderComponent("Orders", OrderManagementAdmin)}
-            {renderComponent("Members", UsersManagement)}
-            {renderComponent("Products", ProductPage)}
             {renderComponent("Profile", Profile)}
+            {renderComponent("Products", ProductPage)}
+
+            <MemberProfileWrapper activeTab={activeTab} setActiveTab={setActiveTab} />
           </Suspense>
         </main>
       </div>

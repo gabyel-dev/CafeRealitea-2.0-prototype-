@@ -4,6 +4,7 @@ import {
   FaUser, FaCamera, FaEnvelope, FaPhone, FaSave, FaTimes, 
   FaLock, FaCheckCircle, FaExclamationTriangle, FaEdit 
 } from "react-icons/fa";
+import Loader from "../../components/UI/loaders/Loader";
 
 export default function Profile({ setActiveTab }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -144,9 +145,7 @@ export default function Profile({ setActiveTab }) {
 
   if (isLoading && !profileData.first_name) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-base-200">
-        <span className="loading loading-spinner loading-lg text-primary"></span>
-      </div>
+      <Loader />
     );
   }
 

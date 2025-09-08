@@ -10,8 +10,10 @@ import DeleteUser from "../../component/DeleteUserModal";
 import { io } from "socket.io-client";
 import EditUserRole from "../../component/EditUserRoleModal";
 import CreateUserModal from "../../component/CreateUserModal";
+import { useParams } from "react-router-dom";
 
-export default function UsersManagement() {
+
+export default function UsersManagement({ setActiveTab, activeTab, setSelectedUserId  }) {
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -28,9 +30,29 @@ export default function UsersManagement() {
   const [onlineStatusError, setOnlineStatusError] = useState(false);
   const [role, setRole] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [openMenuId, setOpenMenuId] = useState(null);
+
+  const handleViewProfile = (userId) => {
+    console.log("Clicked userId:", userId);
+    console.log("setSelectedUserId type:", typeof setSelectedUserId);
+
+    if (typeof setSelectedUserId === "function") {
+      setSelectedUserId(userId);
+      setActiveTab("member_profile");
+    } else {
+      console.error("setSelectedUserId is missing!"); // 👈 this is what you see
+    }
+  };
+
+
 
   const socketRef = useRef(null);
   const navigate = useNavigate();
+
+   // -------------------- TOGGLE MENU CLICK --------------------
+   const toggleMenu = (userId) => {
+    setOpenMenuId(openMenuId === userId ? null : userId)
+   }
 
   // -------------------- CHECK LOGIN --------------------
   useEffect(() => {
@@ -64,7 +86,7 @@ export default function UsersManagement() {
 
   socket.on('connect', () => {
     console.log("Socket connected, emitting user_online");
-    socket.emit('user_online', { user_id: String(currentUser.id) }); // Ensure user_id is string
+    socket.emit('user_online', { user_id: String(currentUser.id) }); 
   });
 
   socket.on('disconnect', (reason) => {
@@ -83,7 +105,6 @@ export default function UsersManagement() {
     setUsers(usersData);
     setFilteredUsers(usersData);
 
-    // ✅ Corrected online status map
     const onlineMap = {};
     usersData.forEach(u => {
       onlineMap[u.id] = onlineRes.data.online_users.includes(String(u.id));
@@ -446,6 +467,7 @@ export default function UsersManagement() {
                             <div className="">
                               <div className="w-[35px] h-[35px] border-1 border-indigo-600 mr-1 p-[1.5px] rounded-full overflow-hidden flex items-center justify-center">
                                 <img 
+                                onClick={() => toggleMenu(user.id)}
                                   src={`https://caferealitea.onrender.com/profile-image/${user.id}`} 
                                   alt="profile" 
                                   className="w-full h-full object-cover rounded-full"
@@ -454,7 +476,29 @@ export default function UsersManagement() {
                                     e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='currentColor'%3E%3Cpath fill-rule='evenodd' d='M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z' clip-rule='evenodd' /%3E%3C/svg%3E";
                                   }}
                                 />
+
+                                
                               </div>
+                                {openMenuId === user.id && (
+                                    <AnimatePresence>
+                                      <motion.div
+                                      className="absolute border-1 bg-white border-slate-300 shadow-black/40 rounded-md   p-2">
+                                        <ul>
+                                         <li className="flex gap-2 items-center hover:bg-gray-100 py-1 px-3 rounded-sm w-[200px]">
+  <FaUser />
+  <button
+    onClick={() => {
+      handleViewProfile(user.id);
+      setOpenMenuId(null); // Close the menu after clicking
+    }}
+  >
+    View Profile
+  </button>
+</li>
+                                        </ul>
+                                      </motion.div>
+                                    </AnimatePresence>
+                                  )}
                             </div>
                             <div>
                               <div className="font-bold">
@@ -482,21 +526,13 @@ export default function UsersManagement() {
 
                         <td>
                           <div className="flex gap-2 items-center">
-                            <Link
-                              to={
-                                ["Admin", "System Administrator"].includes(role)
-                                  ? `user?id=${user.id}&role=${user.role}`
-                                  : "#"
-                              }
-                              className="btn btn-ghost btn-sm"
-                              onClick={(e) => {
-                                if (!["Admin", "System Administrator"].includes(role))
-                                  e.preventDefault();
-                              }}
-                            >
-                              <FaEye />
-                              View
-                            </Link>
+                           <button
+  className="btn btn-ghost btn-sm"
+  onClick={() => handleViewProfile(user.id)}
+>
+  <FaEye />
+  View
+</button>
                           
                             {/* Dropdown Menu */}
                             <div className="dropdown dropdown-left">
@@ -508,6 +544,8 @@ export default function UsersManagement() {
                                 if (['Admin', 'Staff'].includes(role)) {
                                   e.preventDefault();
                                   e.stopPropagation();
+                                   handleViewProfile(user.id);
+                            setOpenMenuId(null); // Close the menu after clicking
                                 }
                                 }}
                               >

@@ -84,16 +84,16 @@ export default function MainDashboard({ activeTab, setActiveTab }) {
   }
 
   return (
-    <div className="bg-indigo-50 w-full min-h-screen ">
+      <div className="bg-indigo-50 w-full min-h-screen ">
 
-        <main>
-          <Suspense fallback={<Loader />}>
-            {renderComponent('Dashboard', Dashboard)}
-            {renderComponent('View All', ViewAll)}
-          </Suspense>
+          <main>
+            <Suspense fallback={<Loader />}>
+              {renderComponent('Dashboard', Dashboard)}
+              {renderComponent('View All', ViewAll)}
+            </Suspense>
 
-          
-        </main>
-    </div>
-  );
+            
+          </main>
+      </div>
+    );
 }

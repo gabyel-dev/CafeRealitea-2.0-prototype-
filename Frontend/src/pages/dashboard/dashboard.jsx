@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Profit from "../../components/UI/Charts/PieChart";
 import Title from "../../components/UI/Title";
 import axios from "axios";
@@ -31,18 +31,11 @@ export default function Dashboard({ setActiveTab, activeTab, totals, financialDa
     packaging_cost: 0
   });
 
-  useEffect(() => {
-    if (financialData) {
-  setProfitData({
-    gross: financialData.totalGrossProfit,
-    net: financialData.totalNetProfit,
-    equipments: financialData.totalEquipmentCost,
-    packaging_cost: financialData.totalPackagingCost
-  });
-}
-
-
-  }, [financialData]);
+  // Helper function to calculate percentage change
+  const getPercentageChange = useCallback((current, previous) => {
+    if (!previous || previous === 0) return 0;
+    return ((current - previous) / previous) * 100;
+  }, []);
 
   // Check authentication and role
   useEffect(() => {
@@ -63,13 +56,23 @@ export default function Dashboard({ setActiveTab, activeTab, totals, financialDa
         console.error("Authentication check failed:", err);
         navigate("/");
       });
-  }, []);
+  }, [navigate]);
 
-  // Helper function to calculate percentage change
-  function getPercentageChange(current, previous) {
-    if (!previous || previous === 0) return 0;
-    return ((current - previous) / previous) * 100;
-  }
+  // Update profit data only when financialData changes meaningfully
+  useEffect(() => {
+    if (financialData && 
+        (financialData.totalGrossProfit !== profitData.gross ||
+         financialData.totalNetProfit !== profitData.net ||
+         financialData.totalEquipmentCost !== profitData.equipments ||
+         financialData.totalPackagingCost !== profitData.packaging_cost)) {
+      setProfitData({
+        gross: financialData.totalGrossProfit,
+        net: financialData.totalNetProfit,
+        equipments: financialData.totalEquipmentCost,
+        packaging_cost: financialData.totalPackagingCost
+      });
+    }
+  }, [financialData, profitData.gross, profitData.net, profitData.equipments, profitData.packaging_cost]);
 
   // Fetch dashboard data
   useEffect(() => {
@@ -89,11 +92,13 @@ export default function Dashboard({ setActiveTab, activeTab, totals, financialDa
       const prev = data.length > 1 ? data[data.length - 2] : null;
 
       if (latest) {
-        setSummary({
+        const newSummary = {
           sales: latest.total_sales,
           orders: latest.total_orders,
           avgOrder: latest.total_sales / latest.total_orders,
-        });
+        };
+        
+        setSummary(newSummary);
 
         if (prev) {
           setPercentChange({
@@ -107,7 +112,7 @@ export default function Dashboard({ setActiveTab, activeTab, totals, financialDa
         }
       }
     });
-  }, []);
+  }, [getPercentageChange]);
   
 
   return (
@@ -138,73 +143,68 @@ export default function Dashboard({ setActiveTab, activeTab, totals, financialDa
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-        {/* Stat Card 1 */}
-   {/* Stat Card 1 - Monthly Sales */}
-<div className="card bg-white shadow-md">
-  <div className="card-body p-6">
-    <div className="flex justify-between items-start">
-      <div>
-        <h3 className="text-sm font-medium text-gray-500">Monthly Sales</h3>
-        <p className="text-2xl font-bold mt-1 text-gray-700">
-          ₱{summary?.sales?.toLocaleString() ?? "0"}
-        </p>
-      </div>
-      <div className={`badge badge-lg gap-1 ${percentChange.sales >= 0 ? "badge-success" : "badge-error"}`}>
-        {percentChange.sales >= 0 ? "↑" : "↓"} {percentChange.sales.toFixed(1)}%
-      </div>
-    </div>
-    <div className="flex items-baseline mt-4">
-      <div className="text-xs text-gray-500">vs previous month</div>
-    </div>
-  </div>
-</div>
-
-
-
-        {/* Stat Card 2 - Total Orders */}
-<div className="card bg-white shadow-md">
-  <div className="card-body p-6">
-    <div className="flex justify-between items-start">
-      <div className="w-full">
-        <div className="flex justify-between">
-          <h3 className="text-sm font-medium text-gray-500">Total Orders</h3>
-          <div
-            className={`badge badge-lg gap-1 ${
-              percentChange.orders >= 0 ? "badge-success" : "badge-error"
-            }`}
-          >
-            {percentChange.orders >= 0 ? "↑" : "↓"}{" "}
-            {percentChange.orders.toFixed(1)}%
+        {/* Stat Card 1 - Monthly Sales */}
+        <div className="card bg-white shadow-md">
+          <div className="card-body p-6">
+            <div className="flex justify-between items-start">
+              <div>
+                <h3 className="text-sm font-medium text-gray-500">Monthly Sales</h3>
+                <p className="text-2xl font-bold mt-1 text-gray-700">
+                  ₱{summary?.sales?.toLocaleString() ?? "0"}
+                </p>
+              </div>
+              <div className={`badge badge-lg gap-1 ${percentChange.sales >= 0 ? "badge-success" : "badge-error"}`}>
+                {percentChange.sales >= 0 ? "↑" : "↓"} {Math.abs(percentChange.sales).toFixed(1)}%
+              </div>
+            </div>
+            <div className="flex items-baseline mt-4">
+              <div className="text-xs text-gray-500">vs previous month</div>
+            </div>
           </div>
         </div>
-        <p className="text-2xl font-bold mt-1 text-gray-700">
-          {summary?.orders ?? "0"}
-        </p>
-      </div>
-    </div>
-    <div className="flex items-baseline mt-4">
-      <div className="text-xs text-gray-500">vs previous month</div>
-    </div>
-  </div>
-</div>
 
-        {/* Stat Card 3 */}
+        {/* Stat Card 2 - Total Orders */}
+        <div className="card bg-white shadow-md">
+          <div className="card-body p-6">
+            <div className="flex justify-between items-start">
+              <div className="w-full">
+                <div className="flex justify-between">
+                  <h3 className="text-sm font-medium text-gray-500">Total Orders</h3>
+                  <div
+                    className={`badge badge-lg gap-1 ${
+                      percentChange.orders >= 0 ? "badge-success" : "badge-error"
+                    }`}
+                  >
+                    {percentChange.orders >= 0 ? "↑" : "↓"}{" "}
+                    {Math.abs(percentChange.orders).toFixed(1)}%
+                  </div>
+                </div>
+                <p className="text-2xl font-bold mt-1 text-gray-700">
+                  {summary?.orders ?? "0"}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-baseline mt-4">
+              <div className="text-xs text-gray-500">vs previous month</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Stat Card 3 - Avg. Order Value */}
         <div className="card bg-white shadow-md">
           <div className="card-body p-6">
             <div className="flex justify-between items-start">
               <div className="w-full">
                 <div className="flex justify-between ">
                   <h3 className="text-sm font-medium text-gray-500">Avg. Order Val</h3> 
-                <div className={`badge badge-lg gap-1 ${percentChange.avgOrder >= 0 ? "badge-success" : "badge-error"}`}>
-                {percentChange.avgOrder >= 0 ? "↑" : "↓"} {percentChange.avgOrder.toFixed(1)}%
-              </div>
+                  <div className={`badge badge-lg gap-1 ${percentChange.avgOrder >= 0 ? "badge-success" : "badge-error"}`}>
+                    {percentChange.avgOrder >= 0 ? "↑" : "↓"} {Math.abs(percentChange.avgOrder).toFixed(1)}%
+                  </div>
                 </div>
                 
                 <p className="text-2xl font-bold mt-1 text-gray-700">
-                  
-                ₱{summary?.avgOrder?.toFixed(2) ?? "0"}
-              </p>
-              
+                  ₱{summary?.avgOrder?.toFixed(2) ?? "0"}
+                </p>
               </div>
             </div>
             <div className="flex items-baseline mt-4">
@@ -215,34 +215,33 @@ export default function Dashboard({ setActiveTab, activeTab, totals, financialDa
       </div>
 
       {/* Main Content */}
-      <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-3    gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Profit Chart */}
-            <div className="lg:col-span-2">
-            <div className="card bg-white shadow-md">
-                <div className="card-body text-slate-700">
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-                    <h3 className="text-lg font-semibold">Profit Overview</h3>
-                    <button disabled={['Admin', 'Staff'].includes(role)} onClick={() => setActiveTab('View All')} className="btn btn-neutral btn-sm">View All Data</button>
-                </div>
-                <div className="h-fit">
-                   <Profit 
-                gross={profitData.gross} 
-                net={profitData.net} 
-                equipments={profitData.equipments} 
-                packaging_cost={profitData.packaging_cost} 
-                className="text-slate-700" 
-              /> 
-                </div>
-                </div>
+        <div className="lg:col-span-2">
+          <div className="card bg-white shadow-md">
+            <div className="card-body text-slate-700">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+                <h3 className="text-lg font-semibold">Profit Overview</h3>
+                <button disabled={['Admin', 'Staff'].includes(role)} onClick={() => setActiveTab('View All')} className="btn btn-neutral btn-sm">View All Data</button>
+              </div>
+              <div className="h-fit">
+                <Profit 
+                  gross={profitData.gross} 
+                  net={profitData.net} 
+                  equipments={profitData.equipments} 
+                  packaging_cost={profitData.packaging_cost} 
+                  className="text-slate-700" 
+                /> 
+              </div>
             </div>
-            </div>
-
+          </div>
+        </div>
 
         {/* Top Items */}
-        <div className="card bg-white h-fit text-slate-700  shadow-md">
+        <div className="card bg-white h-fit text-slate-700 shadow-md">
           <div className="card-body">
             <h3 className="card-title text-lg mb-6">Top Selling Items</h3>
-           {topItems.length <= 0 ? (
+            {topItems.length <= 0 ? (
               <div className="flex flex-col items-center justify-center py-4 mb-4 px-4 text-center bg-gray-50 rounded-lg border border-dashed border-gray-300">
                 <div className="mb-4 p-4 bg-blue-50 rounded-full">
                   <FiBox className="h-8 w-8 text-blue-500" />
@@ -271,20 +270,20 @@ export default function Dashboard({ setActiveTab, activeTab, totals, financialDa
                         <p className="text-xs text-gray-500">{item.total_quantity} sold</p>
                       </div>
                     </div>
-                    <span className="font-semibold">₱ {item.total_sales}</span>
+                    <span className="font-semibold">₱ {item.total_sales.toLocaleString()}</span>
                   </div>
                 ))}
               </div>
             )}
             <button
-  onClick={() => setActiveTab("Products")}
-  className="btn btn-primary btn-sm gap-2 self-center"
->
-  View All Products
-  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-  </svg>
-</button>
+              onClick={() => setActiveTab("Products")}
+              className="btn btn-primary btn-sm gap-2 self-center"
+            >
+              View All Products
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
           </div>
         </div>
       </div>
@@ -299,12 +298,12 @@ export default function Dashboard({ setActiveTab, activeTab, totals, financialDa
               <table className="table table-zebra table-sm">
                 <thead>
                   <tr className="text-slate-700" >
-                    <th >Order ID</th>
+                    <th>Order ID</th>
                     <th>Customer</th>
                     <th>Amount</th>
                   </tr>
                 </thead>
-                  <tbody className="[&>tr:nth-child(even)]:bg-slate-100 [&>tr:nth-child(odd)]:bg-white">
+                <tbody className="[&>tr:nth-child(even)]:bg-slate-100 [&>tr:nth-child(odd)]:bg-white">
                   <tr>
                     <td>#ORD-7829</td>
                     <td>John Smith</td>
@@ -314,13 +313,11 @@ export default function Dashboard({ setActiveTab, activeTab, totals, financialDa
                     <td>#ORD-7828</td>
                     <td>Sarah Johnson</td>
                     <td>$87.99</td>
-      
                   </tr>
                   <tr>
                     <td>#ORD-7827</td>
                     <td>Michael Brown</td>
                     <td>$152.75</td>
-
                   </tr>
                   <tr>
                     <td>#ORD-7826</td>
@@ -333,7 +330,7 @@ export default function Dashboard({ setActiveTab, activeTab, totals, financialDa
           </div>
         </div>
 
-        {/* recent activity */}
+        {/* Recent Activity */}
         <div className="card bg-white text-slate-500 shadow-md">
           <div className="card-body">
             <h3 className="card-title text-lg mb-6">Recent Activity</h3>
@@ -341,12 +338,12 @@ export default function Dashboard({ setActiveTab, activeTab, totals, financialDa
               <table className="table table-zebra table-sm">
                 <thead>
                   <tr className="text-slate-700" >
-                    <th >Order ID</th>
+                    <th>Order ID</th>
                     <th>Customer</th>
                     <th>Amount</th>
                   </tr>
                 </thead>
-                  <tbody className="[&>tr:nth-child(even)]:bg-slate-100 [&>tr:nth-child(odd)]:bg-white">
+                <tbody className="[&>tr:nth-child(even)]:bg-slate-100 [&>tr:nth-child(odd)]:bg-white">
                   <tr>
                     <td>#ORD-7829</td>
                     <td>John Smith</td>
@@ -356,13 +353,11 @@ export default function Dashboard({ setActiveTab, activeTab, totals, financialDa
                     <td>#ORD-7828</td>
                     <td>Sarah Johnson</td>
                     <td>$87.99</td>
-      
                   </tr>
                   <tr>
                     <td>#ORD-7827</td>
                     <td>Michael Brown</td>
                     <td>$152.75</td>
-
                   </tr>
                   <tr>
                     <td>#ORD-7826</td>
@@ -374,21 +369,20 @@ export default function Dashboard({ setActiveTab, activeTab, totals, financialDa
             </div>
           </div>
         </div>
-
       </div>
 
       {/* View All Link */}
-<div className={`${role === 'Admin' ? "hidden" : "block"} mt-8 text-center`}>
-    <button 
-      onClick={() => setActiveTab('View All')}
-      className="btn btn-neutral btn-wide"
-    >
-      View Full Dashboard 
-      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-      </svg>
-    </button> 
-    </div>
+      <div className={`${role === 'Admin' ? "hidden" : "block"} mt-8 text-center`}>
+        <button 
+          onClick={() => setActiveTab('View All')}
+          className="btn btn-neutral btn-wide"
+        >
+          View Full Dashboard 
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </button> 
+      </div>
     </div>
   );
 }
