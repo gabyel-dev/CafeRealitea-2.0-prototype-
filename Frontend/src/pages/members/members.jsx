@@ -497,8 +497,8 @@ export default function UsersManagement({ setActiveTab, activeTab, setSelectedUs
                                 />
 
                                 
-                              </div 
-                              >
+                              </div >
+                              
                                 {openMenuId === user.id && (
                                     <AnimatePresence>
                                       <motion.div
