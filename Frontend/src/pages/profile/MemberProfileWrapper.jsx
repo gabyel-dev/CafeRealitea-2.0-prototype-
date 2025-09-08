@@ -8,7 +8,7 @@ export default function MemberProfileWrapper({ activeTab, setActiveTab }) {
   const [selectedUserId, setSelectedUserId] = useState(null);
 
   return (
-    <div className="bg-indigo-50 w-full min-h-screen">
+    <div className="bg-indigo-50 w-full ">
       <main>
         <Suspense fallback={<Loader />}>
           {activeTab === "Members" && (

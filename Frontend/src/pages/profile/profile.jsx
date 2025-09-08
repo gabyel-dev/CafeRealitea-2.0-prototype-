@@ -154,7 +154,7 @@ export default function Profile({ setActiveTab }) {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
         <div className="mb-4 md:mb-0">
-          <h1 className="text-3xl font-bold text-slate-700">Profile</h1>
+          <h1 className="text-xl md:text-2xl font-bold text-slate-700">Profile</h1>
           <p className="text-sm text-slate-700 opacity-70 mt-1">
             Manage your account information and preferences
           </p>
@@ -208,7 +208,7 @@ export default function Profile({ setActiveTab }) {
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 ">
         {/* Profile Card */}
         <div className="lg:col-span-1">
           <div className="card bg-white shadow-xl sticky top-4">
@@ -294,9 +294,9 @@ export default function Profile({ setActiveTab }) {
         </div>
 
         {/* Profile Form */}
-        <div className="lg:col-span-2">
-          <div className="card bg-base-100 shadow-xl">
-            <div className="card-body bg-white  text-slate-700">
+        <div className="lg:col-span-2 rounded-md">
+          <div className="card bg-base-100 shadow-xl rounded-md">
+            <div className="card-body bg-white  text-slate-700 rounded-md">
               <h2 className="card-title text-2xl">Account Information</h2>
               <p className=" text-slate-700 opacity-70 mb-6">Update your personal information</p>
               

@@ -4,6 +4,7 @@ import {
   FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, 
   FaCalendar, FaUserTag, FaIdBadge 
 } from "react-icons/fa";
+import Loader from "../../components/UI/loaders/Loader";
 
 
 export default function MemberProfile({ setActiveTab, activeTab, userId }) {
@@ -60,15 +61,17 @@ export default function MemberProfile({ setActiveTab, activeTab, userId }) {
   }, [userId]);
 
 
-
+  if (isLoading) {
+    <Loader />
+  }
 
 
   return (
-    <div className="bg-indigo-50 min-h-screen p-0">
+    <div className="bg-indigo-50 min-h-screen p-0 md:p-4">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-slate-700">Member Profile</h1>
+          <h1 className="text-xl md:2xl font-bold text-slate-700">Member Profile</h1>
           <p className="text-sm text-slate-600 mt-1">
             Viewing profile of {memberData.first_name} {memberData.last_name}
           </p>

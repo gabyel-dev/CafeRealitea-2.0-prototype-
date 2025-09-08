@@ -485,16 +485,16 @@ export default function UsersManagement({ setActiveTab, activeTab, setSelectedUs
                                       className="absolute border-1 bg-white border-slate-300 shadow-black/40 rounded-md   p-2">
                                         <ul>
                                          <li className="flex gap-2 items-center hover:bg-gray-100 py-1 px-3 rounded-sm w-[200px]">
-  <FaUser />
-  <button
-    onClick={() => {
-      handleViewProfile(user.id);
-      setOpenMenuId(null); // Close the menu after clicking
-    }}
-  >
-    View Profile
-  </button>
-</li>
+                                              <FaUser />
+                                              <button
+                                                onClick={() => {
+                                                  handleViewProfile(user.id);
+                                                  setOpenMenuId(null); // Close the menu after clicking
+                                                }}
+                                              >
+                                                View Profile
+                                              </button>
+                                            </li>
                                         </ul>
                                       </motion.div>
                                     </AnimatePresence>
@@ -527,12 +527,12 @@ export default function UsersManagement({ setActiveTab, activeTab, setSelectedUs
                         <td>
                           <div className="flex gap-2 items-center">
                            <button
-  className="btn btn-ghost btn-sm"
-  onClick={() => handleViewProfile(user.id)}
->
-  <FaEye />
-  View
-</button>
+                              className="btn btn-ghost btn-sm"
+                              onClick={() => handleViewProfile(user.id)}
+                            >
+                              <FaEye />
+                              View
+                            </button>
                           
                             {/* Dropdown Menu */}
                             <div className="dropdown dropdown-left">
