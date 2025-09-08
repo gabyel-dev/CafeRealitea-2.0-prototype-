@@ -264,7 +264,7 @@ const Option = ({ Icon, title, activeTab, setActiveTab, open, notifs }) => {
     <motion.button
       layout
       onClick={() => setActiveTab(title)}
-      className={`relative flex h-10 w-full items-center rounded-md transition-colors ${activeTab === title ? "bg-indigo-100 text-indigo-800" : "text-slate-500 hover:bg-slate-100"}`}
+      className={`relative cursor-pointer flex h-10 w-full items-center rounded-md transition-colors ${activeTab === title ? "bg-indigo-100 text-indigo-800" : "text-slate-500 hover:bg-slate-100"}`}
     >
       <motion.div
         layout
@@ -326,9 +326,10 @@ const TitleSection = ({ open, setActiveTab }) => {
 
   return (
     <div 
-    onMouseEnter={() => setMenuOpen(true)}
+    
     className="mb-3 border-b border-slate-300 pb-3" ref={dropdownRef}>
       <div 
+      onMouseEnter={() => setMenuOpen(true)}
         onClick={() => setMenuOpen(!menuOpen)}
         className="flex cursor-pointer items-center justify-between rounded-md transition-colors hover:bg-slate-100"
       >
