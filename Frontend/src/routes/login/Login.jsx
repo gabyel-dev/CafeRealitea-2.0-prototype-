@@ -4,6 +4,7 @@ import axios from "axios";
 import Loading from "../../components/UI/loaders/Loading";
 import { default as Button } from "../../components/UI/buttons/button";
 import { useNavigate } from "react-router-dom";
+import { BsEye, BsEyeSlash } from "react-icons/bs";
 
 const api_name = import.meta.env.VITE_SERVER_API_NAME;
 
@@ -16,6 +17,11 @@ const LoginPage = () => {
   const [error, setError] = useState("");
   const [isFocused, setIsFocused] = useState({ email: false, password: false });
   const nav = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
+
+  const showPass = (e) => {
+    setShowPassword(!showPassword);
+  }
 
   const handleChange = (e) => {
     const {name, value} = e.target;
@@ -162,11 +168,11 @@ useEffect(() => {
                   Forgot password?
                 </a>
               </div>
-              <div className="relative mt-1">
+              <div className="relative mt-1 flex">
                 <input
                   id="password"
                   name="password"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   autoComplete="current-password"
                   required
                   value={credentials.password}
@@ -176,6 +182,10 @@ useEffect(() => {
                   className="block w-full px-4 py-3 bg-white/50 border border-gray-200 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-slate-700"
                   placeholder="Enter your password"
                 />
+
+                <button type="button" onClick={() => showPass()} tabIndex={-1} className="text-indigo-600 absolute right-3 top-[13px] text-lg font-bold px-3 py-1 hover:bg-indigo-50 cursor-pointer rounded-md">
+                  {!showPassword ? <BsEye /> : <BsEyeSlash />}
+                </button>
               </div>
             </div>
 

@@ -5,6 +5,7 @@ import {
   FaCalendar, FaUserTag, FaIdBadge 
 } from "react-icons/fa";
 import Loader from "../../components/UI/loaders/Loader";
+import { useUser } from "../../Main/UserContext";
 
 
 export default function MemberProfile({ setActiveTab, activeTab, userId }) {
@@ -20,6 +21,7 @@ export default function MemberProfile({ setActiveTab, activeTab, userId }) {
   });
   const [isLoading, setIsLoading] = useState(true);
   const [profileImage, setProfileImage] = useState(null);
+  const { avatarVersion } = useUser();
 
   useEffect(() => {
     const fetchMemberData = async () => {
@@ -36,7 +38,7 @@ export default function MemberProfile({ setActiveTab, activeTab, userId }) {
           
           // Try to load profile image
           try {
-            const imageRes = await axios.get(`${api}/profile-image/${userId}`, {
+            const imageRes = await axios.get(`${api}/profile-image/${userId}?v=${avatarVersion}`, {
               responseType: 'blob',
               withCredentials: true
             });

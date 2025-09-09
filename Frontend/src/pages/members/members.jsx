@@ -11,6 +11,7 @@ import { io } from "socket.io-client";
 import EditUserRole from "../../component/EditUserRoleModal";
 import CreateUserModal from "../../component/CreateUserModal";
 import { useParams } from "react-router-dom";
+import { useUser } from "../../Main/UserContext";
 
 
 export default function UsersManagement({ setActiveTab, activeTab, setSelectedUserId  }) {
@@ -31,6 +32,7 @@ export default function UsersManagement({ setActiveTab, activeTab, setSelectedUs
   const [role, setRole] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [openMenuId, setOpenMenuId] = useState(null);
+  const { avatarVersion } = useUser();
 
   const handleViewProfile = (userId) => {
     console.log("Clicked userId:", userId);
@@ -486,7 +488,7 @@ export default function UsersManagement({ setActiveTab, activeTab, setSelectedUs
                               <div className="w-[35px] h-[35px] border-1 border-indigo-600 mr-1 p-[1.5px] rounded-full overflow-hidden flex items-center justify-center">
                                 <img 
                                 onClick={() => toggleMenu(user.id)}
-                                  src={`https://caferealitea.onrender.com/profile-image/${user.id}`} 
+                                  src={`https://caferealitea.onrender.com/profile-image/${user.id}?v=${avatarVersion}`} 
                                   alt="profile" 
                                   className="w-full h-full object-cover rounded-full"
                                   onError={(e) => {
@@ -497,14 +499,14 @@ export default function UsersManagement({ setActiveTab, activeTab, setSelectedUs
 
                                 
                               </div >
-                              
+                              <AnimatePresence>
                                 {openMenuId === user.id && (
-                                    <AnimatePresence>
+                                    
                                       <motion.div
+                                      key="dropdown"
                                       initial={{ opacity: 0, y: -5 }}
-                                      animate={{ opacity: 1, y: 0 }}
-                                      exit={{ opacity: 0, y: -5 }}
-                                      transition={{ duration: 0.15 }}
+                                      animate={{ opacity: 1, y: 0, transition: { duration: 0. }}}
+                                      exit={{ opacity: 0, y: -5, transition: { duration: 0.4 }}}
                                       onClick={(e) => e.stopPropagation()}
                                       onMouseEnter={() => setOpenMenuId(user.id)}
                                       onMouseLeave={() => setOpenMenuId(null)}
@@ -524,8 +526,9 @@ export default function UsersManagement({ setActiveTab, activeTab, setSelectedUs
                                             </li>
                                         </ul>
                                       </motion.div>
-                                    </AnimatePresence>
+                                    
                                   )}
+                                  </AnimatePresence>
                             </div>
                             <div>
                               <div className="font-bold">
@@ -553,13 +556,7 @@ export default function UsersManagement({ setActiveTab, activeTab, setSelectedUs
 
                         <td>
                           <div className="flex gap-2 items-center">
-                           <button
-                              className="btn btn-ghost btn-sm"
-                              onClick={() => handleViewProfile(user.id)}
-                            >
-                              <FaEye />
-                              View
-                            </button>
+                           
                           
                             {/* Dropdown Menu */}
                             <div className="dropdown dropdown-left">

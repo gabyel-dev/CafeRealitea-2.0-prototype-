@@ -5,6 +5,7 @@ import {
   FaLock, FaCheckCircle, FaExclamationTriangle, FaEdit 
 } from "react-icons/fa";
 import Loader from "../../components/UI/loaders/Loader";
+import { useUser } from "../../Main/UserContext";
 
 export default function Profile({ setActiveTab }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -22,26 +23,30 @@ export default function Profile({ setActiveTab }) {
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
   const [checkIfHasProfile, setCheckIfHasProfile] = useState(false);
+  const { avatarVersion, setAvatarVersion } = useUser();
+  
+
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      setIsLoading(true);
-      try {
-        const api = import.meta.env.VITE_SERVER_API_NAME;
-        const res = await axios.get(`${api}/user`, { withCredentials: true });
-        setProfileData(res.data.user || res.data);
-        setOriginalProfileData(res.data.user || res.data);
-        setGetId(res.data.user?.id || res.data.id);
-      } catch (err) {
-        console.error("Failed to fetch user data:", err);
-        setMessage({ type: 'error', text: 'Failed to load profile data' });
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  const fetchUserData = async () => {
+    setIsLoading(true);
+    try {
+      const api = import.meta.env.VITE_SERVER_API_NAME;
+      const res = await axios.get(`${api}/user`, { withCredentials: true });
+      setProfileData(res.data.user || res.data);
+      setOriginalProfileData(res.data.user || res.data);
+      setGetId(res.data.user?.id || res.data.id);
+    } catch (err) {
+      console.error("Failed to fetch user data:", err);
+      setMessage({ type: 'error', text: 'Failed to load profile data' });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    fetchUserData();
-  }, []);
+  fetchUserData();
+}, []);
+
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -68,6 +73,7 @@ export default function Profile({ setActiveTab }) {
       setMessage({ type: 'success', text: 'Profile image updated successfully!' });
       setProfileImage(null);
       setPreviewImage(null);
+      setAvatarVersion(Date.now());
       
       // Refresh user data to get updated image
       const res = await axios.get(`${api}/user`, { withCredentials: true });
@@ -224,7 +230,7 @@ export default function Profile({ setActiveTab }) {
                     />
                   ) : (
                     <img 
-                      src={`https://caferealitea.onrender.com/profile-image/${getId}`} 
+                      src={`https://caferealitea.onrender.com/profile-image/${getId}?v=${avatarVersion}`} 
                       alt="Profile" 
                       className="w-full h-full object-cover"
                       onError={(e) => {

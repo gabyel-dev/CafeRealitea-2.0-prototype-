@@ -22,6 +22,8 @@ import { FaBell } from "react-icons/fa";
 import PendingOrdersModal from "../component/PendingOrderModal";
 import { io } from "socket.io-client"
 import Loader from "../components/UI/loaders/Loader";
+import { useUser } from "../Main/UserContext";
+
 
 export const Sidebar = ({ activeTab, setActiveTab }) => {
   return (
@@ -299,6 +301,7 @@ const TitleSection = ({ open, setActiveTab }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [loading, setLoading] = useState(false)
   const [id, setId] = useState()
+  const { avatarVersion } = useUser();
 
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
@@ -336,7 +339,7 @@ const TitleSection = ({ open, setActiveTab }) => {
         <div className="flex items-center gap-2">
           <div className="w-[35px] h-[35px] border-1 border-indigo-600 mr-1 p-[1.5px] rounded-full overflow-hidden flex items-center justify-center">
           <img 
-            src={`https://caferealitea.onrender.com/profile-image/${id}`} 
+            src={`https://caferealitea.onrender.com/profile-image/${id}?v=${avatarVersion}`} 
             alt="profile" 
             className="w-full h-full object-cover rounded-full"
             onError={(e) => {
