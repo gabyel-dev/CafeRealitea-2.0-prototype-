@@ -12,10 +12,10 @@ import {
   ResponsiveContainer
 } from "recharts";
 import { IoIosArrowForward } from "react-icons/io";
-import Profit from "../../components/UI/Charts/PieChart";
+import { useTheme } from "../../Main/ThemeContext";
 
 // ----------------- Equipment Modal -----------------
-function EquipmentModal({ isOpen, onClose, onSave, editing }) {
+function EquipmentModal({ isOpen, onClose, onSave, editing, theme }) {
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
 
@@ -31,25 +31,23 @@ function EquipmentModal({ isOpen, onClose, onSave, editing }) {
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onSave({ name, price: parseFloat(price) || 0 });
-  };
-
   return (
     <div className="modal modal-open">
-      <div className="modal-box">
+      <div className={`modal-box ${theme === "dark" ? "bg-gray-800 text-white" : "bg-white text-gray-900"}`}>
         <h3 className="font-bold text-lg mb-4">
           {editing ? "Edit Equipment" : "Add Equipment"}
         </h3>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={(e) => {
+          e.preventDefault();
+          onSave({ name, price: parseFloat(price) || 0 });
+        }}>
           <div className="form-control mb-4">
             <label className="label">
               <span className="label-text">Name</span>
             </label>
             <input
               type="text"
-              className="input input-bordered"
+              className={`input ${theme === "dark" ? "bg-gray-700 text-white border-gray-600" : "input-bordered"}`}
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
@@ -62,14 +60,14 @@ function EquipmentModal({ isOpen, onClose, onSave, editing }) {
             <input
               type="number"
               step="0.01"
-              className="input input-bordered"
+              className={`input ${theme === "dark" ? "bg-gray-700 text-white border-gray-600" : "input-bordered"}`}
               value={price}
               onChange={(e) => setPrice(e.target.value)}
               required
             />
           </div>
           <div className="modal-action">
-            <button type="button" className="btn btn-ghost" onClick={onClose}>
+            <button type="button" className={`btn ${theme === "dark" ? "btn-ghost text-white" : "btn-ghost"}`} onClick={onClose}>
               Cancel
             </button>
             <button type="submit" className="btn btn-primary">
@@ -83,7 +81,7 @@ function EquipmentModal({ isOpen, onClose, onSave, editing }) {
 }
 
 // ----------------- Gross Profit Modal -----------------
-function GrossProfitModal({ isOpen, onClose, onSave, editing }) {
+function GrossProfitModal({ isOpen, onClose, onSave, editing, theme }) {
   const [name, setName] = useState("");
   const [amount, setAmount] = useState("");
 
@@ -99,25 +97,23 @@ function GrossProfitModal({ isOpen, onClose, onSave, editing }) {
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onSave({ name, amount: parseFloat(amount) || 0 });
-  };
-
   return (
     <div className="modal modal-open">
-      <div className="modal-box">
+      <div className={`modal-box ${theme === "dark" ? "bg-gray-800 text-white" : "bg-white text-gray-900"}`}>
         <h3 className="font-bold text-lg mb-4">
           {editing ? "Edit Gross Profit" : "Add Gross Profit"}
         </h3>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={(e) => {
+          e.preventDefault();
+          onSave({ name, amount: parseFloat(amount) || 0 });
+        }}>
           <div className="form-control mb-4">
             <label className="label">
               <span className="label-text">Name</span>
             </label>
             <input
               type="text"
-              className="input input-bordered"
+              className={`input ${theme === "dark" ? "bg-gray-700 text-white border-gray-600" : "input-bordered"}`}
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
@@ -130,14 +126,14 @@ function GrossProfitModal({ isOpen, onClose, onSave, editing }) {
             <input
               type="number"
               step="0.01"
-              className="input input-bordered"
+              className={`input ${theme === "dark" ? "bg-gray-700 text-white border-gray-600" : "input-bordered"}`}
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               required
             />
           </div>
           <div className="modal-action">
-            <button type="button" className="btn btn-ghost" onClick={onClose}>
+            <button type="button" className={`btn ${theme === "dark" ? "btn-ghost text-white" : "btn-ghost"}`} onClick={onClose}>
               Cancel
             </button>
             <button type="submit" className="btn btn-primary">
@@ -151,7 +147,7 @@ function GrossProfitModal({ isOpen, onClose, onSave, editing }) {
 }
 
 // ----------------- Packaging Modal -----------------
-function PackagingModal({ isOpen, onClose, onSave, category, costs }) {
+function PackagingModal({ isOpen, onClose, onSave, category, costs, theme }) {
   const [localCosts, setLocalCosts] = useState({});
   const [savingPackaging, setSavingPackaging] = useState(false);
 
@@ -174,12 +170,13 @@ function PackagingModal({ isOpen, onClose, onSave, category, costs }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setSavingPackaging(true);
     onSave(category, localCosts);
   };
 
   return (
     <div className="modal modal-open">
-      <div className="modal-box">
+      <div className={`modal-box ${theme === "dark" ? "bg-gray-800 text-white" : "bg-white text-gray-900"}`}>
         <h3 className="font-bold text-lg mb-4">{category} Packaging Costs</h3>
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 mb-6">
@@ -191,7 +188,7 @@ function PackagingModal({ isOpen, onClose, onSave, category, costs }) {
                 <input
                   type="number"
                   step="0.01"
-                  className="input input-bordered"
+                  className={`input ${theme === "dark" ? "bg-gray-700 text-white border-gray-600" : "input-bordered"}`}
                   value={localCosts[item] || 0}
                   onChange={(e) => handleChange(item, e.target.value)}
                   required
@@ -200,7 +197,7 @@ function PackagingModal({ isOpen, onClose, onSave, category, costs }) {
             ))}
           </div>
           <div className="modal-action">
-            <button type="button" className="btn btn-ghost" onClick={onClose}>
+            <button type="button" className={`btn ${theme === "dark" ? "btn-ghost text-white" : "btn-ghost"}`} onClick={onClose}>
               Cancel
             </button>
             <button
@@ -222,11 +219,15 @@ function PackagingModal({ isOpen, onClose, onSave, category, costs }) {
 }
 
 // ----------------- Custom Tooltip -----------------
-const CustomTooltip = ({ active, payload, label, formatCurrency }) => {
+const CustomTooltip = ({ active, payload, label, formatCurrency, theme }) => {
   if (active && payload && payload.length) {
     return (
-      <div className="custom-tooltip bg-white p-3 border border-gray-200 rounded shadow-md">
-        <p className="label text-slate-700 font-semibold">{`Period: ${label}`}</p>
+      <div className={`custom-tooltip p-3 border rounded shadow-md ${
+        theme === "dark" 
+          ? "bg-gray-800 border-gray-700 text-white" 
+          : "bg-white border-gray-200 text-slate-700"
+      }`}>
+        <p className="font-semibold">{`Period: ${label}`}</p>
         {payload.map((entry, index) => (
           <p
             key={`item-${index}`}
@@ -243,7 +244,7 @@ const CustomTooltip = ({ active, payload, label, formatCurrency }) => {
 };
 
 // ----------------- Main Component -----------------
-export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate  }) {
+export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
   const [timeRange, setTimeRange] = useState("monthly");
   const [salesData, setSalesData] = useState([]);
   const [equipment, setEquipment] = useState([]);
@@ -267,11 +268,7 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate  }) 
   const [packagingModal, setPackagingModal] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
 
-  const [savingPackaging, setSavingPackaging] = useState(false);
-
-
-
-  
+  const { theme } = useTheme();
 
   const api = import.meta.env.VITE_SERVER_API_NAME;
 
@@ -359,67 +356,59 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate  }) 
   }, []);
 
   // Calculate net profit with time-range specific filtering
-// Calculate net profit with time-range specific filtering
-useEffect(() => {
-  const calculateNetProfit = () => {
-    if (!salesData.length) return [];
-    
-    return salesData.map((sale) => {
-      // Filter equipment costs by date if needed
-      const totalEquipment = equipment.reduce(
-        (sum, e) => sum + (parseFloat(e.price) || 0),
-        0
-      );
-
-      // Filter gross profit by the same time period as the sale
-      let periodGrossProfit = 0;
+  useEffect(() => {
+    const calculateNetProfit = () => {
+      if (!salesData.length) return [];
       
-      if (timeRange === "daily") {
-        // For daily view, we need to match the sale date with gross profit dates
-        // Assuming sale.day is in format "YYYY-MM-DD" or similar
-        const saleDateStr = sale.day; // This should be the date string from your sales data
+      return salesData.map((sale) => {
+        // Filter equipment costs by date if needed
+        const totalEquipment = equipment.reduce(
+          (sum, e) => sum + (parseFloat(e.price) || 0),
+          0
+        );
+
+        // Filter gross profit by the same time period as the sale
+        let periodGrossProfit = 0;
         
-        periodGrossProfit = grossProfit
-          .filter(g => {
-            // Convert both dates to the same format for comparison
-            const gDate = new Date(g.created_at || g.updated_at);
-            const gDateStr = gDate.toISOString().split('T')[0]; // Format as YYYY-MM-DD
-            
-            return gDateStr === saleDateStr;
-          })
-          .reduce((sum, g) => sum + (parseFloat(g.amount) || 0), 0);
-      }
-      else if (timeRange === "monthly") {
-        // For monthly view, get gross profit for this specific month
-        const saleDate = new Date(sale.year, sale.month - 1);
-        periodGrossProfit = grossProfit
-          .filter(g => {
-            const gDate = new Date(g.created_at || g.updated_at);
-            return gDate.getFullYear() === saleDate.getFullYear() && 
-                   gDate.getMonth() === saleDate.getMonth();
-          })
-          .reduce((sum, g) => sum + (parseFloat(g.amount) || 0), 0);
-      }
-      else if (timeRange === "yearly") {
-        // For yearly view, get gross profit for this specific year
-        periodGrossProfit = grossProfit
-          .filter(g => new Date(g.created_at || g.updated_at).getFullYear() === sale.year)
-          .reduce((sum, g) => sum + (parseFloat(g.amount) || 0), 0);
-      }
+        if (timeRange === "daily") {
+          const saleDateStr = sale.day;
+          
+          periodGrossProfit = grossProfit
+            .filter(g => {
+              const gDate = new Date(g.created_at || g.updated_at);
+              const gDateStr = gDate.toISOString().split('T')[0];
+              return gDateStr === saleDateStr;
+            })
+            .reduce((sum, g) => sum + (parseFloat(g.amount) || 0), 0);
+        }
+        else if (timeRange === "monthly") {
+          const saleDate = new Date(sale.year, sale.month - 1);
+          periodGrossProfit = grossProfit
+            .filter(g => {
+              const gDate = new Date(g.created_at || g.updated_at);
+              return gDate.getFullYear() === saleDate.getFullYear() && 
+                     gDate.getMonth() === saleDate.getMonth();
+            })
+            .reduce((sum, g) => sum + (parseFloat(g.amount) || 0), 0);
+        }
+        else if (timeRange === "yearly") {
+          periodGrossProfit = grossProfit
+            .filter(g => new Date(g.created_at || g.updated_at).getFullYear() === sale.year)
+            .reduce((sum, g) => sum + (parseFloat(g.amount) || 0), 0);
+        }
 
-      return {
-        ...sale,
-        gross_profit: periodGrossProfit,
-        net_profit: (sale.revenue || 0) - totalEquipment - periodGrossProfit - (sale.packaging_cost || 0)
-      };
-    });
-  };
+        return {
+          ...sale,
+          gross_profit: periodGrossProfit,
+          net_profit: (sale.revenue || 0) - totalEquipment - periodGrossProfit - (sale.packaging_cost || 0)
+        };
+      });
+    };
 
-  setNetProfit(calculateNetProfit());
-}, [salesData, equipment, grossProfit, timeRange]);
+    setNetProfit(calculateNetProfit());
+  }, [salesData, equipment, grossProfit, timeRange]);
 
-
-  // ----------------- Handlers -----------------
+  // Handlers for saving and deleting data
   const saveEquipment = async (item) => {
     try {
       if (editingEquipment) {
@@ -486,7 +475,6 @@ useEffect(() => {
   };
 
   const savePackaging = async (category, costs) => {
-    setSavingPackaging(true);
     try {
       const res = await axios.post(`${api}/packaging-costs/update`, {
         category: category,
@@ -504,8 +492,6 @@ useEffect(() => {
     } catch (err) {
       console.error("Error saving packaging:", err);
       alert("Failed to save packaging costs. Please try again.");
-    } finally {
-      setSavingPackaging(false);
     }
   };
 
@@ -534,47 +520,42 @@ useEffect(() => {
     );
   }, [equipment]);
 
- const totalGrossProfit = useMemo(() => {
-  if (timeRange === "daily") {
-    // For daily view, we need to sum gross profit for each day in the sales data
-    // This ensures we match the same dates as in the sales data
-    const salesDates = salesData.map(sale => sale.day);
-    return grossProfit
-      .filter(g => {
-        const gDate = new Date(g.created_at || g.updated_at);
-        const gDateStr = gDate.toISOString().split('T')[0];
-        return salesDates.includes(gDateStr);
-      })
-      .reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
-  }
-  else if (timeRange === "monthly") {
-    // Get gross profit for months in sales data
-    const salesMonths = salesData.map(sale => `${sale.year}-${sale.month}`);
-    return grossProfit
-      .filter(g => {
-        const gDate = new Date(g.created_at || g.updated_at);
-        const gMonth = `${gDate.getFullYear()}-${gDate.getMonth() + 1}`;
-        return salesMonths.includes(gMonth);
-      })
-      .reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
-  }
-  else if (timeRange === "yearly") {
-    // Get gross profit for years in sales data
-    const salesYears = salesData.map(sale => sale.year);
-    return grossProfit
-      .filter(g => {
-        const gYear = new Date(g.created_at || g.updated_at).getFullYear();
-        return salesYears.includes(gYear);
-      })
-      .reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
-  }
-  
-  // Default: return all gross profit
-  return grossProfit.reduce(
-    (sum, item) => sum + (parseFloat(item.amount) || 0),
-    0
-  );
-}, [grossProfit, timeRange, salesData]);
+  const totalGrossProfit = useMemo(() => {
+    if (timeRange === "daily") {
+      const salesDates = salesData.map(sale => sale.day);
+      return grossProfit
+        .filter(g => {
+          const gDate = new Date(g.created_at || g.updated_at);
+          const gDateStr = gDate.toISOString().split('T')[0];
+          return salesDates.includes(gDateStr);
+        })
+        .reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
+    }
+    else if (timeRange === "monthly") {
+      const salesMonths = salesData.map(sale => `${sale.year}-${sale.month}`);
+      return grossProfit
+        .filter(g => {
+          const gDate = new Date(g.created_at || g.updated_at);
+          const gMonth = `${gDate.getFullYear()}-${gDate.getMonth() + 1}`;
+          return salesMonths.includes(gMonth);
+        })
+        .reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
+    }
+    else if (timeRange === "yearly") {
+      const salesYears = salesData.map(sale => sale.year);
+      return grossProfit
+        .filter(g => {
+          const gYear = new Date(g.created_at || g.updated_at).getFullYear();
+          return salesYears.includes(gYear);
+        })
+        .reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
+    }
+    
+    return grossProfit.reduce(
+      (sum, item) => sum + (parseFloat(item.amount) || 0),
+      0
+    );
+  }, [grossProfit, timeRange, salesData]);
 
   const totalPackagingCost = useMemo(() => {
     return salesData.reduce(
@@ -608,33 +589,31 @@ useEffect(() => {
     net_profit: parseFloat(item.net_profit) || 0
   }));
 
-
-    useEffect(() => {
-  if (onDataUpdate) {
-    onDataUpdate({
-      totalSales,
-      totalNetProfit,
-      totalEquipmentCost,
-      totalGrossProfit,
-      totalPackagingCost,
-    });
-  }
-}, [totalSales, totalNetProfit, totalEquipmentCost, totalGrossProfit, totalPackagingCost, onDataUpdate]);
-
+  useEffect(() => {
+    if (onDataUpdate) {
+      onDataUpdate({
+        totalSales,
+        totalNetProfit,
+        totalEquipmentCost,
+        totalGrossProfit,
+        totalPackagingCost,
+      });
+    }
+  }, [totalSales, totalNetProfit, totalEquipmentCost, totalGrossProfit, totalPackagingCost, onDataUpdate]);
 
   if (loading) {
     return (
-      <div className="p-6 bg-indigo-50 min-h-screen flex items-center justify-center">
+      <div className={`p-6 min-h-screen flex items-center justify-center`}>
         <div className="text-center">
           <div className="loading loading-spinner loading-lg text-primary"></div>
-          <p className="mt-4 text-gray-600">Loading financial data...</p>
+          <p className="mt-4">Loading financial data...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className=" lg:p-4 bg-indigo-50 min-h-screen">
+    <div className={`lg:p-4 min-h-screen `}>
       {error && (
         <div className="alert alert-error mb-6">
           <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
@@ -645,27 +624,31 @@ useEffect(() => {
       )}
 
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-        <div className=" ">
+        <div className="">
           <div className="flex items-center">
             <div 
               onClick={() => setActiveTab("Dashboard")}
-              className="cursor-pointer transition-colors duration-200 rounded-md hover:text-slate-500"
+              className="cursor-pointer transition-colors duration-200 rounded-md hover:opacity-80"
             >
-              <h1 className="text-lg lg:text-2xl  font-bold text-slate-700">Dashboard Overview</h1>
+              <h1 className={`text-lg lg:text-2xl font-bold ${theme === "dark" ? "text-white" : "text-slate-700"}`}>Dashboard Overview</h1>
             </div>
-            <div className="mx-2 text-gray-400 translate-y-0.5">
+            <div className={`mx-2 translate-y-0.5 ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>
               <IoIosArrowForward />
             </div>
             <h2 className="text-xs lg:text-lg font-medium translate-y-0.5 text-blue-600">Financial Overview</h2>
           </div>
           
           <div className="flex items-center mt-0">
-            <p className="text-xs sm:text-sm text-gray-500">Administrator view of all financial metrics</p>
+            <p className={`text-xs sm:text-sm ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>Administrator view of all financial metrics</p>
           </div>
         </div>
 
         <select 
-          className="select w-fit select-bordered select-sm mt-4 md:mt-0" 
+          className={`select select-sm mt-4 md:mt-0 ${
+            theme === "dark" 
+              ? "bg-gray-700 text-white border-gray-600" 
+              : "select-bordered"
+          }`} 
           value={timeRange} 
           onChange={e => setTimeRange(e.target.value)}
         >
@@ -676,147 +659,101 @@ useEffect(() => {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 text-slate-700">
-        <div className="card bg-white shadow">
-          <div className="card-body p-4 text-slate-700">
-            <div className="flex justify-between items-start">
-              <div>
-                <h3 className="text-sm font-medium text-gray-500">Total Sales</h3>
-                <p className="text-xl font-bold mt-1 text-gray-700">{formatCurrency(totalSales)}</p>
-              </div>
-              <div className="p-2 rounded-lg bg-blue-100">
-                <FiDollarSign className="text-blue-600" />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="card bg-white shadow">
-          <div className="card-body p-4 ">
-            <div className="flex justify-between items-start">
-              <div>
-                <h3 className="text-sm font-medium text-gray-500">Net Profit</h3>
-                <p className="text-xl font-bold mt-1 text-gray-700">{formatCurrency(totalNetProfit)}</p>
-              </div>
-              <div className="p-2 rounded-lg bg-green-100">
-                <FiDollarSign className="text-green-600" />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        {[
+          { title: "Total Sales", value: totalSales, icon: <FiDollarSign className="text-blue-600" />, bg: "blue" },
+          { title: "Net Profit", value: totalNetProfit, icon: <FiDollarSign className="text-green-600" />, bg: "green" },
+          { title: "Total Costs", value: totalEquipmentCost + totalGrossProfit + totalPackagingCost, icon: <FiDollarSign className="text-red-600" />, bg: "red" },
+          { title: "Profit Margin", value: totalSales > 0 ? ((totalNetProfit / totalSales) * 100).toFixed(1) + '%' : '0%', icon: <FiDollarSign className="text-purple-600" />, bg: "purple" }
+        ].map((card, index) => (
+          <div key={index} className={`card shadow ${
+            theme === "dark" ? "bg-gray-800 text-white" : "bg-white text-slate-700"
+          }`}>
+            <div className="card-body p-4">
+              <div className="flex justify-between items-start">
+                <div>
+                  <h3 className={`text-sm font-medium ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>{card.title}</h3>
+                  <p className="text-xl font-bold mt-1">
+                    {card.title === "Profit Margin" ? card.value : formatCurrency(card.value)}
+                  </p>
+                </div>
+                <div className={`p-2 rounded-lg ${theme === "dark" ? `bg-${card.bg}-900` : `bg-${card.bg}-100`}`}>
+                  {card.icon}
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        ))}
+      </div>
 
-        <div className="card bg-white shadow">
-          <div className="card-body p-4 text-slate-700">
-            <div className="flex justify-between items-start">
-              <div>
-                <h3 className="text-sm font-medium text-gray-500">Total Costs</h3>
-                <p className="text-xl font-bold mt-1 text-gray-700">
-                  {formatCurrency(totalEquipmentCost + totalGrossProfit + totalPackagingCost)}
-                </p>
+      {/* Chart */}
+      <div className={`card shadow mb-6 ${
+        theme === "dark" ? "bg-gray-800 text-white" : "bg-white text-slate-700"
+      }`}>
+        <div className="card-body px-0 py-4">
+          <h3 className="card-title text-lg mb-4 px-4">Financial Overview</h3>
+          <div className="h-80 min-h-[320px] min-w-[300px] relative">
+            {chartData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%" className="outline-none">
+                <LineChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke={theme === "dark" ? "#4B5563" : "#E5E7EB"} />
+                  <XAxis dataKey="name" stroke={theme === "dark" ? "#9CA3AF" : "#6B7280"} />
+                  <YAxis 
+                    tickFormatter={(value) => `₱${value.toLocaleString()}`}
+                    stroke={theme === "dark" ? "#9CA3AF" : "#6B7280"}
+                  />
+                  <Tooltip content={<CustomTooltip formatCurrency={formatCurrency} theme={theme} />} />
+                  <Legend />
+                  <Line 
+                    type="monotone" 
+                    dataKey="revenue" 
+                    stroke="#8884d8" 
+                    activeDot={{ r: 8 }} 
+                    strokeWidth={2}
+                    name="Revenue"
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="net_profit" 
+                    stroke="#82ca9d" 
+                    strokeWidth={2}
+                    name="Net Profit"
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="gross_profit" 
+                    stroke="#ffc658" 
+                    strokeWidth={2}
+                    name="Gross Profit"
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="packaging_cost" 
+                    stroke="#ff7300" 
+                    strokeWidth={2}
+                    name="Packaging Cost"
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex items-center justify-center h-full">
+                <div className="text-center">
+                  <div className="loading loading-spinner text-primary mb-2"></div>
+                  <p className="text-sm">Loading chart data...</p>
+                </div>
               </div>
-              <div className="p-2 rounded-lg bg-red-100">
-                <FiDollarSign className="text-red-600" />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="card bg-white shadow">
-          <div className="card-body p-4">
-            <div className="flex justify-between items-start">
-              <div>
-                <h3 className="text-sm font-medium text-gray-500">Profit Margin</h3>
-                <p className="text-xl font-bold mt-1 text-gray-700">
-                  {totalSales > 0 ? ((totalNetProfit / totalSales) * 100).toFixed(1) + '%' : '0%'}
-                </p>
-              </div>
-              <div className="p-2 rounded-lg bg-purple-100">
-                <FiDollarSign className="text-purple-600" />
-              </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Chart */}
-<div className="card bg-white shadow mb-6">
-  <div className="card-body px-0 py-4">
-    <h3 className="card-title text-lg mb-4 text-slate-700 px-4">Financial Overview</h3>
-    <div 
-  className="h-80 min-h-[320px] min-w-[300px] relative"
-  style={{ 
-    width: '100% !important', 
-    height: '20rem !important',
-    minWidth: '300px !important',
-    minHeight: '320px !important'
-  }}
->
-      {chartData.length > 0 ? (
-        <ResponsiveContainer width="100%" height="100%" className="outline-none">
-          <LineChart
-            data={chartData}
-            margin={{
-              top: 5,
-              right: 30,
-              left: 20,
-              bottom: 5,
-            }}
-          >
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis 
-              tickFormatter={(value) => `₱${value.toLocaleString()}`}
-            />
-            <Tooltip content={<CustomTooltip formatCurrency={formatCurrency} />} />
-            <Legend />
-            <Line 
-              type="monotone" 
-              dataKey="revenue" 
-              stroke="#8884d8" 
-              activeDot={{ r: 8 }} 
-              strokeWidth={2}
-              name="Revenue"
-            />
-            <Line 
-              type="monotone" 
-              dataKey="net_profit" 
-              stroke="#82ca9d" 
-              strokeWidth={2}
-              name="Net Profit"
-            />
-            <Line 
-              type="monotone" 
-              dataKey="gross_profit" 
-              stroke="#ffc658" 
-              strokeWidth={2}
-              name="Gross Profit"
-            />
-            <Line 
-              type="monotone" 
-              dataKey="packaging_cost" 
-              stroke="#ff7300" 
-              strokeWidth={2}
-              name="Packaging Cost"
-            />
-          </LineChart>
-        </ResponsiveContainer>
-      ) : (
-        <div className="flex items-center justify-center h-full">
-          <div className="text-center">
-            <div className="loading loading-spinner text-primary mb-2"></div>
-            <p className="text-sm text-gray-500">Loading chart data...</p>
-          </div>
-        </div>
-      )}
-    </div>
-  </div>
-</div>
-
       {/* Cost Management Sections */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         {/* Equipment Costs */}
-        <div className="card bg-white shadow h-fit">
-          <div className="card-body text-slate-700">
+        <div className={`card shadow h-fit ${
+          theme === "dark" ? "bg-gray-800 text-white" : "bg-white text-slate-700"
+        }`}>
+          <div className="card-body">
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-bold text-lg">Equipment Costs</h3>
               <button 
@@ -827,8 +764,8 @@ useEffect(() => {
               </button>
             </div>
             <div className="overflow-x-auto">
-              <table className="table  table-sm w-full ">
-                <thead className="text-slate-700">
+              <table className="table table-sm w-full">
+                <thead>
                   <tr>
                     <th>Name</th>
                     <th>Price</th>
@@ -860,7 +797,7 @@ useEffect(() => {
                   ))}
                   {equipment.length === 0 && (
                     <tr>
-                      <td colSpan="3" className="text-center text-gray-500 py-4">
+                      <td colSpan="3" className="text-center py-4">
                         No equipment added
                       </td>
                     </tr>
@@ -875,8 +812,10 @@ useEffect(() => {
         </div>
 
         {/* Gross Profit Items */}
-        <div className="card bg-white shadow h-fit">
-          <div className="card-body text-slate-700">
+        <div className={`card shadow h-fit ${
+          theme === "dark" ? "bg-gray-800 text-white" : "bg-white text-slate-700"
+        }`}>
+          <div className="card-body">
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-bold text-lg">Gross Profit Items</h3>
               <button 
@@ -887,8 +826,8 @@ useEffect(() => {
               </button>
             </div>
             <div className="overflow-x-auto">
-              <table className="table  table-sm w-full">
-                <thead className="text-slate-700">
+              <table className="table table-sm w-full">
+                <thead>
                   <tr>
                     <th>Name</th>
                     <th>Amount</th>
@@ -922,7 +861,7 @@ useEffect(() => {
                   ))}
                   {grossProfit.length === 0 && (
                     <tr>
-                      <td colSpan="4" className="text-center text-gray-500 py-4">
+                      <td colSpan="4" className="text-center py-4">
                         No gross profit items for selected period
                       </td>
                     </tr>
@@ -932,7 +871,7 @@ useEffect(() => {
             </div>
             <div className="mt-4 pt-2 border-t border-gray-200">
               <p className="font-semibold">Total: {formatCurrency(totalGrossProfit)}</p>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm">
                 Filtered by: {timeRange === "daily" ? "daily" : timeRange === "monthly" ? "This Month" : "This Year"}
               </p>
             </div>
@@ -940,14 +879,18 @@ useEffect(() => {
         </div>
 
         {/* Packaging Costs */}
-        <div className="card bg-white shadow">
-          <div className="card-body text-slate-700">
+        <div className={`card shadow ${
+          theme === "dark" ? "bg-gray-800 text-white" : "bg-white text-slate-700"
+        }`}>
+          <div className="card-body">
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-bold text-lg">Packaging Costs</h3>
             </div>
             <div className="space-y-4">
               {Object.entries(packagingCosts).map(([category, costs]) => (
-                <div key={category} className="border rounded-lg p-3 text-slate-700">
+                <div key={category} className={`border rounded-lg p-3 ${
+                  theme === "dark" ? "border-gray-700" : "border-gray-200"
+                }`}>
                   <div className="flex justify-between items-center mb-2">
                     <h4 className="font-semibold">{category}</h4>
                     <button 
@@ -983,7 +926,7 @@ useEffect(() => {
         </div>
       </div>
 
-       <EquipmentModal
+      <EquipmentModal
         isOpen={equipmentModal}
         onClose={() => {
           setEquipmentModal(false);
@@ -991,6 +934,7 @@ useEffect(() => {
         }}
         onSave={saveEquipment}
         editing={editingEquipment}
+        theme={theme}
       />
 
       <GrossProfitModal
@@ -1001,6 +945,7 @@ useEffect(() => {
         }}
         onSave={saveGross}
         editing={editingGross}
+        theme={theme}
       />
 
       <PackagingModal

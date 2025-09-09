@@ -7,6 +7,7 @@ import { io } from "socket.io-client";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Suspense, lazy } from "react";
+import { useTheme } from "./ThemeContext";
 
 // Lazy load components
 const Dashboard = lazy(() => import("../pages/dashboard/MainDashboard"));
@@ -26,6 +27,7 @@ export default function MainLayout() {
   const [userData, setUserData] = useState(null);
   const [loadedTabs, setLoadedTabs] = useState(new Set(["Dashboard"])); // Track loaded tabs
   const navigate = useNavigate();
+  const { theme } = useTheme();
 
   // Function to handle tab changes
   const handleTabChange = (tabName) => {
@@ -159,7 +161,9 @@ export default function MainLayout() {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        <main className="flex-1 overflow-y-auto p-4 bg-indigo-50">
+        <main className={`flex-1 overflow-y-auto p-4 ${
+      theme === "dark" ? "bg-gray-900 text-white" : "bg-indigo-50 text-gray-900"
+    }  transition-all duration-300 `}>
           <ToastContainer />
           
           <Suspense fallback={<Loader />}>

@@ -23,6 +23,7 @@ import PendingOrdersModal from "../component/PendingOrderModal";
 import { io } from "socket.io-client"
 import Loader from "../components/UI/loaders/Loader";
 import { useUser } from "../Main/UserContext";
+import { useTheme } from "../Main/ThemeContext";
 
 
 export const Sidebar = ({ activeTab, setActiveTab }) => {

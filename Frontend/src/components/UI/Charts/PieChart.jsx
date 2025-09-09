@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import CanvasJS from "@canvasjs/charts";
 
-const Profit = ({ gross, net, equipments, packaging_cost }) => {
+const Profit = ({ gross, net, equipments, packaging_cost, theme = "light" }) => {
   const containerRef = useRef(null);
   const chartRef = useRef(null);
 
@@ -16,13 +16,13 @@ const Profit = ({ gross, net, equipments, packaging_cost }) => {
             text: "Monthly Profit",
             fontFamily: "Inter, sans-serif",
             fontSize: 20,
-            fontColor: "#1F2937", // slate-800 text
+            fontColor: theme === "dark" ? "#F1F5F9" : "#1F2937", // Dynamic text color
           },
           legend: {
             fontFamily: "Inter, sans-serif",
             fontSize: 14,
-            fontColor: "#1F2937",
-            horizontalAlign: "right", // default desktop
+            fontColor: theme === "dark" ? "#F1F5F9" : "#1F2937", // Dynamic text color
+            horizontalAlign: "right",
             verticalAlign: "center",
             dockInsidePlotArea: true,
             itemWidth: 120,
@@ -32,7 +32,7 @@ const Profit = ({ gross, net, equipments, packaging_cost }) => {
               type: "doughnut",
               showInLegend: true,
               indexLabelFontSize: 14,
-              indexLabelFontColor: "#1F2937",
+              indexLabelFontColor: theme === "dark" ? "#F1F5F9" : "#1F2937", // Dynamic text color
               indexLabelFontFamily: "Inter, sans-serif",
               indexLabel: "{name}: {y}%",
               legendText: "{name}: {y}%",
@@ -41,6 +41,11 @@ const Profit = ({ gross, net, equipments, packaging_cost }) => {
           ],
         });
       }
+
+      // Update chart colors based on theme
+      chartRef.current.options.title.fontColor = theme === "dark" ? "#F1F5F9" : "#1F2937";
+      chartRef.current.options.legend.fontColor = theme === "dark" ? "#F1F5F9" : "#1F2937";
+      chartRef.current.options.data[0].indexLabelFontColor = theme === "dark" ? "#F1F5F9" : "#1F2937";
 
       // sanitize values
       const safeGross = gross > 0 ? gross : 0;
@@ -52,39 +57,42 @@ const Profit = ({ gross, net, equipments, packaging_cost }) => {
 
       if (total === 0) {
         chartRef.current.options.data[0].dataPoints = [
-          { name: "No Data", y: 100, color: "#D1D5DB" },
+          { 
+            name: "No Data", 
+            y: 100, 
+            color: theme === "dark" ? "#374151" : "#D1D5DB" // Dynamic no data color
+          },
         ];
       } else {
-chartRef.current.options.data[0].dataPoints = [
-  {
-    name: "Gross Profit",
-    y: Math.round((safeGross / total) * 100),
-    color: "#4ADE80", // green-600 (💰 profit = green)
-  },
-  {
-    name: "Net Profit",
-    y: Math.round((safeNet / total) * 100),
-    color: "#15803D", // green-700 (darker shade = net/take-home profit)
-  },
-  {
-    name: "Equipments",
-    y: Math.round((safeEquipments / total) * 100),
-    color: "#6366f1", // blue-600 (🔧 tools = blue/tech/steel)
-  },
-  {
-    name: "Packaging Cost",
-    y: Math.round((safePackaging / total) * 100),
-    color: "#F59E0B", // amber-500 (📦 box/package = amber/yellow)
-  },
-];
-
+        chartRef.current.options.data[0].dataPoints = [
+          {
+            name: "Gross Profit",
+            y: Math.round((safeGross / total) * 100),
+            color: "#4ADE80", // green-600
+          },
+          {
+            name: "Net Profit",
+            y: Math.round((safeNet / total) * 100),
+            color: "#15803D", // green-700
+          },
+          {
+            name: "Equipments",
+            y: Math.round((safeEquipments / total) * 100),
+            color: "#6366f1", // blue-600
+          },
+          {
+            name: "Packaging Cost",
+            y: Math.round((safePackaging / total) * 100),
+            color: "#F59E0B", // amber-500
+          },
+        ];
       }
 
       // Responsive adjustments
       const handleResize = () => {
         if (chartRef.current) {
           if (window.innerWidth < 1024) {
-            // 📱 Mobile → legend bottom, no index labels
+            // Mobile → legend bottom, no index labels
             chartRef.current.options.legend.fontSize = 11;
             chartRef.current.options.legend.itemWidth = 90;
             chartRef.current.options.legend.horizontalAlign = "center";
@@ -108,12 +116,16 @@ chartRef.current.options.data[0].dataPoints = [
         window.removeEventListener("resize", handleResize);
       };
     }
-  }, [gross, net, equipments, packaging_cost]);
+  }, [gross, net, equipments, packaging_cost, theme]);
 
   return (
     <div
       ref={containerRef}
-      className="bg-white rounded-xl w-full p-4 md:p-6 border border-slate-300"
+      className={`rounded-xl w-full p-4 md:p-6 border ${
+        theme === "dark" 
+          ? "bg-[#243049] border-gray-700" 
+          : "bg-white border-slate-300"
+      }`}
       style={{ height: 350 }}
     />
   );

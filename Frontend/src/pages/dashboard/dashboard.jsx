@@ -1,11 +1,11 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import Profit from "../../components/UI/Charts/PieChart";
 import Title from "../../components/UI/Title";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
 import { FiBox, FiPlus } from "react-icons/fi";
-
+import { useTheme } from "../../Main/ThemeContext";
 const socket = io('https://caferealitea.onrender.com');
 
 // Main Dashboard Component
@@ -24,6 +24,11 @@ export default function Dashboard({ setActiveTab, activeTab, totals, financialDa
   const [recentOrder, setRecentOrder] = useState();
   const [role, setRole] = useState("");
 
+  const { theme, setTheme } = useTheme();
+  const toggleTheme = () => {
+    setTheme(theme === "light" ? "dark" : "light")
+  }
+
   const [profitData, setProfitData] = useState({
     gross: 0,
     net: 0,
@@ -31,11 +36,16 @@ export default function Dashboard({ setActiveTab, activeTab, totals, financialDa
     packaging_cost: 0
   });
 
-  // Helper function to calculate percentage change
-  const getPercentageChange = useCallback((current, previous) => {
-    if (!previous || previous === 0) return 0;
-    return ((current - previous) / previous) * 100;
-  }, []);
+  useEffect(() => {
+    if (financialData) {
+      setProfitData({
+        gross: financialData.totalGrossProfit,
+        net: financialData.totalNetProfit,
+        equipments: financialData.totalEquipmentCost,
+        packaging_cost: financialData.totalPackagingCost
+      });
+    }
+  }, [financialData]);
 
   // Check authentication and role
   useEffect(() => {
@@ -56,23 +66,13 @@ export default function Dashboard({ setActiveTab, activeTab, totals, financialDa
         console.error("Authentication check failed:", err);
         navigate("/");
       });
-  }, [navigate]);
+  }, []);
 
-  // Update profit data only when financialData changes meaningfully
-  useEffect(() => {
-    if (financialData && 
-        (financialData.totalGrossProfit !== profitData.gross ||
-         financialData.totalNetProfit !== profitData.net ||
-         financialData.totalEquipmentCost !== profitData.equipments ||
-         financialData.totalPackagingCost !== profitData.packaging_cost)) {
-      setProfitData({
-        gross: financialData.totalGrossProfit,
-        net: financialData.totalNetProfit,
-        equipments: financialData.totalEquipmentCost,
-        packaging_cost: financialData.totalPackagingCost
-      });
-    }
-  }, [financialData, profitData.gross, profitData.net, profitData.equipments, profitData.packaging_cost]);
+  // Helper function to calculate percentage change
+  function getPercentageChange(current, previous) {
+    if (!previous || previous === 0) return 0;
+    return ((current - previous) / previous) * 100;
+  }
 
   // Fetch dashboard data
   useEffect(() => {
@@ -92,13 +92,11 @@ export default function Dashboard({ setActiveTab, activeTab, totals, financialDa
       const prev = data.length > 1 ? data[data.length - 2] : null;
 
       if (latest) {
-        const newSummary = {
+        setSummary({
           sales: latest.total_sales,
           orders: latest.total_orders,
           avgOrder: latest.total_sales / latest.total_orders,
-        };
-        
-        setSummary(newSummary);
+        });
 
         if (prev) {
           setPercentChange({
@@ -112,20 +110,20 @@ export default function Dashboard({ setActiveTab, activeTab, totals, financialDa
         }
       }
     });
-  }, [getPercentageChange]);
+  }, []);
   
 
   return (
-    <div className="md:p-4 pt-0 md:pt-4 bg-indigo-50 min-h-screen">
+    <div className={` md:p-4 pt-0 md:pt-4 min-h-screen`}>
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8  ">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
         <div onClick={() => setActiveTab("Dashboard")} className="cursor-pointer mb-4 md:mb-0">
           <Title titleName={"Dashboard Overview"} />
-          <p className="text-sm text-gray-500 mt-1">Track your store performance and metrics</p>
+          <p className={`text-sm ${theme === "dark" ? "text-gray-400" : "text-gray-500"} mt-1`}>Track your store performance and metrics</p>
         </div>
-        <div className="lg:flex lg:flex-row flex md:flex-col flex-row  gap-2">
+        <div className="lg:flex lg:flex-row flex md:flex-col flex-row gap-2">
           <div className="form-control">
-            <select className="select select-bordered select-sm">
+            <select className={`select ${theme === "dark" ? "bg-gray-700 text-white" : "select-bordered text-white"} select-sm`}>
               <option>This Month</option>
               <option>Last Month</option>
               <option>This Year</option>
@@ -138,77 +136,86 @@ export default function Dashboard({ setActiveTab, activeTab, totals, financialDa
             </svg>
             Export Report
           </button>
+
+          <label className="flex items-center gap-2">
+            <span className={theme === "dark" ? "text-gray-300" : "text-slate-700"}>Dark Mode</span>
+            <input
+              type="checkbox"
+              className="toggle toggle-primary"
+              checked={theme === "dark"}
+              onChange={() => toggleTheme()}
+            />
+          </label>
         </div>
       </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
         {/* Stat Card 1 - Monthly Sales */}
-        <div className="card bg-white shadow-md">
+        <div className={`${theme === "dark" ? "black-card text-color-black" : "light-card text-slate-700"} card shadow-md`}>
           <div className="card-body p-6">
             <div className="flex justify-between items-start">
               <div>
-                <h3 className="text-sm font-medium text-gray-500">Monthly Sales</h3>
-                <p className="text-2xl font-bold mt-1 text-gray-700">
+                <h3 className={`text-sm font-medium ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>Monthly Sales</h3>
+                <p className="text-2xl font-bold mt-1">
                   ₱{summary?.sales?.toLocaleString() ?? "0"}
                 </p>
               </div>
               <div className={`badge badge-lg gap-1 ${percentChange.sales >= 0 ? "badge-success" : "badge-error"}`}>
-                {percentChange.sales >= 0 ? "↑" : "↓"} {Math.abs(percentChange.sales).toFixed(1)}%
+                {percentChange.sales >= 0 ? "↑" : "↓"} {percentChange.sales.toFixed(1)}%
               </div>
             </div>
             <div className="flex items-baseline mt-4">
-              <div className="text-xs text-gray-500">vs previous month</div>
+              <div className={`text-xs ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>vs previous month</div>
             </div>
           </div>
         </div>
 
         {/* Stat Card 2 - Total Orders */}
-        <div className="card bg-white shadow-md">
+        <div className={`${theme === "dark" ? "black-card text-color-black" : "light-card text-slate-700"} card shadow-md`}>
           <div className="card-body p-6">
             <div className="flex justify-between items-start">
               <div className="w-full">
                 <div className="flex justify-between">
-                  <h3 className="text-sm font-medium text-gray-500">Total Orders</h3>
+                  <h3 className={`text-sm font-medium ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>Total Orders</h3>
                   <div
                     className={`badge badge-lg gap-1 ${
                       percentChange.orders >= 0 ? "badge-success" : "badge-error"
                     }`}
                   >
                     {percentChange.orders >= 0 ? "↑" : "↓"}{" "}
-                    {Math.abs(percentChange.orders).toFixed(1)}%
+                    {percentChange.orders.toFixed(1)}%
                   </div>
                 </div>
-                <p className="text-2xl font-bold mt-1 text-gray-700">
+                <p className="text-2xl font-bold mt-1">
                   {summary?.orders ?? "0"}
                 </p>
               </div>
             </div>
             <div className="flex items-baseline mt-4">
-              <div className="text-xs text-gray-500">vs previous month</div>
+              <div className={`text-xs ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>vs previous month</div>
             </div>
           </div>
         </div>
 
         {/* Stat Card 3 - Avg. Order Value */}
-        <div className="card bg-white shadow-md">
+        <div className={`${theme === "dark" ? "black-card text-color-black" : "light-card text-slate-700"} card shadow-md`}>
           <div className="card-body p-6">
             <div className="flex justify-between items-start">
               <div className="w-full">
-                <div className="flex justify-between ">
-                  <h3 className="text-sm font-medium text-gray-500">Avg. Order Val</h3> 
+                <div className="flex justify-between">
+                  <h3 className={`text-sm font-medium ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>Avg. Order Val</h3> 
                   <div className={`badge badge-lg gap-1 ${percentChange.avgOrder >= 0 ? "badge-success" : "badge-error"}`}>
-                    {percentChange.avgOrder >= 0 ? "↑" : "↓"} {Math.abs(percentChange.avgOrder).toFixed(1)}%
+                    {percentChange.avgOrder >= 0 ? "↑" : "↓"} {percentChange.avgOrder.toFixed(1)}%
                   </div>
                 </div>
-                
-                <p className="text-2xl font-bold mt-1 text-gray-700">
+                <p className="text-2xl font-bold mt-1">
                   ₱{summary?.avgOrder?.toFixed(2) ?? "0"}
                 </p>
               </div>
             </div>
             <div className="flex items-baseline mt-4">
-              <div className="text-xs text-gray-500">vs previous month</div>
+              <div className={`text-xs ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>vs previous month</div>
             </div>
           </div>
         </div>
@@ -218,8 +225,8 @@ export default function Dashboard({ setActiveTab, activeTab, totals, financialDa
       <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Profit Chart */}
         <div className="lg:col-span-2">
-          <div className="card bg-white shadow-md">
-            <div className="card-body text-slate-700">
+          <div className={`${theme === "dark" ? "black-card text-color-black" : "light-card text-slate-700"} card shadow-md`}>
+            <div className="card-body">
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
                 <h3 className="text-lg font-semibold">Profit Overview</h3>
                 <button disabled={['Admin', 'Staff'].includes(role)} onClick={() => setActiveTab('View All')} className="btn btn-neutral btn-sm">View All Data</button>
@@ -230,7 +237,7 @@ export default function Dashboard({ setActiveTab, activeTab, totals, financialDa
                   net={profitData.net} 
                   equipments={profitData.equipments} 
                   packaging_cost={profitData.packaging_cost} 
-                  className="text-slate-700" 
+                  theme={theme}
                 /> 
               </div>
             </div>
@@ -238,16 +245,16 @@ export default function Dashboard({ setActiveTab, activeTab, totals, financialDa
         </div>
 
         {/* Top Items */}
-        <div className="card bg-white h-fit text-slate-700 shadow-md">
+        <div className={`${theme === "dark" ? "black-card text-color-black" : "light-card text-slate-700"} card h-fit shadow-md`}>
           <div className="card-body">
             <h3 className="card-title text-lg mb-6">Top Selling Items</h3>
             {topItems.length <= 0 ? (
-              <div className="flex flex-col items-center justify-center py-4 mb-4 px-4 text-center bg-gray-50 rounded-lg border border-dashed border-gray-300">
-                <div className="mb-4 p-4 bg-blue-50 rounded-full">
+              <div className={`flex flex-col items-center justify-center py-4 mb-4 px-4 text-center rounded-lg border border-dashed ${theme === "dark" ? "bg-gray-800 border-gray-700" : "bg-gray-50 border-gray-300"}`}>
+                <div className={`mb-4 p-4 rounded-full ${theme === "dark" ? "bg-blue-900" : "bg-blue-50"}`}>
                   <FiBox className="h-8 w-8 text-blue-500" />
                 </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No top items yet</h3>
-                <p className="text-gray-500 max-w-md mb-4">
+                <h3 className={`text-lg font-medium mb-2 ${theme === "dark" ? "text-gray-200" : "text-gray-900"}`}>No top items yet</h3>
+                <p className={`max-w-md mb-4 ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>
                   When you start making sales, your top performing items will appear here.
                   Start by adding products to your inventory.
                 </p>
@@ -267,10 +274,10 @@ export default function Dashboard({ setActiveTab, activeTab, totals, financialDa
                       </div>
                       <div>
                         <p className="font-medium">{item.product_name}</p>
-                        <p className="text-xs text-gray-500">{item.total_quantity} sold</p>
+                        <p className={`text-xs ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>{item.total_quantity} sold</p>
                       </div>
                     </div>
-                    <span className="font-semibold">₱ {item.total_sales.toLocaleString()}</span>
+                    <span className="font-semibold">₱ {item.total_sales}</span>
                   </div>
                 ))}
               </div>
@@ -291,19 +298,19 @@ export default function Dashboard({ setActiveTab, activeTab, totals, financialDa
       {/* Recent Activity Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
         {/* Recent Orders */}
-        <div className="card bg-white text-slate-500 shadow-md">
+        <div className={`${theme === "dark" ? "black-card text-color-black" : "light-card text-slate-700"} card shadow-md`}>
           <div className="card-body">
             <h3 className="card-title text-lg mb-6">Recent Orders</h3>
             <div className="overflow-x-auto">
               <table className="table table-zebra table-sm">
                 <thead>
-                  <tr className="text-slate-700" >
+                  <tr className={`${theme === "dark" ? " text-color-black" : " text-slate-700"} `}>
                     <th>Order ID</th>
                     <th>Customer</th>
                     <th>Amount</th>
                   </tr>
                 </thead>
-                <tbody className="[&>tr:nth-child(even)]:bg-slate-100 [&>tr:nth-child(odd)]:bg-white">
+                <tbody className={`${theme === "dark" ? "[&>tr:nth-child(even)]:bg-gray-700 [&>tr:nth-child(odd)]:bg-gray-800" : "[&>tr:nth-child(even)]:bg-slate-100 [&>tr:nth-child(odd)]:bg-white"}`}>
                   <tr>
                     <td>#ORD-7829</td>
                     <td>John Smith</td>
@@ -331,19 +338,19 @@ export default function Dashboard({ setActiveTab, activeTab, totals, financialDa
         </div>
 
         {/* Recent Activity */}
-        <div className="card bg-white text-slate-500 shadow-md">
+        <div className={`${theme === "dark" ? "black-card text-color-black" : "light-card text-slate-700"} card shadow-md`}>
           <div className="card-body">
             <h3 className="card-title text-lg mb-6">Recent Activity</h3>
             <div className="overflow-x-auto">
               <table className="table table-zebra table-sm">
                 <thead>
-                  <tr className="text-slate-700" >
+                  <tr  className={`${theme === "dark" ? " text-color-black" : " text-slate-700"} `}>
                     <th>Order ID</th>
                     <th>Customer</th>
                     <th>Amount</th>
                   </tr>
                 </thead>
-                <tbody className="[&>tr:nth-child(even)]:bg-slate-100 [&>tr:nth-child(odd)]:bg-white">
+                <tbody className={`${theme === "dark" ? "[&>tr:nth-child(even)]:bg-gray-700 [&>tr:nth-child(odd)]:bg-gray-800" : "[&>tr:nth-child(even)]:bg-slate-100 [&>tr:nth-child(odd)]:bg-white"}`}>
                   <tr>
                     <td>#ORD-7829</td>
                     <td>John Smith</td>

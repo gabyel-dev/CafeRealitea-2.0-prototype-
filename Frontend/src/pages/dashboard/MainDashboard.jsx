@@ -1,6 +1,7 @@
 import { useState, useEffect, lazy, Suspense } from "react";
 import Loader from "../../components/UI/loaders/Loader"; // Adjust path as needed
 import ProductPage from "../products/products";
+import { useTheme } from "../../Main/ThemeContext";
 
 const ViewAll = lazy(() => import("./view_all_data"))
 const Dashboard = lazy(() => import("./dashboard"))
@@ -10,6 +11,7 @@ export default function MainDashboard({ activeTab, setActiveTab }) {
   const [dashboardData, setDashboardData] = useState(null);
   const [loadedTabs, setLoadedTabs] = useState(new Set(["Dashboard"])); // Track loaded tabs
   const [financialData, setFinancialData] = useState(null);
+  
 
   const handleFinancialDataUpdate = (data) => {
   setFinancialData(data);
@@ -84,7 +86,7 @@ export default function MainDashboard({ activeTab, setActiveTab }) {
   }
 
   return (
-      <div className="bg-indigo-50 w-full min-hfitscreen ">
+      <div className={` w-full min-hfitscreen `}>
           <main>
             <Suspense fallback={<Loader />}>
               {renderComponent('Dashboard', Dashboard)}

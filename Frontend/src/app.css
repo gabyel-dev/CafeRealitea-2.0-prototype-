@@ -1,6 +1,106 @@
 @import 'tailwindcss';
 @plugin "daisyui";
 
+:root {
+  --bg-light: #eef2ff; /* indigo-50 */
+  --bg-dark: #1a2235; /* Modern dark blue-gray */
+  --blue-text-light: #4f46e5;
+  --black-text-light: #334155;
+  --blue-text-dark: #93c5fd; /* Lighter blue for dark mode */
+  --black-text-dark: #f1f5f9; /* Light gray for text in dark mode */
+
+  --light-card: #ffffff;
+  --dark-card: #243049; /* Modern card color */
+  --dark-card-hover: #2d3e5d; /* Slightly lighter for hover states */
+}
+
 .recharts-surface:focus {
   outline: none;
+}
+
+/* Light Theme */
+.light-bg-color {
+  background-color: var(--bg-light);
+}
+
+.dark-card {
+  background-color: var(--dark-card);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.blue-text-color {
+  color: var(--blue-text-light)
+}
+
+.black-text-color {
+  color: var(--black-text-light);
+}
+
+.light-card {
+  background-color: var(--light-card);
+  border: 1px solid #e2e8f0;
+}
+
+/* Dark Theme*/
+.dark-bg-color {
+  background-color: var(--bg-dark);
+}
+
+.text-color {
+  color: var(--blue-text-dark)
+}
+
+.text-color-black {
+  color: var(--black-text-dark);
+}
+
+.black-card {
+  background-color: var(--dark-card);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Additional modern dark mode enhancements */
+.dark-bg-color .table {
+  color: var(--black-text-dark);
+}
+
+.dark-bg-color .table th {
+  background-color: var(--dark-card-hover);
+  color: var(--blue-text-dark);
+}
+
+.dark-bg-color .select {
+  background-color: var(--dark-card);
+  color: var(--black-text-dark);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark-bg-color .select option {
+  background-color: var(--dark-card);
+  color: var(--black-text-dark);
+}
+
+/* Smooth transitions for theme switching */
+.light-bg-color, .dark-bg-color,
+.light-card, .dark-card,
+.text-color-black {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Custom scrollbar for dark mode */
+.dark-bg-color ::-webkit-scrollbar {
+  width: 8px;
+}
+
+.dark-bg-color ::-webkit-scrollbar-track {
+  background: var(--dark-card);
+}
+
+.dark-bg-color ::-webkit-scrollbar-thumb {
+  background: var(--dark-card-hover);
+  border-radius: 4px;
+}
+
+.dark-bg-color ::-webkit-scrollbar-thumb:hover {
+  background: #3a4a6b;
 }
