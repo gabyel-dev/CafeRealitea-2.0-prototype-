@@ -150,7 +150,7 @@ export default function Dashboard({ setActiveTab, activeTab, totals, financialDa
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-6">
         {/* Stat Card 1 - Monthly Sales */}
         <div className={`${theme === "dark" ? "black-card text-color-black" : "light-card text-slate-700"} card shadow-md`}>
           <div className="card-body p-6">

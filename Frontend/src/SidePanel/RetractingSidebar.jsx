@@ -241,10 +241,10 @@ const Sidebar2 = ({ activeTab, setActiveTab }) => {
         ref={sidebarRef} // 👈 attach ref
         layout
         className={`fixed md:sticky top-0 h-screen z-40
-        shrink-0 border-r ${theme === "dark" ? "dark-card border-r border-slate-100" : "bg-white border-slate-300"} p-2
+        shrink-0 border-r ${theme === "dark" ? "dark-card  border-slate-100" : "bg-white border-slate-300"} p-2
         ${open ? "translate-x-0" : "-translate-x-full"} md:translate-x-0`}
         style={{
-          width: open ? "225px" : "fit-content",
+          width: open ? "225px" : "60px",
         }}
       >
         <TitleSection open={open} setActiveTab={setActiveTab} />
@@ -353,14 +353,14 @@ const TitleSection = ({ open, setActiveTab }) => {
   return (
     <div 
     
-    className="mb-3 border-b border-slate-300 pb-3" ref={dropdownRef}>
+    className={`mb-3 border-b pb-3 ${theme === "dark" ? "border-slate-600 " : "border-slate-300 "}`} ref={dropdownRef}>
       <div 
       onMouseEnter={() => setMenuOpen(true)}
         onClick={() => setMenuOpen(!menuOpen)}
         className={`flex cursor-pointer items-center justify-between rounded-md transition-colors ${theme === "dark" ? 'hover:bg-[#1a2235]/60' : 'hover:bg-slate-100'}`}
       >
-        <div className="flex items-center gap-2 ">
-          <div className="w-[35px] h-[35px] border-1 border-indigo-600 mr-1 p-[1.5px] rounded-full overflow-hidden flex items-center justify-center">
+        <div className="flex items-center gap-2 pl-1 ">
+          <div className="w-[35px] h-[35px]  border-1 border-indigo-600 mr-1 p-[1.5px] rounded-full overflow-hidden flex items-center justify-center">
           <img 
             src={`https://caferealitea.onrender.com/profile-image/${id}?v=${avatarVersion}`} 
             alt="profile" 
