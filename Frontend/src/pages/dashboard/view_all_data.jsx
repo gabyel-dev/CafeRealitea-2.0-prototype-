@@ -47,7 +47,7 @@ function EquipmentModal({ isOpen, onClose, onSave, editing, theme }) {
             </label>
             <input
               type="text"
-              className={`input ${theme === "dark" ? "bg-gray-700 text-white border-gray-600" : "input-bordered"}`}
+              className={`input ${theme === "dark" ? "bg-gray-700 text-white border-gray-600" : "input-bordered text-white"}`}
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
@@ -60,7 +60,7 @@ function EquipmentModal({ isOpen, onClose, onSave, editing, theme }) {
             <input
               type="number"
               step="0.01"
-              className={`input ${theme === "dark" ? "bg-gray-700 text-white border-gray-600" : "input-bordered"}`}
+              className={`input ${theme === "dark" ? "bg-gray-700 text-white border-gray-600" : "input-bordered text-white"}`}
               value={price}
               onChange={(e) => setPrice(e.target.value)}
               required
@@ -113,7 +113,7 @@ function GrossProfitModal({ isOpen, onClose, onSave, editing, theme }) {
             </label>
             <input
               type="text"
-              className={`input ${theme === "dark" ? "bg-gray-700 text-white border-gray-600" : "input-bordered"}`}
+              className={`input ${theme === "dark" ? "bg-gray-700 text-white border-gray-600" : "input-bordered text-white"}`}
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
@@ -126,7 +126,7 @@ function GrossProfitModal({ isOpen, onClose, onSave, editing, theme }) {
             <input
               type="number"
               step="0.01"
-              className={`input ${theme === "dark" ? "bg-gray-700 text-white border-gray-600" : "input-bordered"}`}
+              className={`input ${theme === "dark" ? "bg-gray-700 text-white border-gray-600" : "input-bordered text-white"}`}
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               required
@@ -188,7 +188,7 @@ function PackagingModal({ isOpen, onClose, onSave, category, costs, theme }) {
                 <input
                   type="number"
                   step="0.01"
-                  className={`input ${theme === "dark" ? "bg-gray-700 text-white border-gray-600" : "input-bordered"}`}
+                  className={`input ${theme === "dark" ? "bg-gray-700 text-white border-gray-600" : "input-bordered text-white"}`}
                   value={localCosts[item] || 0}
                   onChange={(e) => handleChange(item, e.target.value)}
                   required
@@ -644,7 +644,7 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
         </div>
 
         <select 
-          className={`select select-sm mt-4 md:mt-0 ${
+          className={`select select-sm text-white mt-4 md:mt-0 ${
             theme === "dark" 
               ? "bg-gray-700 text-white border-gray-600" 
               : "select-bordered"
