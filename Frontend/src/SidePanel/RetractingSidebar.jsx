@@ -28,7 +28,7 @@ import { useTheme } from "../Main/ThemeContext";
 
 export const Sidebar = ({ activeTab, setActiveTab }) => {
   return (
-    <div className="flex bg-indigo-50 shadow-2xl shadow-black/20 z-1000">
+    <div className="flex   shadow-2xl shadow-black/20 z-1000">
       <Sidebar2 activeTab={activeTab} setActiveTab={setActiveTab} />
       <ExampleContent />
     </div>
@@ -44,6 +44,7 @@ const Sidebar2 = ({ activeTab, setActiveTab }) => {
   const navigate = useNavigate();
   const sidebarRef = useRef(null); // 👈 sidebar reference
   const socketRef = useRef(null);
+  const { theme } = useTheme();
 
 
   const [notifications, setNotifications] = useState([]);
@@ -230,7 +231,7 @@ const Sidebar2 = ({ activeTab, setActiveTab }) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-indigo-50 bg-opacity-40 -z-1 md:hidden"
+            className="fixed inset-0 backdrop-filter bg-black/60 bg-opacity-40 -z-1 md:hidden"
             onClick={() => setOpen(false)}
           ></motion.div>
         )}
@@ -240,7 +241,7 @@ const Sidebar2 = ({ activeTab, setActiveTab }) => {
         ref={sidebarRef} // 👈 attach ref
         layout
         className={`fixed md:sticky top-0 h-screen z-40
-        shrink-0 border-r border-slate-300 bg-white p-2
+        shrink-0 border-r ${theme === "dark" ? "dark-card border-r border-slate-100" : "bg-white border-slate-300"} p-2
         ${open ? "translate-x-0" : "-translate-x-full"} md:translate-x-0`}
         style={{
           width: open ? "225px" : "fit-content",
@@ -262,12 +263,32 @@ const Sidebar2 = ({ activeTab, setActiveTab }) => {
   );
 };
 
-const Option = ({ Icon, title, activeTab, setActiveTab, open, notifs }) => {
+const Option = ({ Icon, title, activeTab, setActiveTab, open }) => {
+  const { theme } = useTheme();
+
+  // Base styles
+  const baseClasses =
+    "relative cursor-pointer flex h-10 w-full items-center rounded-md transition-colors px-2 py-1";
+
+  // Active state
+  const activeClasses =
+    theme === "dark"
+      ? "bg-[var(--dark-card-hover)] text-[var(--blue-text-dark)]"
+      : "bg-indigo-100 text-indigo-800";
+
+  // Inactive state (default text + hover)
+  const inactiveClasses =
+    theme === "dark"
+      ? "text-[var(--black-text-dark)] hover:bg-[var(--dark-card-hover)]"
+      : "text-slate-500 hover:bg-slate-100";
+
   return (
     <motion.button
       layout
       onClick={() => setActiveTab(title)}
-      className={`relative cursor-pointer flex h-10 w-full items-center rounded-md transition-colors ${activeTab === title ? "bg-indigo-100 text-indigo-800" : "text-slate-500 hover:bg-slate-100"}`}
+      className={`${baseClasses} ${
+        activeTab === title ? activeClasses : inactiveClasses
+      }`}
     >
       <motion.div
         layout
@@ -290,10 +311,10 @@ const Option = ({ Icon, title, activeTab, setActiveTab, open, notifs }) => {
           </motion.span>
         )}
       </AnimatePresence>
-
     </motion.button>
   );
 };
+
 
 const TitleSection = ({ open, setActiveTab }) => {
   const [userFirstname, setFirstname] = useState();
@@ -303,6 +324,7 @@ const TitleSection = ({ open, setActiveTab }) => {
   const [loading, setLoading] = useState(false)
   const [id, setId] = useState()
   const { avatarVersion } = useUser();
+  const { theme } = useTheme();
 
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
@@ -335,9 +357,9 @@ const TitleSection = ({ open, setActiveTab }) => {
       <div 
       onMouseEnter={() => setMenuOpen(true)}
         onClick={() => setMenuOpen(!menuOpen)}
-        className="flex cursor-pointer items-center justify-between rounded-md transition-colors hover:bg-slate-100"
+        className={`flex cursor-pointer items-center justify-between rounded-md transition-colors ${theme === "dark" ? 'hover:bg-[#1a2235]/60' : 'hover:bg-slate-100'}`}
       >
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 ">
           <div className="w-[35px] h-[35px] border-1 border-indigo-600 mr-1 p-[1.5px] rounded-full overflow-hidden flex items-center justify-center">
           <img 
             src={`https://caferealitea.onrender.com/profile-image/${id}?v=${avatarVersion}`} 
@@ -358,12 +380,12 @@ const TitleSection = ({ open, setActiveTab }) => {
               exit={{ opacity: 0, x: -10 }}
               transition={{ duration: 0.15 }}
             >
-              <span className="block text-xs font-semibold text-slate-700">{userFirstname || "null user"}&nbsp;{userLastname}</span>
-              <span className="block text-xs text-slate-500">{userRole || "null role"}</span>
+              <span className={`block text-xs font-semibold  ${theme === "dark" ? 'text-white' : 'text-slate-700'}`}>{userFirstname || "null user"}&nbsp;{userLastname}</span>
+              <span className={`block text-xs text-slate-500  ${theme === "dark" ? 'text-white/50' : 'text-slate-700'}`}>{userRole || "null role"}</span>
             </motion.div>
           )}
         </div>
-        {open && <FiChevronDown className="mr-2 text-slate-700" />}
+        {open && <FiChevronDown className={`mr-2 ${theme === "dark" ? 'text-white' : 'text-slate-700'}`} />}
       </div>
 
       <AnimatePresence>
@@ -375,19 +397,19 @@ const TitleSection = ({ open, setActiveTab }) => {
             initial={{ opacity: 0, y: -5 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -5 }}
-            className={open ? "absolute translate-y-0 translate-x-20 mt-2 w-48 bg-white shadow-lg border-1 border-slate-300 p-3 z-50 rounded-xl flex flex-col gap-2" : "absolute translate-y-0 translate-x-0 mt-2 w-48 bg-white shadow-lg p-3 z-50 rounded-xl flex flex-col gap-2"}
+            className={`${open ? "absolute translate-y-0 translate-x-20 mt-2 w-48  shadow-lg border-1 p-3 z-50 rounded-xl flex flex-col gap-2" : "absolute translate-y-0 translate-x-0 mt-2 w-48  shadow-lg p-3 z-50 rounded-xl flex flex-col gap-2 " } ${theme === "dark" ? 'dark-card border-slate-100' : 'bg-white border-slate-300'}`}
           >
             <button 
             onClick={() => setActiveTab("Profile")}
-            className="flex items-center gap-2 text-sm text-slate-700 hover:text-indigo-600">
+            className={`flex items-center gap-2 text-sm hover:text-indigo-600 ${theme === "dark" ? 'text-white' : 'text-slate-700'}`}>
               <FiUser className="w-4 h-4" /> Profile
             </button>
-            <button className="flex items-center gap-2 text-sm text-slate-700 hover:text-indigo-600">
+            <button className={`flex items-center gap-2 text-sm hover:text-indigo-600 ${theme === "dark" ? 'text-white' : 'text-slate-700'}`}>
               <FiSettings className="w-4 h-4" /> Account Settings
             </button>
             <button 
               onClick={() => logout(navigate, setLoading)}
-              className="flex items-center gap-2 text-sm text-slate-700 hover:text-red-600"
+              className={`flex items-center gap-2 text-sm hover:text-red-600 ${theme === "dark" ? 'text-white' : 'text-slate-700'}`}
             >
               <FiLogOut className="w-4 h-4" /> Logout
             </button>
@@ -400,11 +422,12 @@ const TitleSection = ({ open, setActiveTab }) => {
 
 
 const ToggleClose = ({ open, setOpen }) => {
+  const { theme } = useTheme()
   return (
     <motion.button
       layout
       onClick={() => setOpen((pv) => !pv)}
-      className="absolute bottom-0 left-0 right-0 border-t border-slate-300 transition-colors hover:bg-slate-100"
+      className={`absolute bottom-0 left-0 right-0 border-t  transition-colors ${theme === "dark" ? 'border-slate-600 hover:bg-slate-700/50' : 'border-slate-300 hover:bg-slate-100'}`}
     >
       <div className="flex items-center p-2">
         <motion.div
@@ -423,7 +446,7 @@ const ToggleClose = ({ open, setOpen }) => {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -10 }}
               transition={{ duration: 0.15 }}
-              className="text-xs font-medium text-slate-500"
+              className={`text-xs font-medium ${theme === "dark" ? 'text-white/50' : 'text-slate-500'}`}
             >
               Hide
             </motion.span>
