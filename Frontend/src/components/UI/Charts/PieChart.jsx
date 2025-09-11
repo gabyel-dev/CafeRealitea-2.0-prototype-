@@ -1,9 +1,18 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import CanvasJS from "@canvasjs/charts";
+import axios from "axios";
 
 const Profit = ({ gross, net, equipments, packaging_cost, theme = "light" }) => {
   const containerRef = useRef(null);
   const chartRef = useRef(null);
+  const [role, setRole] = useState(null);
+
+  useEffect(() => {
+          axios.get("https://caferealitea.onrender.com/user", { withCredentials: true })
+          .then((res) => {
+            setRole(res.data.role);
+          })
+      }, [])
 
   useEffect(() => {
     if (containerRef.current) {
@@ -41,6 +50,8 @@ const Profit = ({ gross, net, equipments, packaging_cost, theme = "light" }) => 
           ],
         });
       }
+
+      
 
       // Update chart colors based on theme
       chartRef.current.options.title.fontColor = theme === "dark" ? "#F1F5F9" : "#1F2937";
@@ -118,16 +129,30 @@ const Profit = ({ gross, net, equipments, packaging_cost, theme = "light" }) => 
     }
   }, [gross, net, equipments, packaging_cost, theme]);
 
+  const restricted = () => {
+    return (
+      <div className="h-fit w-full flex items-end text-xs md:text-xl text-center relative  text-red-500 rounded-md">
+  <p className="whitespace-normal break-words">
+    <span >This content is restricted to certain user roles!</span>
+  </p>
+</div>
+
+    )
+  }
+
   return (
+    <>
     <div
       ref={containerRef}
-      className={`rounded-xl w-full p-4 md:p-6 border ${
+      className={`rounded-xl w-full p-4 md:p-6 border ${['Admin', 'Staff'].includes(role) ? 'blur-sm ' : ''} ${
         theme === "dark" 
           ? "bg-[#243049] border-gray-700" 
           : "bg-white border-slate-300"
       }`}
       style={{ height: 350 }}
     />
+      {(['Admin', 'Staff'].includes(role)) && restricted()}
+      </>
   );
 };
 
