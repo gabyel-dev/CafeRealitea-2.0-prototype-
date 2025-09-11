@@ -646,8 +646,8 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
         <select 
           className={`select select-sm text-white mt-4 md:mt-0 ${
             theme === "dark" 
-              ? "bg-gray-700 text-white border-gray-600" 
-              : "select-bordered"
+              ? "black-card text-color-black select-bordered" : "bg-slate-900 text-slate-700 select-bordered" 
+
           }`} 
           value={timeRange} 
           onChange={e => setTimeRange(e.target.value)}
@@ -667,8 +667,7 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
           { title: "Profit Margin", value: totalSales > 0 ? ((totalNetProfit / totalSales) * 100).toFixed(1) + '%' : '0%', icon: <FiDollarSign className="text-purple-600" />, bg: "purple" }
         ].map((card, index) => (
           <div key={index} className={`card shadow ${
-            theme === "dark" ? "bg-gray-800 text-white" : "bg-white text-slate-700"
-          }`}>
+            theme === "dark" ? "black-card text-color-black" : "light-card text-slate-700"} }`}>
             <div className="card-body p-4">
               <div className="flex justify-between items-start">
                 <div>
@@ -688,7 +687,7 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
 
       {/* Chart */}
       <div className={`card shadow mb-6 ${
-        theme === "dark" ? "bg-gray-800 text-white" : "bg-white text-slate-700"
+        theme === "dark" ? "black-card text-color-black" : "light-card text-slate-700"
       }`}>
         <div className="card-body px-0 py-4">
           <h3 className="card-title text-lg mb-4 px-4">Financial Overview</h3>
@@ -751,7 +750,7 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         {/* Equipment Costs */}
         <div className={`card shadow h-fit ${
-          theme === "dark" ? "bg-gray-800 text-white" : "bg-white text-slate-700"
+          theme === "dark" ? "black-card text-color-black" : "light-card text-slate-700"
         }`}>
           <div className="card-body">
             <div className="flex justify-between items-center mb-4">
@@ -813,7 +812,7 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
 
         {/* Gross Profit Items */}
         <div className={`card shadow h-fit ${
-          theme === "dark" ? "bg-gray-800 text-white" : "bg-white text-slate-700"
+          theme === "dark" ? "black-card text-color-black" : "light-card text-slate-700"
         }`}>
           <div className="card-body">
             <div className="flex justify-between items-center mb-4">
@@ -880,7 +879,7 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
 
         {/* Packaging Costs */}
         <div className={`card shadow ${
-          theme === "dark" ? "bg-gray-800 text-white" : "bg-white text-slate-700"
+          theme === "dark" ? "black-card text-color-black" : "light-card text-slate-700"
         }`}>
           <div className="card-body">
             <div className="flex justify-between items-center mb-4">
