@@ -763,6 +763,7 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
               </button>
             </div>
             <div className="overflow-x-auto">
+              <div className="min-h-80 max-h-100 overflow-y-auto">
               <table className="table table-sm w-full">
                 <thead >
                   <tr className={`${theme === "dark" ? "bg-gray-700 text-white" : "bg-gray-200 text-slate-700"}`}>
@@ -807,6 +808,7 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
             <div className="mt-4 pt-2 border-t border-gray-200">
               <p className="font-semibold">Total: {formatCurrency(totalEquipmentCost)}</p>
             </div>
+            </div>
           </div>
         </div>
 
@@ -824,50 +826,53 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
                 <FiPlus className="mr-1" /> Add
               </button>
             </div>
-            <div className="overflow-x-auto">
-              <table className="table table-sm w-full">
-                <thead>
-                  <tr className={`${theme === "dark" ? "bg-gray-700 text-white" : "bg-gray-200 text-slate-700"}`}>
-                    <th>Name</th>
-                    <th>Amount</th>
-                    <th>Date</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {grossProfit.map(g => (
-                    <tr key={g.id}>
-                      <td>{g.name}</td>
-                      <td>{formatCurrency(parseFloat(g.amount) || 0)}</td>
-                      <td>{new Date(g.created_at).toLocaleDateString()}</td>
-                      <td>
-                        <div className="flex gap-2">
-                          <button 
-                            className="btn btn-xs btn-warning"
-                            onClick={() => { setEditingGross(g); setGrossModal(true); }}
-                          >
-                            <FiEdit/>
-                          </button>
-                          <button 
-                            className="btn btn-xs btn-error"
-                            onClick={() => deleteGrossProfit(g.id)}
-                          >
-                            <FiTrash2/>
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                  {grossProfit.length === 0 && (
-                    <tr>
-                      <td colSpan="4" className="text-center py-4">
-                        No gross profit items for selected period
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
+          <div className="overflow-x-auto">
+  <div className="max-h-100 min-h-80 overflow-y-auto">
+    <table className="table table-sm w-full">
+      <thead className={`${theme === "dark" ? "bg-gray-700 text-white" : "bg-gray-200 text-slate-700"}`}>
+        <tr>
+          <th>Name</th>
+          <th>Amount</th>
+          <th>Date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {grossProfit.map(g => (
+          <tr key={g.id}>
+            <td>{g.name}</td>
+            <td>{formatCurrency(parseFloat(g.amount) || 0)}</td>
+            <td>{new Date(g.created_at).toLocaleDateString()}</td>
+            <td>
+              <div className="flex gap-2">
+                <button 
+                  className="btn btn-xs btn-warning"
+                  onClick={() => { setEditingGross(g); setGrossModal(true); }}
+                >
+                  <FiEdit/>
+                </button>
+                <button 
+                  className="btn btn-xs btn-error"
+                  onClick={() => deleteGrossProfit(g.id)}
+                >
+                  <FiTrash2/>
+                </button>
+              </div>
+            </td>
+          </tr>
+        ))}
+        {grossProfit.length === 0 && (
+          <tr>
+            <td colSpan="4" className="text-center py-4">
+              No gross profit items for selected period
+            </td>
+          </tr>
+        )}
+      </tbody>
+    </table>
+  </div>
+</div>
+
             <div className="mt-4 pt-2 border-t border-gray-200">
               <p className="font-semibold">Total: {formatCurrency(totalGrossProfit)}</p>
               <p className="text-sm">
