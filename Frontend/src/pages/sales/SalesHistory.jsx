@@ -15,6 +15,8 @@ import {
   FiChevronDown,
   FiChevronUp
 } from "react-icons/fi";
+import { useTheme } from "../../Main/ThemeContext";
+
 
 export default function SalesHistory({ activeTab, setActiveTab }) {
     const navigate = useNavigate();
@@ -31,6 +33,7 @@ export default function SalesHistory({ activeTab, setActiveTab }) {
         year: 'all',
         month: 'all',
     });
+    const { theme } = useTheme();
 
     useEffect(() => {
         axios.get('https://caferealitea.onrender.com/daily-sales')
@@ -253,89 +256,89 @@ export default function SalesHistory({ activeTab, setActiveTab }) {
 
     return (
         <>
-            <div className="lg:pt-4 lg:py-4 lg:px-4 bg-indigo-50 min-h-screen">
+            <div className="lg:pt-4 lg:py-4 lg:px-4  min-h-screen">
                 <div className="w-full mb-6">
-                    <h1 className="text-2xl font-bold text-gray-800">
+                    <h1 className={`${theme === "dark" ? 'text-white' : 'text-slate-700'} text-2xl font-bold `}>
                         Sales History
                     </h1>
-                    <p className="text-sm text-gray-500 mt-1">
+                    <p className={`${theme === "dark" ? "text-gray-400" : "text-gray-500"} text-sm  mt-1`}>
                         View and manage all sales records
                     </p>
                 </div>
 
                 {/* Stats Overview */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
-                    <div className="bg-white rounded-xl shadow-md p-5 ">
+                    <div className={`${theme === "dark" ? "black-card text-color-black" : "light-card text-slate-700"} rounded-xl shadow-md p-5 `}>
                         <div className="flex items-center">
-                            <div className="p-3 rounded-lg bg-blue-50">
+                            <div className={`p-3 rounded-lg ${theme === "dark" ? 'bg-blue-900/20' : 'bg-blue-50'}`}>
                                 <FiDollarSign className="text-xl text-blue-600" />
                             </div>
                             <div className="ml-4">
-                                <p className="text-sm font-medium text-gray-600">Total Sales</p>
-                                <h3 className="text-xl font-bold text-gray-800">
+                                <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} text-sm font-medium `}>Total Sales</p>
+                                <h3 className={` text-xl font-bold ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'} `}>
                                     {formatCurrency(totalSales)}
                                 </h3>
                             </div>
                         </div>
-                        <div className="mt-3 pt-3 border-t border-gray-100">
+                        <div className={`mt-3 pt-3 border-t ${theme === "dark" ? 'border-slate-700' : 'border-gray-100'}`}>
                             <p className="text-xs text-gray-500">{totalOrders} transactions</p>
                         </div>
                     </div>
 
-                    <div className="bg-white rounded-xl shadow-md p-5 ">
+                    <div className={`${theme === "dark" ? "black-card text-color-black" : "light-card text-slate-700"} rounded-xl shadow-md p-5 `}>
                         <div className="flex items-center">
-                            <div className="p-3 rounded-lg bg-green-50">
+                            <div className={`p-3 rounded-lg ${theme === "dark" ? 'bg-green-900/30' : 'bg-green-50'}`}>
                                 <FiShoppingBag className="text-xl text-green-600" />
                             </div>
                             <div className="ml-4">
-                                <p className="text-sm font-medium text-gray-600">Total Orders</p>
-                                <h3 className="text-xl font-bold text-gray-800">{totalOrders}</h3>
+                                <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} text-sm font-medium `}>Total Orders</p>
+                                <h3 className={`text-xl font-bold ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'} `}            >{totalOrders}</h3>
                             </div>
                         </div>
-                        <div className="mt-3 pt-3 border-t border-gray-100 flex justify-between">
+                        <div className={`mt-3 pt-3 border-t ${theme === "dark" ? 'border-slate-700' : 'border-gray-100' } flex justify-between`}>
                             <p className="text-xs text-gray-500">{dineInOrders} Dine-in</p>
                             <p className="text-xs text-gray-500">{deliveryOrders} Delivery</p>
                         </div>
                     </div>
 
-                    <div className="bg-white rounded-xl shadow-md p-5  ">
+                    <div className={`${theme === "dark" ? "black-card text-color-black" : "light-card text-slate-700"} rounded-xl shadow-md p-5 `}>
                         <div className="flex items-center">
-                            <div className="p-3 rounded-lg bg-purple-50">
+                            <div className={`p-3 rounded-lg ${theme === "dark" ? 'bg-purple-900/20' : 'bg-purple-50'}`}>
                                 <FiCreditCard className="text-xl text-purple-600" />
                             </div>
                             <div className="ml-4">
-                                <p className="text-sm font-medium text-gray-600">Payments</p>
-                                <h3 className="text-xl font-bold text-gray-800">{cashPayments + gcashPayments}</h3>
+                                <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} text-sm font-medium `}>Payments</p>
+                                <h3 className={`text-xl font-bold ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'} `} >{cashPayments + gcashPayments}</h3>
                             </div>
                         </div>
-                        <div className="mt-3 pt-3 border-t border-gray-100 flex justify-between">
+                        <div className={`mt-3 pt-3 border-t ${theme === "dark" ? 'border-slate-700' : 'border-gray-100 ' } flex justify-between`}>
                             <p className="text-xs text-gray-500">{cashPayments} Cash</p>
                             <p className="text-xs text-gray-500">{gcashPayments} GCash</p>
                         </div>
                     </div>
 
-                    <div className="bg-white rounded-xl shadow-md p-5 ">
+                    <div className={`${theme === "dark" ? "black-card text-color-black" : "light-card text-slate-700"} rounded-xl shadow-md p-5 `}>
                         <div className="flex items-center">
-                            <div className="p-3 rounded-lg bg-orange-50">
+                            <div className={`p-3 rounded-lg ${theme === "dark" ? 'bg-orange-400/10' : 'bg-orange-50'}`}>
                                 <FiBox className="text-xl text-orange-600" />
                             </div>
                             <div className="ml-4">
-                                <p className="text-sm font-medium text-gray-600">Delivery Orders</p>
-                                <h3 className="text-xl font-bold text-gray-800">{deliveryOrders}</h3>
+                                <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} text-sm font-medium `}>Delivery Orders</p>
+                                <h3 className={`text-xl font-bold ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'} `}>{deliveryOrders}</h3>
                             </div>
                         </div>
-                        <div className="mt-3 pt-3 border-t border-gray-100">
+                        <div className={`mt-3 pt-3 border-t ${theme === "dark" ? 'border-slate-700' : 'border-gray-100 ' }`}>
                             <p className="text-xs text-gray-500">{totalOrders > 0 ? ((deliveryOrders / totalOrders) * 100).toFixed(1) : 0}% of all orders</p>
                         </div>
                     </div>
                 </div>
 
                 {/* Filters Section */}
-                <div className="bg-white rounded-xl shadow-md p-5   mb-6">
+                <div className={`${theme === "dark" ? "black-card text-color-black" : "light-card text-slate-700"} rounded-xl shadow-md p-5   mb-6`}>
                     <div className="flex flex-col md:flex-row md:items-center justify-between mb-5 ">
                         <h2 className="text-lg font-semibold text-gray-800 flex items-center">
-                            <FiFilter className="mr-2 text-gray-500" />
-                            Filters
+                            <FiFilter className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} text-sm font-medium  mr-2`}  />
+                            <h1 className={`${theme === 'dark' ? 'text-gray-200' : 'text-gray-600'}`}>Filter</h1>
                         </h2>
                         
                         <div className="relative mt-3 md:mt-0 md:w-64">
