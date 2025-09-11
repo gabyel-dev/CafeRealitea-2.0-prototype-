@@ -765,8 +765,8 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
             </div>
             <div className="overflow-x-auto">
               <table className="table table-sm w-full">
-                <thead>
-                  <tr>
+                <thead >
+                  <tr className={`${theme === "dark" ? "bg-gray-700 text-white" : "bg-gray-200 text-slate-700"}`}>
                     <th>Name</th>
                     <th>Price</th>
                     <th>Actions</th>
@@ -828,7 +828,7 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
             <div className="overflow-x-auto">
               <table className="table table-sm w-full">
                 <thead>
-                  <tr>
+                  <tr className={`${theme === "dark" ? "bg-gray-700 text-white" : "bg-gray-200 text-slate-700"}`}>
                     <th>Name</th>
                     <th>Amount</th>
                     <th>Date</th>
