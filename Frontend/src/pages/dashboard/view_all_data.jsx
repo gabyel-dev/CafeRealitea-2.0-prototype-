@@ -20,6 +20,17 @@ function EquipmentModal({ isOpen, onClose, onSave, editing, theme }) {
   const [price, setPrice] = useState("");
 
   useEffect(() => {
+  const handleEsc = (e) => {
+    if (e.key === "Escape") {
+      console.log("Escape pressed - closing modal");
+      onClose();
+    }
+  };
+  window.addEventListener("keydown", handleEsc);
+  return () => window.removeEventListener("keydown", handleEsc);
+}, []);
+
+  useEffect(() => {
     if (editing) {
       setName(editing.name);
       setPrice(editing.price);
@@ -84,6 +95,17 @@ function EquipmentModal({ isOpen, onClose, onSave, editing, theme }) {
 function GrossProfitModal({ isOpen, onClose, onSave, editing, theme }) {
   const [name, setName] = useState("");
   const [amount, setAmount] = useState("");
+
+  useEffect(() => {
+  const handleEsc = (e) => {
+    if (e.key === "Escape") {
+      console.log("Escape pressed - closing modal");
+      onClose();
+    }
+  };
+  window.addEventListener("keydown", handleEsc);
+  return () => window.removeEventListener("keydown", handleEsc);
+}, []);
 
   useEffect(() => {
     if (editing) {
@@ -151,6 +173,17 @@ function PackagingModal({ isOpen, onClose, onSave, category, costs, theme }) {
   const [localCosts, setLocalCosts] = useState({});
   const [savingPackaging, setSavingPackaging] = useState(false);
 
+   useEffect(() => {
+  const handleEsc = (e) => {
+    if (e.key === "Escape") {
+      console.log("Escape pressed - closing modal");
+      onClose();
+    }
+  };
+  window.addEventListener("keydown", handleEsc);
+  return () => window.removeEventListener("keydown", handleEsc);
+}, []);
+
   useEffect(() => {
     if (costs) setLocalCosts(costs);
   }, [costs, isOpen]);
@@ -173,10 +206,13 @@ function PackagingModal({ isOpen, onClose, onSave, category, costs, theme }) {
     setSavingPackaging(true);
     onSave(category, localCosts);
   };
+  
+ 
+
 
   return (
     <div className="modal modal-open">
-      <div className={`modal-box ${theme === "dark" ? "bg-gray-800 text-white" : "bg-white text-gray-900"}`}>
+      <div  className={`modal-box  ${theme === "dark" ? "bg-gray-800 text-white" : "bg-white text-gray-900"} `}>
         <h3 className="font-bold text-lg mb-4">{category} Packaging Costs</h3>
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 mb-6">

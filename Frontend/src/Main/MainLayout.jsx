@@ -14,12 +14,12 @@ const Dashboard = lazy(() => import("../pages/dashboard/MainDashboard"));
 const ViewAllData = lazy(() => import("../pages/dashboard/view_all_data"));
 const SalesHistory = lazy(() => import("../pages/sales/SalesHistory"));
 const OrderManagementAdmin = lazy(() => import("../pages/orders/orders"));
-const UsersManagement = lazy(() => import("../pages/members/members"));
 const ProductPage = lazy(() => import("../pages/products/products"));
 const Profile = lazy(() => import("../pages/profile/profile"));
-const memberProfile = lazy(() => import("../pages/profile/members_profile"));
-const MemberProfileWrapper = lazy(() => import("../pages/profile/MemberProfileWrapper"));
-
+const MemberProfileWrapper = lazy(() =>
+  import("../pages/profile/MemberProfileWrapper")
+);
+import SalesDashboard from "../pages/sales/SalesDashboard";
 
 export default function MainLayout() {
   const [socketConnected, setSocketConnected] = useState(false);
@@ -32,10 +32,10 @@ export default function MainLayout() {
   // Function to handle tab changes
   const handleTabChange = (tabName) => {
     setActiveTab(tabName);
-    
+
     // Add the tab to loaded tabs if it hasn't been loaded yet
     if (!loadedTabs.has(tabName)) {
-      setLoadedTabs(prev => new Set([...prev, tabName]));
+      setLoadedTabs((prev) => new Set([...prev, tabName]));
     }
   };
 
@@ -58,7 +58,7 @@ export default function MainLayout() {
 
           if (userData?.id) {
             socket.emit("register_user", { user_id: userData.id });
-          } 
+          }
         });
 
         socket.on("new_pending_order", (data) => {
@@ -128,10 +128,11 @@ export default function MainLayout() {
   useEffect(() => {
     document.title = "Café Realitea - Dashboard";
 
-    axios.get("https://caferealitea.onrender.com/user", { withCredentials: true })
+    axios
+      .get("https://caferealitea.onrender.com/user", { withCredentials: true })
       .then((res) => {
         console.log(res.data.role);
-        
+
         if (!res.data.logged_in || res.data.role === "") {
           navigate("/");
           return;
@@ -140,13 +141,12 @@ export default function MainLayout() {
       })
       .catch((err) => {
         console.error("Authentication check failed:", err);
-        navigate("/")
-      })
+        navigate("/");
+      });
   }, [navigate]);
 
   // Render component only if it's loaded (active or previously loaded)
   const renderComponent = (tabName, Component) => {
-    
     return (
       <div style={{ display: activeTab === tabName ? "block" : "none" }}>
         <Component setActiveTab={setActiveTab} activeTab={activeTab} />
@@ -161,22 +161,27 @@ export default function MainLayout() {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        <main className={`flex-1 overflow-y-auto p-4 ${
-      theme === "dark" ? "bg-gray-900 text-white" : "bg-indigo-50 text-gray-900"
-    }  transition-all duration-300 `}>
+        <main
+          className={`flex-1 overflow-y-auto p-4 ${
+            theme === "dark"
+              ? "bg-gray-900 text-white"
+              : "bg-indigo-50 text-gray-900"
+          }  transition-all duration-300 `}
+        >
           <ToastContainer />
-          
+
           <Suspense fallback={<Loader />}>
             {renderComponent("Dashboard", Dashboard)}
             {renderComponent("View All", ViewAllData)}
-            {renderComponent("Sales", SalesHistory)}
             {renderComponent("Orders", OrderManagementAdmin)}
             {renderComponent("Profile", Profile)}
             {renderComponent("Products", ProductPage)}
-
-            
           </Suspense>
-          <MemberProfileWrapper activeTab={activeTab} setActiveTab={setActiveTab} />
+          <MemberProfileWrapper
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+          />
+          <SalesDashboard activeTab={activeTab} setActiveTab={setActiveTab} />
         </main>
       </div>
     </div>
