@@ -176,12 +176,12 @@ export default function MainLayout() {
             {renderComponent("Orders", OrderManagementAdmin)}
             {renderComponent("Profile", Profile)}
             {renderComponent("Products", ProductPage)}
+            <MemberProfileWrapper
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+            />
+            <SalesDashboard activeTab={activeTab} setActiveTab={setActiveTab} />
           </Suspense>
-          <MemberProfileWrapper
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-          />
-          <SalesDashboard activeTab={activeTab} setActiveTab={setActiveTab} />
         </main>
       </div>
     </div>
