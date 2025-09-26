@@ -9,10 +9,11 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
-  ResponsiveContainer
+  ResponsiveContainer,
 } from "recharts";
 import { IoIosArrowForward } from "react-icons/io";
 import { useTheme } from "../../Main/ThemeContext";
+import * as XLSX from "xlsx";
 
 // ----------------- Equipment Modal -----------------
 function EquipmentModal({ isOpen, onClose, onSave, editing, theme }) {
@@ -20,15 +21,15 @@ function EquipmentModal({ isOpen, onClose, onSave, editing, theme }) {
   const [price, setPrice] = useState("");
 
   useEffect(() => {
-  const handleEsc = (e) => {
-    if (e.key === "Escape") {
-      console.log("Escape pressed - closing modal");
-      onClose();
-    }
-  };
-  window.addEventListener("keydown", handleEsc);
-  return () => window.removeEventListener("keydown", handleEsc);
-}, []);
+    const handleEsc = (e) => {
+      if (e.key === "Escape") {
+        console.log("Escape pressed - closing modal");
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
+  }, []);
 
   useEffect(() => {
     if (editing) {
@@ -44,21 +45,31 @@ function EquipmentModal({ isOpen, onClose, onSave, editing, theme }) {
 
   return (
     <div className="modal modal-open">
-      <div className={`modal-box ${theme === "dark" ? "bg-gray-800 text-white" : "bg-white text-gray-900"}`}>
+      <div
+        className={`modal-box ${
+          theme === "dark" ? "bg-gray-800 text-white" : "bg-white text-gray-900"
+        }`}
+      >
         <h3 className="font-bold text-lg mb-4">
           {editing ? "Edit Equipment" : "Add Equipment"}
         </h3>
-        <form onSubmit={(e) => {
-          e.preventDefault();
-          onSave({ name, price: parseFloat(price) || 0 });
-        }}>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            onSave({ name, price: parseFloat(price) || 0 });
+          }}
+        >
           <div className="form-control mb-4">
             <label className="label">
               <span className="label-text">Name</span>
             </label>
             <input
               type="text"
-              className={`input ${theme === "dark" ? "bg-gray-700 text-white border-gray-600" : "input-bordered text-white"}`}
+              className={`input ${
+                theme === "dark"
+                  ? "bg-gray-700 text-white border-gray-600"
+                  : "input-bordered text-white"
+              }`}
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
@@ -71,14 +82,24 @@ function EquipmentModal({ isOpen, onClose, onSave, editing, theme }) {
             <input
               type="number"
               step="0.01"
-              className={`input ${theme === "dark" ? "bg-gray-700 text-white border-gray-600" : "input-bordered text-white"}`}
+              className={`input ${
+                theme === "dark"
+                  ? "bg-gray-700 text-white border-gray-600"
+                  : "input-bordered text-white"
+              }`}
               value={price}
               onChange={(e) => setPrice(e.target.value)}
               required
             />
           </div>
           <div className="modal-action">
-            <button type="button" className={`btn ${theme === "dark" ? "btn-ghost text-white" : "btn-ghost"}`} onClick={onClose}>
+            <button
+              type="button"
+              className={`btn ${
+                theme === "dark" ? "btn-ghost text-white" : "btn-ghost"
+              }`}
+              onClick={onClose}
+            >
               Cancel
             </button>
             <button type="submit" className="btn btn-primary">
@@ -97,15 +118,15 @@ function GrossProfitModal({ isOpen, onClose, onSave, editing, theme }) {
   const [amount, setAmount] = useState("");
 
   useEffect(() => {
-  const handleEsc = (e) => {
-    if (e.key === "Escape") {
-      console.log("Escape pressed - closing modal");
-      onClose();
-    }
-  };
-  window.addEventListener("keydown", handleEsc);
-  return () => window.removeEventListener("keydown", handleEsc);
-}, []);
+    const handleEsc = (e) => {
+      if (e.key === "Escape") {
+        console.log("Escape pressed - closing modal");
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
+  }, []);
 
   useEffect(() => {
     if (editing) {
@@ -121,21 +142,31 @@ function GrossProfitModal({ isOpen, onClose, onSave, editing, theme }) {
 
   return (
     <div className="modal modal-open">
-      <div className={`modal-box ${theme === "dark" ? "bg-gray-800 text-white" : "bg-white text-gray-900"}`}>
+      <div
+        className={`modal-box ${
+          theme === "dark" ? "bg-gray-800 text-white" : "bg-white text-gray-900"
+        }`}
+      >
         <h3 className="font-bold text-lg mb-4">
           {editing ? "Edit Gross Profit" : "Add Gross Profit"}
         </h3>
-        <form onSubmit={(e) => {
-          e.preventDefault();
-          onSave({ name, amount: parseFloat(amount) || 0 });
-        }}>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            onSave({ name, amount: parseFloat(amount) || 0 });
+          }}
+        >
           <div className="form-control mb-4">
             <label className="label">
               <span className="label-text">Name</span>
             </label>
             <input
               type="text"
-              className={`input ${theme === "dark" ? "bg-gray-700 text-white border-gray-600" : "input-bordered text-white"}`}
+              className={`input ${
+                theme === "dark"
+                  ? "bg-gray-700 text-white border-gray-600"
+                  : "input-bordered text-white"
+              }`}
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
@@ -148,14 +179,24 @@ function GrossProfitModal({ isOpen, onClose, onSave, editing, theme }) {
             <input
               type="number"
               step="0.01"
-              className={`input ${theme === "dark" ? "bg-gray-700 text-white border-gray-600" : "input-bordered text-white"}`}
+              className={`input ${
+                theme === "dark"
+                  ? "bg-gray-700 text-white border-gray-600"
+                  : "input-bordered text-white"
+              }`}
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               required
             />
           </div>
           <div className="modal-action">
-            <button type="button" className={`btn ${theme === "dark" ? "btn-ghost text-white" : "btn-ghost"}`} onClick={onClose}>
+            <button
+              type="button"
+              className={`btn ${
+                theme === "dark" ? "btn-ghost text-white" : "btn-ghost"
+              }`}
+              onClick={onClose}
+            >
               Cancel
             </button>
             <button type="submit" className="btn btn-primary">
@@ -173,16 +214,16 @@ function PackagingModal({ isOpen, onClose, onSave, category, costs, theme }) {
   const [localCosts, setLocalCosts] = useState({});
   const [savingPackaging, setSavingPackaging] = useState(false);
 
-   useEffect(() => {
-  const handleEsc = (e) => {
-    if (e.key === "Escape") {
-      console.log("Escape pressed - closing modal");
-      onClose();
-    }
-  };
-  window.addEventListener("keydown", handleEsc);
-  return () => window.removeEventListener("keydown", handleEsc);
-}, []);
+  useEffect(() => {
+    const handleEsc = (e) => {
+      if (e.key === "Escape") {
+        console.log("Escape pressed - closing modal");
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
+  }, []);
 
   useEffect(() => {
     if (costs) setLocalCosts(costs);
@@ -194,7 +235,7 @@ function PackagingModal({ isOpen, onClose, onSave, category, costs, theme }) {
     Milktea: ["Cup", "Straw", "Logo", "Paper"],
     "Coffee Hot": ["Cup", "Lid"],
     "Coffee Cold": ["Cup", "Straw"],
-    "Fruit Soda": ["Cup", "Lid"]
+    "Fruit Soda": ["Cup", "Lid"],
   };
 
   const handleChange = (item, value) => {
@@ -206,13 +247,14 @@ function PackagingModal({ isOpen, onClose, onSave, category, costs, theme }) {
     setSavingPackaging(true);
     onSave(category, localCosts);
   };
-  
- 
-
 
   return (
     <div className="modal modal-open">
-      <div  className={`modal-box  ${theme === "dark" ? "bg-gray-800 text-white" : "bg-white text-gray-900"} `}>
+      <div
+        className={`modal-box  ${
+          theme === "dark" ? "bg-gray-800 text-white" : "bg-white text-gray-900"
+        } `}
+      >
         <h3 className="font-bold text-lg mb-4">{category} Packaging Costs</h3>
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 mb-6">
@@ -224,7 +266,11 @@ function PackagingModal({ isOpen, onClose, onSave, category, costs, theme }) {
                 <input
                   type="number"
                   step="0.01"
-                  className={`input ${theme === "dark" ? "bg-gray-700 text-white border-gray-600" : "input-bordered text-white"}`}
+                  className={`input ${
+                    theme === "dark"
+                      ? "bg-gray-700 text-white border-gray-600"
+                      : "input-bordered text-white"
+                  }`}
                   value={localCosts[item] || 0}
                   onChange={(e) => handleChange(item, e.target.value)}
                   required
@@ -233,7 +279,13 @@ function PackagingModal({ isOpen, onClose, onSave, category, costs, theme }) {
             ))}
           </div>
           <div className="modal-action">
-            <button type="button" className={`btn ${theme === "dark" ? "btn-ghost text-white" : "btn-ghost"}`} onClick={onClose}>
+            <button
+              type="button"
+              className={`btn ${
+                theme === "dark" ? "btn-ghost text-white" : "btn-ghost"
+              }`}
+              onClick={onClose}
+            >
               Cancel
             </button>
             <button
@@ -258,11 +310,13 @@ function PackagingModal({ isOpen, onClose, onSave, category, costs, theme }) {
 const CustomTooltip = ({ active, payload, label, formatCurrency, theme }) => {
   if (active && payload && payload.length) {
     return (
-      <div className={`custom-tooltip p-3 border rounded shadow-md ${
-        theme === "dark" 
-          ? "bg-gray-800 border-gray-700 text-white" 
-          : "bg-white border-gray-200 text-slate-700"
-      }`}>
+      <div
+        className={`custom-tooltip p-3 border rounded shadow-md ${
+          theme === "dark"
+            ? "bg-gray-800 border-gray-700 text-white"
+            : "bg-white border-gray-200 text-slate-700"
+        }`}
+      >
         <p className="font-semibold">{`Period: ${label}`}</p>
         {payload.map((entry, index) => (
           <p
@@ -289,7 +343,7 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
     Milktea: { Cup: 5, Straw: 2, Logo: 1, Paper: 0.5 },
     "Coffee Hot": { Cup: 6, Lid: 1.5 },
     "Coffee Cold": { Cup: 7, Straw: 2 },
-    "Fruit Soda": { Cup: 5, Lid: 2 }
+    "Fruit Soda": { Cup: 5, Lid: 2 },
   });
   const [netProfit, setNetProfit] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -336,7 +390,7 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
         const equipmentData = Array.isArray(res.data)
           ? res.data.map((item) => ({
               ...item,
-              price: parseFloat(item.price) || 0
+              price: parseFloat(item.price) || 0,
             }))
           : [];
         setEquipment(equipmentData);
@@ -356,7 +410,7 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
         const grossProfitData = Array.isArray(res.data)
           ? res.data.map((item) => ({
               ...item,
-              amount: parseFloat(item.amount) || 0
+              amount: parseFloat(item.amount) || 0,
             }))
           : [];
         setGrossProfit(grossProfitData);
@@ -391,11 +445,131 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
     fetchPackagingCosts();
   }, []);
 
+  // Add this function inside your ViewAllData component, before the return statement
+  const generateExcelReceipt = () => {
+    // Create workbook
+    const workbook = XLSX.utils.book_new();
+
+    // Summary Sheet
+    const summaryData = [
+      ["FINANCIAL REPORT - SUMMARY"],
+      ["Generated Date:", new Date().toLocaleDateString()],
+      ["Time Range:", timeRange.charAt(0).toUpperCase() + timeRange.slice(1)],
+      [],
+      ["FINANCIAL OVERVIEW", ""],
+      ["Total Sales:", totalSales],
+      ["Net Profit:", totalNetProfit],
+      ["Total Equipment Costs:", totalEquipmentCost],
+      ["Total Gross Profit:", totalGrossProfit],
+      ["Total Packaging Costs:", totalPackagingCost],
+      [
+        "Profit Margin:",
+        totalSales > 0
+          ? `${((totalNetProfit / totalSales) * 100).toFixed(2)}%`
+          : "0%",
+      ],
+      [],
+      ["DETAILED BREAKDOWN", ""],
+    ];
+
+    const summaryWorksheet = XLSX.utils.aoa_to_sheet(summaryData);
+    XLSX.utils.book_append_sheet(workbook, summaryWorksheet, "Summary");
+
+    // Sales Data Sheet
+    if (salesData.length > 0) {
+      const salesHeaders =
+        timeRange === "daily"
+          ? ["Day", "Revenue", "Packaging Cost"]
+          : timeRange === "monthly"
+          ? ["Month", "Year", "Revenue", "Packaging Cost"]
+          : ["Year", "Revenue", "Packaging Cost"];
+
+      const salesSheetData = [
+        ["SALES DATA"],
+        [],
+        salesHeaders,
+        ...salesData.map((sale) =>
+          timeRange === "daily"
+            ? [sale.day, sale.revenue || 0, sale.packaging_cost || 0]
+            : timeRange === "monthly"
+            ? [
+                sale.month,
+                sale.year,
+                sale.revenue || 0,
+                sale.packaging_cost || 0,
+              ]
+            : [sale.year, sale.revenue || 0, sale.packaging_cost || 0]
+        ),
+      ];
+
+      const salesWorksheet = XLSX.utils.aoa_to_sheet(salesSheetData);
+      XLSX.utils.book_append_sheet(workbook, salesWorksheet, "Sales Data");
+    }
+
+    // Equipment Costs Sheet
+    if (equipment.length > 0) {
+      const equipmentData = [
+        ["EQUIPMENT COSTS"],
+        [],
+        ["Name", "Price", "Date Added"],
+        ...equipment.map((item) => [
+          item.name,
+          item.price || 0,
+          new Date(item.created_at).toLocaleDateString(),
+        ]),
+      ];
+
+      const equipmentWorksheet = XLSX.utils.aoa_to_sheet(equipmentData);
+      XLSX.utils.book_append_sheet(workbook, equipmentWorksheet, "Equipment");
+    }
+
+    // Gross Profit Sheet
+    if (grossProfit.length > 0) {
+      const grossProfitData = [
+        ["GROSS PROFIT ITEMS"],
+        [],
+        ["Name", "Amount", "Date"],
+        ...grossProfit.map((item) => [
+          item.name,
+          item.amount || 0,
+          new Date(item.created_at).toLocaleDateString(),
+        ]),
+      ];
+
+      const grossProfitWorksheet = XLSX.utils.aoa_to_sheet(grossProfitData);
+      XLSX.utils.book_append_sheet(
+        workbook,
+        grossProfitWorksheet,
+        "Gross Profit"
+      );
+    }
+
+    // Packaging Costs Sheet
+    const packagingData = [
+      ["PACKAGING COSTS"],
+      [],
+      ["Category", "Item", "Cost"],
+      ...Object.entries(packagingCosts).flatMap(([category, costs]) =>
+        Object.entries(costs).map(([item, cost]) => [category, item, cost])
+      ),
+    ];
+
+    const packagingWorksheet = XLSX.utils.aoa_to_sheet(packagingData);
+    XLSX.utils.book_append_sheet(workbook, packagingWorksheet, "Packaging");
+
+    // Generate filename with timestamp
+    const timestamp = new Date().toISOString().split("T")[0];
+    const filename = `Financial_Report_${timeRange}_${timestamp}.xlsx`;
+
+    // Download the file
+    XLSX.writeFile(workbook, filename);
+  };
+
   // Calculate net profit with time-range specific filtering
   useEffect(() => {
     const calculateNetProfit = () => {
       if (!salesData.length) return [];
-      
+
       return salesData.map((sale) => {
         // Filter equipment costs by date if needed
         const totalEquipment = equipment.reduce(
@@ -405,38 +579,46 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
 
         // Filter gross profit by the same time period as the sale
         let periodGrossProfit = 0;
-        
+
         if (timeRange === "daily") {
           const saleDateStr = sale.day;
-          
+
           periodGrossProfit = grossProfit
-            .filter(g => {
+            .filter((g) => {
               const gDate = new Date(g.created_at || g.updated_at);
-              const gDateStr = gDate.toISOString().split('T')[0];
+              const gDateStr = gDate.toISOString().split("T")[0];
               return gDateStr === saleDateStr;
             })
             .reduce((sum, g) => sum + (parseFloat(g.amount) || 0), 0);
-        }
-        else if (timeRange === "monthly") {
+        } else if (timeRange === "monthly") {
           const saleDate = new Date(sale.year, sale.month - 1);
           periodGrossProfit = grossProfit
-            .filter(g => {
+            .filter((g) => {
               const gDate = new Date(g.created_at || g.updated_at);
-              return gDate.getFullYear() === saleDate.getFullYear() && 
-                     gDate.getMonth() === saleDate.getMonth();
+              return (
+                gDate.getFullYear() === saleDate.getFullYear() &&
+                gDate.getMonth() === saleDate.getMonth()
+              );
             })
             .reduce((sum, g) => sum + (parseFloat(g.amount) || 0), 0);
-        }
-        else if (timeRange === "yearly") {
+        } else if (timeRange === "yearly") {
           periodGrossProfit = grossProfit
-            .filter(g => new Date(g.created_at || g.updated_at).getFullYear() === sale.year)
+            .filter(
+              (g) =>
+                new Date(g.created_at || g.updated_at).getFullYear() ===
+                sale.year
+            )
             .reduce((sum, g) => sum + (parseFloat(g.amount) || 0), 0);
         }
 
         return {
           ...sale,
           gross_profit: periodGrossProfit,
-          net_profit: (sale.revenue || 0) - totalEquipment - periodGrossProfit - (sale.packaging_cost || 0)
+          net_profit:
+            (sale.revenue || 0) -
+            totalEquipment -
+            periodGrossProfit -
+            (sale.packaging_cost || 0),
         };
       });
     };
@@ -463,7 +645,7 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
         const res = await axios.post(`${api}/equipment`, item);
         setEquipment([
           ...equipment,
-          { ...res.data, price: parseFloat(res.data.price) || 0 }
+          { ...res.data, price: parseFloat(res.data.price) || 0 },
         ]);
       }
       setEquipmentModal(false);
@@ -500,7 +682,7 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
         const res = await axios.post(`${api}/gross-profit`, item);
         setGrossProfit([
           ...grossProfit,
-          { ...res.data, amount: parseFloat(res.data.amount) || 0 }
+          { ...res.data, amount: parseFloat(res.data.amount) || 0 },
         ]);
       }
       setGrossModal(false);
@@ -514,7 +696,7 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
     try {
       const res = await axios.post(`${api}/packaging-costs/update`, {
         category: category,
-        costs: costs
+        costs: costs,
       });
 
       if (res.status === 200) {
@@ -544,7 +726,7 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat("en-PH", {
       style: "currency",
-      currency: "PHP"
+      currency: "PHP",
     }).format(amount || 0);
   };
 
@@ -558,35 +740,33 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
 
   const totalGrossProfit = useMemo(() => {
     if (timeRange === "daily") {
-      const salesDates = salesData.map(sale => sale.day);
+      const salesDates = salesData.map((sale) => sale.day);
       return grossProfit
-        .filter(g => {
+        .filter((g) => {
           const gDate = new Date(g.created_at || g.updated_at);
-          const gDateStr = gDate.toISOString().split('T')[0];
+          const gDateStr = gDate.toISOString().split("T")[0];
           return salesDates.includes(gDateStr);
         })
         .reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
-    }
-    else if (timeRange === "monthly") {
-      const salesMonths = salesData.map(sale => `${sale.year}-${sale.month}`);
+    } else if (timeRange === "monthly") {
+      const salesMonths = salesData.map((sale) => `${sale.year}-${sale.month}`);
       return grossProfit
-        .filter(g => {
+        .filter((g) => {
           const gDate = new Date(g.created_at || g.updated_at);
           const gMonth = `${gDate.getFullYear()}-${gDate.getMonth() + 1}`;
           return salesMonths.includes(gMonth);
         })
         .reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
-    }
-    else if (timeRange === "yearly") {
-      const salesYears = salesData.map(sale => sale.year);
+    } else if (timeRange === "yearly") {
+      const salesYears = salesData.map((sale) => sale.year);
       return grossProfit
-        .filter(g => {
+        .filter((g) => {
           const gYear = new Date(g.created_at || g.updated_at).getFullYear();
           return salesYears.includes(gYear);
         })
         .reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
     }
-    
+
     return grossProfit.reduce(
       (sum, item) => sum + (parseFloat(item.amount) || 0),
       0
@@ -608,7 +788,9 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
   }, [salesData]);
 
   const totalNetProfit = useMemo(() => {
-    return totalSales - totalEquipmentCost - totalGrossProfit - totalPackagingCost;
+    return (
+      totalSales - totalEquipmentCost - totalGrossProfit - totalPackagingCost
+    );
   }, [totalSales, totalEquipmentCost, totalGrossProfit, totalPackagingCost]);
 
   // Prepare data for Recharts chart
@@ -622,7 +804,7 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
     revenue: parseFloat(item.revenue) || 0,
     packaging_cost: parseFloat(item.packaging_cost) || 0,
     gross_profit: parseFloat(item.gross_profit) || 0,
-    net_profit: parseFloat(item.net_profit) || 0
+    net_profit: parseFloat(item.net_profit) || 0,
   }));
 
   useEffect(() => {
@@ -635,7 +817,14 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
         totalPackagingCost,
       });
     }
-  }, [totalSales, totalNetProfit, totalEquipmentCost, totalGrossProfit, totalPackagingCost, onDataUpdate]);
+  }, [
+    totalSales,
+    totalNetProfit,
+    totalEquipmentCost,
+    totalGrossProfit,
+    totalPackagingCost,
+    onDataUpdate,
+  ]);
 
   if (loading) {
     return (
@@ -652,8 +841,18 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
     <div className={`lg:p-4 min-h-screen `}>
       {error && (
         <div className="alert alert-error mb-6">
-          <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="stroke-current shrink-0 h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
           </svg>
           <span>{error}</span>
         </div>
@@ -662,57 +861,126 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
         <div className="">
           <div className="flex items-center">
-            <div 
+            <div
               onClick={() => setActiveTab("Dashboard")}
               className="cursor-pointer transition-colors duration-200 rounded-md hover:opacity-80"
             >
-              <h1 className={`text-lg lg:text-2xl font-bold ${theme === "dark" ? "text-white" : "text-slate-700"}`}>Dashboard Overview</h1>
+              <h1
+                className={`text-lg lg:text-2xl font-bold ${
+                  theme === "dark" ? "text-white" : "text-slate-700"
+                }`}
+              >
+                Dashboard Overview
+              </h1>
             </div>
-            <div className={`mx-2 translate-y-0.5 ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>
+            <div
+              className={`mx-2 translate-y-0.5 ${
+                theme === "dark" ? "text-gray-400" : "text-gray-500"
+              }`}
+            >
               <IoIosArrowForward />
             </div>
-            <h2 className="text-xs lg:text-lg font-medium translate-y-0.5 text-blue-600">Financial Overview</h2>
+            <h2 className="text-xs lg:text-lg font-medium translate-y-0.5 text-blue-600">
+              Financial Overview
+            </h2>
           </div>
-          
+
           <div className="flex items-center mt-0">
-            <p className={`text-xs sm:text-sm ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>Administrator view of all financial metrics</p>
+            <p
+              className={`text-xs sm:text-sm ${
+                theme === "dark" ? "text-gray-400" : "text-gray-500"
+              }`}
+            >
+              Administrator view of all financial metrics
+            </p>
           </div>
         </div>
 
-        <select 
-          className={`select select-sm text-white mt-4 md:mt-0 ${
-            theme === "dark" 
-              ? "black-card text-color-black select-bordered" : "bg-slate-900 text-slate-700 select-bordered" 
+        <div className="flex gap-2 items-center mt-4">
+          <select
+            className={`select select-sm text-white md:mt-0 ${
+              theme === "dark"
+                ? "black-card text-color-black select-bordered"
+                : "bg-slate-900 text-slate-700 select-bordered"
+            }`}
+            value={timeRange}
+            onChange={(e) => setTimeRange(e.target.value)}
+          >
+            <option value="daily">Daily</option>
+            <option value="monthly">Monthly</option>
+            <option value="yearly">Yearly</option>
+          </select>
 
-          }`} 
-          value={timeRange} 
-          onChange={e => setTimeRange(e.target.value)}
-        >
-          <option value="daily">Daily</option>
-          <option value="monthly">Monthly</option>
-          <option value="yearly">Yearly</option>
-        </select>
+          <button
+            onClick={generateExcelReceipt}
+            className="btn btn-success btn-sm text-white text-xs"
+          >
+            <FiDollarSign className="mr-2" />
+            Export Excel Report
+          </button>
+        </div>
       </div>
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {[
-          { title: "Total Sales", value: totalSales, icon: <FiDollarSign className="text-blue-600" />, bg: "blue" },
-          { title: "Net Profit", value: totalNetProfit, icon: <FiDollarSign className="text-green-600" />, bg: "green" },
-          { title: "Total Costs", value: totalEquipmentCost + totalGrossProfit + totalPackagingCost, icon: <FiDollarSign className="text-red-600" />, bg: "red" },
-          { title: "Profit Margin", value: totalSales > 0 ? ((totalNetProfit / totalSales) * 100).toFixed(1) + '%' : '0%', icon: <FiDollarSign className="text-purple-600" />, bg: "purple" }
+          {
+            title: "Total Sales",
+            value: totalSales,
+            icon: <FiDollarSign className="text-blue-600" />,
+            bg: "blue",
+          },
+          {
+            title: "Net Profit",
+            value: totalNetProfit,
+            icon: <FiDollarSign className="text-green-600" />,
+            bg: "green",
+          },
+          {
+            title: "Total Costs",
+            value: totalEquipmentCost + totalGrossProfit + totalPackagingCost,
+            icon: <FiDollarSign className="text-red-600" />,
+            bg: "red",
+          },
+          {
+            title: "Profit Margin",
+            value:
+              totalSales > 0
+                ? ((totalNetProfit / totalSales) * 100).toFixed(1) + "%"
+                : "0%",
+            icon: <FiDollarSign className="text-purple-600" />,
+            bg: "purple",
+          },
         ].map((card, index) => (
-          <div key={index} className={`card shadow ${
-            theme === "dark" ? "black-card text-color-black" : "light-card text-slate-700"} }`}>
+          <div
+            key={index}
+            className={`card shadow ${
+              theme === "dark"
+                ? "black-card text-color-black"
+                : "light-card text-slate-700"
+            } }`}
+          >
             <div className="card-body p-4">
               <div className="flex justify-between items-start">
                 <div>
-                  <h3 className={`text-sm font-medium ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>{card.title}</h3>
+                  <h3
+                    className={`text-sm font-medium ${
+                      theme === "dark" ? "text-gray-400" : "text-gray-500"
+                    }`}
+                  >
+                    {card.title}
+                  </h3>
                   <p className="text-xl font-bold mt-1">
-                    {card.title === "Profit Margin" ? card.value : formatCurrency(card.value)}
+                    {card.title === "Profit Margin"
+                      ? card.value
+                      : formatCurrency(card.value)}
                   </p>
                 </div>
-                <div className={`p-2 rounded-lg ${theme === "dark" ? `bg-${card.bg}-900` : `bg-${card.bg}-100`}`}>
+                <div
+                  className={`p-2 rounded-lg ${
+                    theme === "dark" ? `bg-${card.bg}-900` : `bg-${card.bg}-100`
+                  }`}
+                >
                   {card.icon}
                 </div>
               </div>
@@ -722,49 +990,73 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
       </div>
 
       {/* Chart */}
-      <div className={`card shadow mb-6 ${
-        theme === "dark" ? "black-card text-color-black" : "light-card text-slate-700"
-      }`}>
+      <div
+        className={`card shadow mb-6 ${
+          theme === "dark"
+            ? "black-card text-color-black"
+            : "light-card text-slate-700"
+        }`}
+      >
         <div className="card-body px-0 py-4">
           <h3 className="card-title text-lg mb-4 px-4">Financial Overview</h3>
           <div className="h-80 min-h-[320px] min-w-[300px] relative">
             {chartData.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%" className="outline-none">
-                <LineChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke={theme === "dark" ? "#4B5563" : "#E5E7EB"} />
-                  <XAxis dataKey="name" stroke={theme === "dark" ? "#9CA3AF" : "#6B7280"} />
-                  <YAxis 
+              <ResponsiveContainer
+                width="100%"
+                height="100%"
+                className="outline-none"
+              >
+                <LineChart
+                  data={chartData}
+                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                >
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke={theme === "dark" ? "#4B5563" : "#E5E7EB"}
+                  />
+                  <XAxis
+                    dataKey="name"
+                    stroke={theme === "dark" ? "#9CA3AF" : "#6B7280"}
+                  />
+                  <YAxis
                     tickFormatter={(value) => `₱${value.toLocaleString()}`}
                     stroke={theme === "dark" ? "#9CA3AF" : "#6B7280"}
                   />
-                  <Tooltip content={<CustomTooltip formatCurrency={formatCurrency} theme={theme} />} />
+                  <Tooltip
+                    content={
+                      <CustomTooltip
+                        formatCurrency={formatCurrency}
+                        theme={theme}
+                      />
+                    }
+                  />
                   <Legend />
-                  <Line 
-                    type="monotone" 
-                    dataKey="revenue" 
-                    stroke="#8884d8" 
-                    activeDot={{ r: 8 }} 
+                  <Line
+                    type="monotone"
+                    dataKey="revenue"
+                    stroke="#8884d8"
+                    activeDot={{ r: 8 }}
                     strokeWidth={2}
                     name="Revenue"
                   />
-                  <Line 
-                    type="monotone" 
-                    dataKey="net_profit" 
-                    stroke="#82ca9d" 
+                  <Line
+                    type="monotone"
+                    dataKey="net_profit"
+                    stroke="#82ca9d"
                     strokeWidth={2}
                     name="Net Profit"
                   />
-                  <Line 
-                    type="monotone" 
-                    dataKey="gross_profit" 
-                    stroke="#ffc658" 
+                  <Line
+                    type="monotone"
+                    dataKey="gross_profit"
+                    stroke="#ffc658"
                     strokeWidth={2}
                     name="Gross Profit"
                   />
-                  <Line 
-                    type="monotone" 
-                    dataKey="packaging_cost" 
-                    stroke="#ff7300" 
+                  <Line
+                    type="monotone"
+                    dataKey="packaging_cost"
+                    stroke="#ff7300"
                     strokeWidth={2}
                     name="Packaging Cost"
                   />
@@ -785,13 +1077,17 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
       {/* Cost Management Sections */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         {/* Equipment Costs */}
-        <div className={`card shadow h-fit ${
-          theme === "dark" ? "black-card text-color-black" : "light-card text-slate-700"
-        }`}>
+        <div
+          className={`card shadow h-fit ${
+            theme === "dark"
+              ? "black-card text-color-black"
+              : "light-card text-slate-700"
+          }`}
+        >
           <div className="card-body">
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-bold text-lg">Equipment Costs</h3>
-              <button 
+              <button
                 className="btn btn-sm btn-primary"
                 onClick={() => setEquipmentModal(true)}
               >
@@ -800,140 +1096,178 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
             </div>
             <div className="overflow-x-auto">
               <div className="min-h-80 max-h-100 overflow-y-auto">
-              <table className="table table-sm w-full">
-                <thead >
-                  <tr className={`${theme === "dark" ? "bg-gray-700 text-white" : "bg-gray-200 text-slate-700"}`}>
-                    <th>Name</th>
-                    <th>Price</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {equipment.map(e => (
-                    <tr key={e.id}>
-                      <td>{e.name}</td>
-                      <td>{formatCurrency(parseFloat(e.price) || 0)}</td>
-                      <td>
-                        <div className="flex gap-2">
-                          <button 
-                            className="btn btn-xs btn-warning"
-                            onClick={() => { setEditingEquipment(e); setEquipmentModal(true); }}
-                          >
-                            <FiEdit/>
-                          </button>
-                          <button 
-                            className="btn btn-xs btn-error"
-                            onClick={() => deleteEquipment(e.id)}
-                          >
-                            <FiTrash2/>
-                          </button>
-                        </div>
-                      </td>
+                <table className="table table-sm w-full">
+                  <thead>
+                    <tr
+                      className={`${
+                        theme === "dark"
+                          ? "bg-gray-700 text-white"
+                          : "bg-gray-200 text-slate-700"
+                      }`}
+                    >
+                      <th>Name</th>
+                      <th>Price</th>
+                      <th>Actions</th>
                     </tr>
-                  ))}
-                  {equipment.length === 0 && (
-                    <tr>
-                      <td colSpan="3" className="text-center py-4">
-                        No equipment added
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-            <div className="mt-4 pt-2 border-t border-gray-200">
-              <p className="font-semibold">Total: {formatCurrency(totalEquipmentCost)}</p>
-            </div>
+                  </thead>
+                  <tbody>
+                    {equipment.map((e) => (
+                      <tr key={e.id}>
+                        <td>{e.name}</td>
+                        <td>{formatCurrency(parseFloat(e.price) || 0)}</td>
+                        <td>
+                          <div className="flex gap-2">
+                            <button
+                              className="btn btn-xs btn-warning"
+                              onClick={() => {
+                                setEditingEquipment(e);
+                                setEquipmentModal(true);
+                              }}
+                            >
+                              <FiEdit />
+                            </button>
+                            <button
+                              className="btn btn-xs btn-error"
+                              onClick={() => deleteEquipment(e.id)}
+                            >
+                              <FiTrash2 />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                    {equipment.length === 0 && (
+                      <tr>
+                        <td colSpan="3" className="text-center py-4">
+                          No equipment added
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+              <div className="mt-4 pt-2 border-t border-gray-200">
+                <p className="font-semibold">
+                  Total: {formatCurrency(totalEquipmentCost)}
+                </p>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Gross Profit Items */}
-        <div className={`card shadow h-fit ${
-          theme === "dark" ? "black-card text-color-black" : "light-card text-slate-700"
-        }`}>
+        <div
+          className={`card shadow h-fit ${
+            theme === "dark"
+              ? "black-card text-color-black"
+              : "light-card text-slate-700"
+          }`}
+        >
           <div className="card-body">
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-bold text-lg">Gross Profit Items</h3>
-              <button 
+              <button
                 className="btn btn-sm btn-primary"
                 onClick={() => setGrossModal(true)}
               >
                 <FiPlus className="mr-1" /> Add
               </button>
             </div>
-          <div className="overflow-x-auto">
-  <div className="max-h-100 min-h-80 overflow-y-auto">
-    <table className="table table-sm w-full">
-      <thead className={`${theme === "dark" ? "bg-gray-700 text-white" : "bg-gray-200 text-slate-700"}`}>
-        <tr>
-          <th>Name</th>
-          <th>Amount</th>
-          <th>Date</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {grossProfit.map(g => (
-          <tr key={g.id}>
-            <td>{g.name}</td>
-            <td>{formatCurrency(parseFloat(g.amount) || 0)}</td>
-            <td>{new Date(g.created_at).toLocaleDateString()}</td>
-            <td>
-              <div className="flex gap-2">
-                <button 
-                  className="btn btn-xs btn-warning"
-                  onClick={() => { setEditingGross(g); setGrossModal(true); }}
-                >
-                  <FiEdit/>
-                </button>
-                <button 
-                  className="btn btn-xs btn-error"
-                  onClick={() => deleteGrossProfit(g.id)}
-                >
-                  <FiTrash2/>
-                </button>
+            <div className="overflow-x-auto">
+              <div className="max-h-100 min-h-80 overflow-y-auto">
+                <table className="table table-sm w-full">
+                  <thead
+                    className={`${
+                      theme === "dark"
+                        ? "bg-gray-700 text-white"
+                        : "bg-gray-200 text-slate-700"
+                    }`}
+                  >
+                    <tr>
+                      <th>Name</th>
+                      <th>Amount</th>
+                      <th>Date</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {grossProfit.map((g) => (
+                      <tr key={g.id}>
+                        <td>{g.name}</td>
+                        <td>{formatCurrency(parseFloat(g.amount) || 0)}</td>
+                        <td>{new Date(g.created_at).toLocaleDateString()}</td>
+                        <td>
+                          <div className="flex gap-2">
+                            <button
+                              className="btn btn-xs btn-warning"
+                              onClick={() => {
+                                setEditingGross(g);
+                                setGrossModal(true);
+                              }}
+                            >
+                              <FiEdit />
+                            </button>
+                            <button
+                              className="btn btn-xs btn-error"
+                              onClick={() => deleteGrossProfit(g.id)}
+                            >
+                              <FiTrash2 />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                    {grossProfit.length === 0 && (
+                      <tr>
+                        <td colSpan="4" className="text-center py-4">
+                          No gross profit items for selected period
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
               </div>
-            </td>
-          </tr>
-        ))}
-        {grossProfit.length === 0 && (
-          <tr>
-            <td colSpan="4" className="text-center py-4">
-              No gross profit items for selected period
-            </td>
-          </tr>
-        )}
-      </tbody>
-    </table>
-  </div>
-</div>
+            </div>
 
             <div className="mt-4 pt-2 border-t border-gray-200">
-              <p className="font-semibold">Total: {formatCurrency(totalGrossProfit)}</p>
+              <p className="font-semibold">
+                Total: {formatCurrency(totalGrossProfit)}
+              </p>
               <p className="text-sm">
-                Filtered by: {timeRange === "daily" ? "daily" : timeRange === "monthly" ? "This Month" : "This Year"}
+                Filtered by:{" "}
+                {timeRange === "daily"
+                  ? "daily"
+                  : timeRange === "monthly"
+                  ? "This Month"
+                  : "This Year"}
               </p>
             </div>
           </div>
         </div>
 
         {/* Packaging Costs */}
-        <div className={`card shadow ${
-          theme === "dark" ? "black-card text-color-black" : "light-card text-slate-700"
-        }`}>
+        <div
+          className={`card shadow ${
+            theme === "dark"
+              ? "black-card text-color-black"
+              : "light-card text-slate-700"
+          }`}
+        >
           <div className="card-body">
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-bold text-lg">Packaging Costs</h3>
             </div>
             <div className="space-y-4">
               {Object.entries(packagingCosts).map(([category, costs]) => (
-                <div key={category} className={`border rounded-lg p-3 ${
-                  theme === "dark" ? "border-gray-700" : "border-gray-200"
-                }`}>
+                <div
+                  key={category}
+                  className={`border rounded-lg p-3 ${
+                    theme === "dark" ? "border-gray-700" : "border-gray-200"
+                  }`}
+                >
                   <div className="flex justify-between items-center mb-2">
                     <h4 className="font-semibold">{category}</h4>
-                    <button 
+                    <button
                       className="btn btn-xs btn-ghost"
                       onClick={() => {
                         setEditingCategory(category);
@@ -953,14 +1287,22 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
                   </div>
                   <div className="mt-2 pt-2 border-t border-gray-200">
                     <p className="font-medium text-right">
-                      Total: {formatCurrency(Object.values(costs).reduce((sum, cost) => sum + (parseFloat(cost) || 0), 0))}
+                      Total:{" "}
+                      {formatCurrency(
+                        Object.values(costs).reduce(
+                          (sum, cost) => sum + (parseFloat(cost) || 0),
+                          0
+                        )
+                      )}
                     </p>
                   </div>
                 </div>
               ))}
             </div>
             <div className="mt-4 pt-2 border-t border-gray-200">
-              <p className="font-semibold">Overall Total: {formatCurrency(totalPackagingCost)}</p>
+              <p className="font-semibold">
+                Overall Total: {formatCurrency(totalPackagingCost)}
+              </p>
             </div>
           </div>
         </div>

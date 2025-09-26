@@ -11,7 +11,7 @@ const api_name = import.meta.env.VITE_SERVER_API_NAME;
 const LoginPage = () => {
   const [credentials, setCredentials] = useState({
     username: "",
-    password: ""
+    password: "",
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -21,13 +21,13 @@ const LoginPage = () => {
 
   const showPass = (e) => {
     setShowPassword(!showPassword);
-  }
+  };
 
   const handleChange = (e) => {
-    const {name, value} = e.target;
+    const { name, value } = e.target;
     setCredentials({
       ...credentials,
-      [name]: value
+      [name]: value,
     });
   };
 
@@ -43,54 +43,51 @@ const LoginPage = () => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
-    
+
     try {
-      
-      const response = await axios.post(
-        `${api_name}/login`,
-        credentials,
-        { withCredentials: true }
-      );
-      
+      const response = await axios.post(`${api_name}/login`, credentials, {
+        withCredentials: true,
+      });
+
       // Handle successful login (redirect or state update)
       console.log("Login successful", response.data);
-      nav('/dashboard')
-      
+      nav("/dashboard");
     } catch (err) {
-      setError(err.response?.data?.error_msg || "Login failed. Please try again.");
+      setError(
+        err.response?.data?.error_msg || "Login failed. Please try again."
+      );
       setTimeout(() => {
-        setError("")
-      }, 4000)
+        setError("");
+      }, 4000);
     } finally {
       setIsLoading(false);
     }
   };
-  
-    //check user role and if user is loggedin
-useEffect(() => {
-  const checkAuthStatus = async () => {
-    try {
-      const response = await axios.get(`${api_name}/user`, { 
-        withCredentials: true 
-      });
-      
-      if (response.data.logged_in && response.data.role !== "") {
-        // User is already authenticated, redirect to dashboard
-        nav('/dashboard');
-      }
-      // If not logged in, stay on login page
-    } catch (error) {
-      console.error("Auth check failed:", error);
-      // Stay on login page if there's an error
-    }
-  };
 
-  checkAuthStatus();
-}, [nav]);
+  //check user role and if user is loggedin
+  useEffect(() => {
+    const checkAuthStatus = async () => {
+      try {
+        const response = await axios.get(`${api_name}/user`, {
+          withCredentials: true,
+        });
+
+        if (response.data.logged_in && response.data.role !== "") {
+          // User is already authenticated, redirect to dashboard
+          nav("/dashboard");
+        }
+        // If not logged in, stay on login page
+      } catch (error) {
+        console.error("Auth check failed:", error);
+      }
+    };
+
+    checkAuthStatus();
+  }, [nav]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-blue-50 to-purple-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
@@ -107,7 +104,7 @@ useEffect(() => {
         </p>
       </motion.div>
 
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.1 }}
@@ -117,7 +114,7 @@ useEffect(() => {
           <form className="space-y-5" onSubmit={handleSubmit}>
             <AnimatePresence>
               {error && (
-                <motion.div 
+                <motion.div
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: "auto" }}
                   exit={{ opacity: 0, height: 0 }}
@@ -126,8 +123,17 @@ useEffect(() => {
                 >
                   <div className="flex items-start">
                     <div className="flex-shrink-0">
-                      <svg className="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clipRule="evenodd" />
+                      <svg
+                        className="h-5 w-5 text-red-400"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z"
+                          clipRule="evenodd"
+                        />
                       </svg>
                     </div>
                     <div className="ml-3">
@@ -137,9 +143,12 @@ useEffect(() => {
                 </motion.div>
               )}
             </AnimatePresence>
-            
+
             <div className="space-y-2">
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Email address
               </label>
               <div className="relative mt-1">
@@ -161,10 +170,17 @@ useEffect(() => {
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   Password
                 </label>
-                <a tabIndex={-1} href="#" className="text-sm font-medium text-indigo-600 hover:text-indigo-500 transition-colors duration-200">
+                <a
+                  tabIndex={-1}
+                  href="#"
+                  className="text-sm font-medium text-indigo-600 hover:text-indigo-500 transition-colors duration-200"
+                >
                   Forgot password?
                 </a>
               </div>
@@ -183,48 +199,50 @@ useEffect(() => {
                   placeholder="Enter your password"
                 />
 
-                <button type="button" onClick={() => showPass()} tabIndex={-1} className="text-indigo-600 absolute right-3 top-[13px] text-lg font-bold px-3 py-1 hover:bg-indigo-50 cursor-pointer rounded-md">
+                <button
+                  type="button"
+                  onClick={() => showPass()}
+                  tabIndex={-1}
+                  className="text-indigo-600 absolute right-3 top-[13px] text-lg font-bold px-3 py-1 hover:bg-indigo-50 cursor-pointer rounded-md"
+                >
                   {!showPassword ? <BsEye /> : <BsEyeSlash />}
                 </button>
               </div>
             </div>
 
             <div className="pt-2">
-            <AnimatePresence mode="wait">
-              {isLoading ? (
-                <div 
-                className="w-full">
+              <AnimatePresence mode="wait">
+                {isLoading ? (
+                  <div className="w-full">
                     <Loading text={"Signing in...."} />
-                </div>
-              ) : (
-                <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.5 }}
-                >
-                  <Button
-                    type="submit"
-                    loading={isLoading}
-                    variant="primary"
-                    size="md"
-                    className="w-full py-3 px-4 rounded-xl font-medium shadow-md hover:shadow-lg transition-shadow duration-200"
+                  </div>
+                ) : (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.5 }}
                   >
-                  Sign in
-                </Button>
-                </motion.div>
-              )}
-            </AnimatePresence>
-              
-
-              
+                    <Button
+                      type="submit"
+                      loading={isLoading}
+                      variant="primary"
+                      size="md"
+                      className="w-full py-3 px-4 rounded-xl font-medium shadow-md hover:shadow-lg transition-shadow duration-200"
+                    >
+                      Sign in
+                    </Button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </form>
         </div>
-        
+
         <div className="mt-6 text-center">
           <p className="text-xs text-gray-500">
-            &copy; {new Date().getFullYear()} Cafe Realitea. All rights reserved.
+            &copy; {new Date().getFullYear()} Cafe Realitea. All rights
+            reserved.
           </p>
         </div>
       </motion.div>
@@ -234,14 +252,16 @@ useEffect(() => {
 
 const Logo = () => {
   return (
-    <motion.div 
+    <motion.div
       whileHover={{ scale: 1.05 }}
       className="flex items-center justify-center"
     >
       <div className="grid size-12 shrink-0 place-content-center rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 shadow-md">
         <img src="/Logo.jpg" alt="Logo" className="rounded-xl " />
       </div>
-      <span className="ml-2 text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">Cafe Realitea</span>
+      <span className="ml-2 text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+        Cafe Realitea
+      </span>
     </motion.div>
   );
 };
