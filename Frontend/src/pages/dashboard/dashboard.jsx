@@ -4,9 +4,76 @@ import Title from "../../components/UI/Title";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
-import { FiBox, FiPlus } from "react-icons/fi";
+import {
+  FiBox,
+  FiPlus,
+  FiTrendingUp,
+  FiTrendingDown,
+  FiShoppingCart,
+  FiDollarSign,
+  FiPackage,
+} from "react-icons/fi";
 import { useTheme } from "../../Main/ThemeContext";
+
 const socket = io("https://caferealitea.onrender.com");
+
+// Stat Card Component for better reusability
+function StatCard({ title, value, change, icon, theme }) {
+  const isPositive = change >= 0;
+
+  return (
+    <div
+      className={`${
+        theme === "dark"
+          ? "black-card text-color-black"
+          : "light-card text-slate-700"
+      } card shadow-lg hover:shadow-xl transition-shadow duration-300`}
+    >
+      <div className="card-body p-4 md:p-6">
+        <div className="flex justify-between items-start mb-2">
+          <div className="flex items-center gap-3">
+            <div
+              className={`p-3 rounded-lg ${
+                theme === "dark" ? "bg-gray-700" : "bg-primary/10"
+              }`}
+            >
+              {icon}
+            </div>
+            <div>
+              <h3
+                className={`text-sm font-medium ${
+                  theme === "dark" ? "text-gray-400" : "text-gray-500"
+                }`}
+              >
+                {title}
+              </h3>
+              <p className="text-2xl font-bold mt-1">{value}</p>
+            </div>
+          </div>
+          <div
+            className={`badge badge-lg gap-1 ${
+              isPositive ? "badge-success" : "badge-error"
+            }`}
+          >
+            {isPositive ? (
+              <FiTrendingUp className="w-3 h-3" />
+            ) : (
+              <FiTrendingDown className="w-3 h-3" />
+            )}
+            {Math.abs(change).toFixed(1)}%
+          </div>
+        </div>
+        <div
+          className={`text-xs ${
+            theme === "dark" ? "text-gray-400" : "text-gray-500"
+          } mt-2`}
+        >
+          vs previous month
+        </div>
+      </div>
+    </div>
+  );
+}
 
 // Main Dashboard Component
 export default function Dashboard({
@@ -28,6 +95,7 @@ export default function Dashboard({
   });
   const [recentOrder, setRecentOrder] = useState([]);
   const [role, setRole] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
 
   const { theme, setTheme } = useTheme();
   const toggleTheme = () => {
@@ -42,12 +110,35 @@ export default function Dashboard({
   });
 
   useEffect(() => {
-    axios
-      .get("https://caferealitea.onrender.com/recent-order", {
-        withCredentials: true,
-      })
-      .then((res) => setRecentOrder(res.data));
-  }, []);
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        const [recentOrderRes, userRes] = await Promise.all([
+          axios.get("https://caferealitea.onrender.com/recent-order", {
+            withCredentials: true,
+          }),
+          axios.get("https://caferealitea.onrender.com/user", {
+            withCredentials: true,
+          }),
+        ]);
+
+        setRecentOrder(recentOrderRes.data);
+
+        if (!userRes.data.logged_in || userRes.data.role === "") {
+          navigate("/");
+          return;
+        }
+        setRole(userRes.data.role);
+      } catch (err) {
+        console.error("Data fetch failed:", err);
+        navigate("/");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [navigate]);
 
   useEffect(() => {
     if (financialData) {
@@ -63,22 +154,6 @@ export default function Dashboard({
   // Check authentication and role
   useEffect(() => {
     document.title = "Café Realitea - Dashboard";
-
-    axios
-      .get("https://caferealitea.onrender.com/user", { withCredentials: true })
-      .then((res) => {
-        console.log(res.data.role);
-
-        if (!res.data.logged_in || res.data.role === "") {
-          navigate("/");
-          return;
-        }
-        setRole(res.data.role);
-      })
-      .catch((err) => {
-        console.error("Authentication check failed:", err);
-        navigate("/");
-      });
   }, []);
 
   // Helper function to calculate percentage change
@@ -91,49 +166,66 @@ export default function Dashboard({
   useEffect(() => {
     const api = import.meta.env.VITE_SERVER_API_NAME;
 
-    // Fetch top items
-    axios.get(`${api}/top_items`).then((result) => setTopItems(result.data));
+    const fetchDashboardData = async () => {
+      try {
+        const [topItemsRes, ordersRes] = await Promise.all([
+          axios.get(`${api}/top_items`),
+          axios.get(`${api}/orders/months`),
+        ]);
 
-    // Fetch orders summary
-    axios.get(`${api}/orders/months`).then((res) => {
-      const data = res.data;
+        setTopItems(topItemsRes.data);
 
-      // Sort by year + month
-      data.sort((a, b) =>
-        a.year === b.year ? a.month - b.month : a.year - b.year
-      );
+        const data = ordersRes.data.sort((a, b) =>
+          a.year === b.year ? a.month - b.month : a.year - b.year
+        );
 
-      const latest = data[data.length - 1];
-      const prev = data.length > 1 ? data[data.length - 2] : null;
+        const latest = data[data.length - 1];
+        const prev = data.length > 1 ? data[data.length - 2] : null;
 
-      if (latest) {
-        setSummary({
-          sales: latest.total_sales,
-          orders: latest.total_orders,
-          avgOrder: latest.total_sales / latest.total_orders,
-        });
-
-        if (prev) {
-          setPercentChange({
-            sales: getPercentageChange(latest.total_sales, prev.total_sales),
-            orders: getPercentageChange(latest.total_orders, prev.total_orders),
-            avgOrder: getPercentageChange(
-              latest.total_sales / latest.total_orders,
-              prev.total_sales / prev.total_orders
-            ),
+        if (latest) {
+          setSummary({
+            sales: latest.total_sales,
+            orders: latest.total_orders,
+            avgOrder: latest.total_sales / latest.total_orders,
           });
+
+          if (prev) {
+            setPercentChange({
+              sales: getPercentageChange(latest.total_sales, prev.total_sales),
+              orders: getPercentageChange(
+                latest.total_orders,
+                prev.total_orders
+              ),
+              avgOrder: getPercentageChange(
+                latest.total_sales / latest.total_orders,
+                prev.total_sales / prev.total_orders
+              ),
+            });
+          }
         }
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error);
       }
-    });
+    };
+
+    fetchDashboardData();
   }, []);
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="loading loading-spinner loading-lg"></div>
+      </div>
+    );
+  }
+
   return (
-    <div className={` md:p-4 pt-0 md:pt-4 min-h-screen`}>
+    <div className={`md:p-4 pt-0 md:pt-4 min-h-screen`}>
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-8 md:p-0">
         <div
           onClick={() => setActiveTab("Dashboard")}
-          className="cursor-pointer mb-4 md:mb-0"
+          className="cursor-pointer"
         >
           <Title titleName={"Dashboard Overview"} />
           <p
@@ -144,48 +236,52 @@ export default function Dashboard({
             Track your store performance and metrics
           </p>
         </div>
-        <div className="lg:flex lg:flex-row flex md:flex-col flex-row gap-2">
-          <div className="form-control">
+
+        <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+          <div className="flex gap-2">
             <select
-              className={`select ${
+              className={`select select-sm ${
                 theme === "dark"
-                  ? "bg-gray-700 text-white"
-                  : "select-bordered text-white"
-              } select-sm`}
+                  ? "bg-gray-700 text-white border-gray-600"
+                  : "select-bordered text-white border-gray-300"
+              } flex-1`}
             >
               <option>This Month</option>
               <option>Last Month</option>
               <option>This Year</option>
               <option>Last Year</option>
             </select>
-          </div>
-          <button className="btn btn-sm btn-primary gap-2">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-4 w-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-              />
-            </svg>
-            Export Report
-          </button>
 
-          <label className="flex items-center gap-2">
+            <button className="btn btn-primary btn-sm gap-2 whitespace-nowrap">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                />
+              </svg>
+              Export
+            </button>
+          </div>
+
+          <label className="flex items-center gap-2 bg-base-200 px-3 py-2 rounded-lg">
             <span
-              className={theme === "dark" ? "text-gray-300" : "text-slate-700"}
+              className={
+                theme === "dark" ? "text-gray-300" : "text-slate-700 text-sm"
+              }
             >
-              Dark Mode
+              Dark
             </span>
             <input
               type="checkbox"
-              className="toggle toggle-primary"
+              className="toggle toggle-primary toggle-sm"
               checked={theme === "dark"}
               onChange={() => toggleTheme()}
             />
@@ -194,168 +290,55 @@ export default function Dashboard({
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-6">
-        {/* Stat Card 1 - Monthly Sales */}
-        <div
-          className={`${
-            theme === "dark"
-              ? "black-card text-color-black"
-              : "light-card text-slate-700"
-          } card shadow-md`}
-        >
-          <div className="card-body p-6">
-            <div className="flex justify-between items-start">
-              <div>
-                <h3
-                  className={`text-sm font-medium ${
-                    theme === "dark" ? "text-gray-400" : "text-gray-500"
-                  }`}
-                >
-                  Monthly Sales
-                </h3>
-                <p className="text-2xl font-bold mt-1">
-                  ₱{summary?.sales?.toLocaleString() ?? "0"}
-                </p>
-              </div>
-              <div
-                className={`badge badge-lg gap-1 ${
-                  percentChange.sales >= 0 ? "badge-success" : "badge-error"
-                }`}
-              >
-                {percentChange.sales >= 0 ? "↑" : "↓"}{" "}
-                {percentChange.sales.toFixed(1)}%
-              </div>
-            </div>
-            <div className="flex items-baseline mt-4">
-              <div
-                className={`text-xs ${
-                  theme === "dark" ? "text-gray-400" : "text-gray-500"
-                }`}
-              >
-                vs previous month
-              </div>
-            </div>
-          </div>
-        </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6 md:px-0">
+        <StatCard
+          title="Monthly Sales"
+          value={`₱${summary?.sales?.toLocaleString() ?? "0"}`}
+          change={percentChange.sales}
+          icon={<FiDollarSign className="w-5 h-5 text-primary" />}
+          theme={theme}
+        />
 
-        {/* Stat Card 2 - Total Orders */}
-        <div
-          className={`${
-            theme === "dark"
-              ? "black-card text-color-black"
-              : "light-card text-slate-700"
-          } card shadow-md`}
-        >
-          <div className="card-body p-6">
-            <div className="flex justify-between items-start">
-              <div className="w-full">
-                <div className="flex justify-between">
-                  <h3
-                    className={`text-sm font-medium ${
-                      theme === "dark" ? "text-gray-400" : "text-gray-500"
-                    }`}
-                  >
-                    Total Orders
-                  </h3>
-                  <div
-                    className={`badge badge-lg gap-1 ${
-                      percentChange.orders >= 0
-                        ? "badge-success"
-                        : "badge-error"
-                    }`}
-                  >
-                    {percentChange.orders >= 0 ? "↑" : "↓"}{" "}
-                    {percentChange.orders.toFixed(1)}%
-                  </div>
-                </div>
-                <p className="text-2xl font-bold mt-1">
-                  {summary?.orders ?? "0"}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-baseline mt-4">
-              <div
-                className={`text-xs ${
-                  theme === "dark" ? "text-gray-400" : "text-gray-500"
-                }`}
-              >
-                vs previous month
-              </div>
-            </div>
-          </div>
-        </div>
+        <StatCard
+          title="Total Orders"
+          value={summary?.orders ?? "0"}
+          change={percentChange.orders}
+          icon={<FiShoppingCart className="w-5 h-5 text-primary" />}
+          theme={theme}
+        />
 
-        {/* Stat Card 3 - Avg. Order Value */}
-        <div
-          className={`${
-            theme === "dark"
-              ? "black-card text-color-black"
-              : "light-card text-slate-700"
-          } card shadow-md`}
-        >
-          <div className="card-body p-6">
-            <div className="flex justify-between items-start">
-              <div className="w-full">
-                <div className="flex justify-between">
-                  <h3
-                    className={`text-sm font-medium ${
-                      theme === "dark" ? "text-gray-400" : "text-gray-500"
-                    }`}
-                  >
-                    Avg. Order Val
-                  </h3>
-                  <div
-                    className={`badge badge-lg gap-1 ${
-                      percentChange.avgOrder >= 0
-                        ? "badge-success"
-                        : "badge-error"
-                    }`}
-                  >
-                    {percentChange.avgOrder >= 0 ? "↑" : "↓"}{" "}
-                    {percentChange.avgOrder.toFixed(1)}%
-                  </div>
-                </div>
-                <p className="text-2xl font-bold mt-1">
-                  ₱{summary?.avgOrder?.toFixed(2) ?? "0"}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-baseline mt-4">
-              <div
-                className={`text-xs ${
-                  theme === "dark" ? "text-gray-400" : "text-gray-500"
-                }`}
-              >
-                vs previous month
-              </div>
-            </div>
-          </div>
-        </div>
+        <StatCard
+          title="Avg. Order Value"
+          value={`₱${summary?.avgOrder?.toFixed(2) ?? "0"}`}
+          change={percentChange.avgOrder}
+          icon={<FiTrendingUp className="w-5 h-5 text-primary" />}
+          theme={theme}
+        />
       </div>
 
-      {/* Main Content */}
-      <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Profit Chart */}
-        <div className="lg:col-span-2">
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6  md:px-0">
+        {/* Profit Chart - Full width on mobile, 2/3 on desktop */}
+        <div className="xl:col-span-2">
           <div
             className={`${
               theme === "dark"
                 ? "black-card text-color-black"
                 : "light-card text-slate-700"
-            } card shadow-md`}
+            } card shadow-lg h-full`}
           >
             <div className="card-body">
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                 <h3 className="text-lg font-semibold">Profit Overview</h3>
                 <button
-                  disabled={["Admin", "Staff"].includes(role)}
+                  disabled={!["Admin", "Staff"].includes(role)}
                   onClick={() => setActiveTab("View All")}
                   className="btn btn-neutral btn-sm"
                 >
                   View All Data
                 </button>
               </div>
-              <div className="h-fit">
+              <div className="h-64 sm:h-80">
                 <Profit
                   gross={profitData.gross}
                   net={profitData.net}
@@ -368,146 +351,190 @@ export default function Dashboard({
           </div>
         </div>
 
-        {/* Top Items */}
-        <div
-          className={`${
-            theme === "dark"
-              ? "black-card text-color-black"
-              : "light-card text-slate-700"
-          } card h-fit shadow-md`}
-        >
-          <div className="card-body">
-            <h3 className="card-title text-lg mb-6">Top Selling Items</h3>
-            {topItems.length <= 0 ? (
-              <div
-                className={`flex flex-col items-center justify-center py-4 mb-4 px-4 text-center rounded-lg border border-dashed ${
-                  theme === "dark"
-                    ? "bg-gray-800 border-gray-700"
-                    : "bg-gray-50 border-gray-300"
-                }`}
-              >
-                <div
-                  className={`mb-4 p-4 rounded-full ${
-                    theme === "dark" ? "bg-blue-900" : "bg-blue-50"
-                  }`}
-                >
-                  <FiBox className="h-8 w-8 text-blue-500" />
-                </div>
-                <h3
-                  className={`text-lg font-medium mb-2 ${
-                    theme === "dark" ? "text-gray-200" : "text-gray-900"
-                  }`}
-                >
-                  No top items yet
-                </h3>
-                <p
-                  className={`max-w-md mb-4 ${
-                    theme === "dark" ? "text-gray-400" : "text-gray-500"
-                  }`}
-                >
-                  When you start making sales, your top performing items will
-                  appear here. Start by adding products to your inventory.
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-5 pb-10">
-                {topItems.slice(0, 4).map((item, index) => (
+        {/* Top Items - Full width on mobile, 1/3 on desktop */}
+        <div className="xl:col-span-1">
+          <div
+            className={`${
+              theme === "dark"
+                ? "black-card text-color-black"
+                : "light-card text-slate-700"
+            } card shadow-lg h-full`}
+          >
+            <div className="card-body flex flex-col">
+              <h3 className="card-title text-lg mb-6">Top Selling Items</h3>
+
+              {topItems.length <= 0 ? (
+                <div className="flex-1 flex flex-col items-center justify-center py-8 text-center">
                   <div
-                    key={item.item_id}
-                    className="flex items-center justify-between"
+                    className={`mb-4 p-4 rounded-full ${
+                      theme === "dark" ? "bg-blue-900" : "bg-blue-50"
+                    }`}
                   >
-                    <div className="flex items-center">
-                      <div
-                        className={`w-10 h-10 rounded-lg flex items-center justify-center mr-3 ${
-                          index === 0
-                            ? "bg-blue-100 text-blue-600"
-                            : index === 1
-                            ? "bg-purple-100 text-purple-600"
-                            : index === 2
-                            ? "bg-amber-100 text-amber-600"
-                            : "bg-gray-100 text-gray-600"
-                        }`}
-                      >
-                        <span className="font-bold">{index + 1}</span>
-                      </div>
-                      <div>
-                        <p className="font-medium">{item.product_name}</p>
-                        <p
-                          className={`text-xs ${
-                            theme === "dark" ? "text-gray-400" : "text-gray-500"
+                    <FiBox className="h-8 w-8 text-blue-500" />
+                  </div>
+                  <h3
+                    className={`text-lg font-medium mb-2 ${
+                      theme === "dark" ? "text-gray-200" : "text-gray-900"
+                    }`}
+                  >
+                    No top items yet
+                  </h3>
+                  <p
+                    className={`max-w-md mb-4 text-sm ${
+                      theme === "dark" ? "text-gray-400" : "text-gray-500"
+                    }`}
+                  >
+                    When you start making sales, your top performing items will
+                    appear here.
+                  </p>
+                </div>
+              ) : (
+                <div className="flex-1 space-y-4 pb-4">
+                  {topItems.slice(0, 4).map((item, index) => (
+                    <div
+                      key={item.item_id}
+                      className="flex items-center justify-between p-3 rounded-lg hover:bg-base-200 transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                            index === 0
+                              ? "bg-blue-100 text-blue-600"
+                              : index === 1
+                              ? "bg-purple-100 text-purple-600"
+                              : index === 2
+                              ? "bg-amber-100 text-amber-600"
+                              : "bg-gray-100 text-gray-600"
                           }`}
                         >
-                          {item.total_quantity} sold
-                        </p>
+                          <span className="font-bold text-sm">{index + 1}</span>
+                        </div>
+                        <div className="max-w-[120px] sm:max-w-none">
+                          <p className="font-medium truncate">
+                            {item.product_name}
+                          </p>
+                          <p
+                            className={`text-xs ${
+                              theme === "dark"
+                                ? "text-gray-400"
+                                : "text-gray-500"
+                            }`}
+                          >
+                            {item.total_quantity} sold
+                          </p>
+                        </div>
                       </div>
+                      <span className="font-semibold text-sm">
+                        ₱{item.total_sales}
+                      </span>
                     </div>
-                    <span className="font-semibold">₱ {item.total_sales}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-            <button
-              onClick={() => setActiveTab("Products")}
-              className="btn btn-primary btn-sm gap-2 self-center"
-            >
-              View All Products
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
+                  ))}
+                </div>
+              )}
+
+              <button
+                onClick={() => setActiveTab("Products")}
+                className="btn btn-primary btn-sm gap-2 mt-auto"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
-            </button>
+                View All Products
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Recent Activity Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mt-6  md:px-0">
         {/* Recent Orders */}
         <div
-          className={`${
-            theme === "dark"
-              ? "black-card text-color-black"
-              : "light-card text-slate-700"
-          } card shadow-md`}
+          className={`
+    rounded-xl border border-gray-200 shadow-lg
+    ${
+      theme === "dark"
+        ? "bg-gray-800 border-gray-700 text-white"
+        : "bg-white text-slate-700"
+    }
+  `}
         >
-          <div className="card-body">
-            <h3 className="card-title text-lg mb-6">Recent Orders</h3>
+          <div className="p-6">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-lg font-semibold">Recent Orders</h3>
+              <span
+                className={`
+          text-sm px-2 py-1 rounded-full
+          ${
+            theme === "dark"
+              ? "text-gray-400 bg-gray-700"
+              : "text-gray-500 bg-gray-100"
+          }
+        `}
+              >
+                {recentOrder.length} orders
+              </span>
+            </div>
             <div className="overflow-x-auto">
-              <table className="table table-zebra table-sm">
+              <table className="w-full">
                 <thead>
                   <tr
-                    className={`${
-                      theme === "dark" ? " text-color-black" : " text-slate-700"
-                    } `}
+                    className={`
+              border-b
+              ${
+                theme === "dark"
+                  ? "border-gray-700 text-gray-400"
+                  : "border-gray-200 text-gray-600"
+              }
+            `}
                   >
-                    <th>Order ID</th>
-                    <th>Customer</th>
-                    <th>Amount</th>
+                    <th className="text-left py-3 px-2 font-medium">
+                      Order ID
+                    </th>
+                    <th className="text-left py-3 px-2 font-medium">
+                      Customer
+                    </th>
+                    <th className="text-left py-3 px-2 font-medium">Amount</th>
                   </tr>
                 </thead>
-
-                <tbody
-                  className={`${
-                    theme === "dark"
-                      ? "[&>tr:nth-child(even)]:bg-gray-700 [&>tr:nth-child(odd)]:bg-gray-800"
-                      : "[&>tr:nth-child(even)]:bg-slate-100 [&>tr:nth-child(odd)]:bg-white"
-                  }`}
-                >
-                  {recentOrder.map((order) => (
-                    <tr key={order.id}>
-                      <td>#ORD-{order.id}</td>
-                      <td>{order.customer_name}</td>
-                      <td>₱ {order.total}</td>
+                <tbody>
+                  {recentOrder.slice(0, 5).map((order, index) => (
+                    <tr
+                      key={order.id}
+                      className={`
+                  transition-colors duration-200
+                  ${
+                    index % 2 === 0
+                      ? theme === "dark"
+                        ? "bg-gray-750 hover:bg-gray-700"
+                        : "bg-gray-50 hover:bg-gray-100"
+                      : theme === "dark"
+                      ? "bg-gray-800 hover:bg-gray-700"
+                      : "bg-white hover:bg-gray-100"
+                  }
+                  ${theme === "dark" ? "border-gray-700" : "border-gray-200"}
+                `}
+                    >
+                      <td className="py-3 px-2 font-mono text-sm">
+                        #ORD-{order.id}
+                      </td>
+                      <td className="py-3 px-2 max-w-[100px] truncate">
+                        {order.customer_name}
+                      </td>
+                      <td className="py-3 px-2 font-semibold">
+                        ₱{order.total}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -516,58 +543,128 @@ export default function Dashboard({
           </div>
         </div>
 
-        {/* Recent Activity */}
+        {/* Quick Stats */}
         <div
-          className={`${
-            theme === "dark"
-              ? "black-card text-color-black"
-              : "light-card text-slate-700"
-          } card shadow-md`}
+          className={`
+    rounded-xl border border-gray-200 shadow-lg
+    ${
+      theme === "dark"
+        ? "bg-gray-800 border-gray-700 text-white"
+        : "bg-white text-slate-700"
+    }
+  `}
         >
-          <div className="card-body">
-            <h3 className="card-title text-lg mb-6">Recent Activity</h3>
-            <div className="overflow-x-auto">
-              <table className="table table-zebra table-sm">
-                <thead>
-                  <tr
-                    className={`${
-                      theme === "dark" ? " text-color-black" : " text-slate-700"
-                    } `}
-                  >
-                    <th>Order ID</th>
-                    <th>Customer</th>
-                    <th>Amount</th>
-                  </tr>
-                </thead>
-                <tbody
-                  className={`${
-                    theme === "dark"
-                      ? "[&>tr:nth-child(even)]:bg-gray-700 [&>tr:nth-child(odd)]:bg-gray-800"
-                      : "[&>tr:nth-child(even)]:bg-slate-100 [&>tr:nth-child(odd)]:bg-white"
+          <div className="p-6">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-lg font-semibold">Quick Stats</h3>
+              <FiPackage
+                className={`w-5 h-5 ${
+                  theme === "dark" ? "text-gray-400" : "text-gray-500"
+                }`}
+              />
+            </div>
+            <div className="space-y-3">
+              {/* Total Products */}
+              <div
+                className={`
+          flex justify-between items-center p-3 rounded-lg transition-colors duration-200
+          ${
+            theme === "dark"
+              ? "bg-gray-700 hover:bg-gray-600"
+              : "bg-gray-50 hover:bg-gray-100"
+          }
+        `}
+              >
+                <span className="flex items-center gap-2">
+                  <div
+                    className={`w-2 h-2 rounded-full ${
+                      theme === "dark" ? "bg-blue-400" : "bg-blue-500"
+                    }`}
+                  ></div>
+                  Total Products
+                </span>
+                <span className="font-semibold">{totals?.products || 0}</span>
+              </div>
+
+              {/* Low Stock Items */}
+              <div
+                className={`
+          flex justify-between items-center p-3 rounded-lg transition-colors duration-200
+          ${
+            theme === "dark"
+              ? "bg-gray-700 hover:bg-gray-600"
+              : "bg-gray-50 hover:bg-gray-100"
+          }
+        `}
+              >
+                <span className="flex items-center gap-2">
+                  <div
+                    className={`w-2 h-2 rounded-full ${
+                      theme === "dark" ? "bg-yellow-400" : "bg-yellow-500"
+                    }`}
+                  ></div>
+                  Low Stock Items
+                </span>
+                <span
+                  className={`font-semibold ${
+                    theme === "dark" ? "text-yellow-300" : "text-yellow-600"
                   }`}
                 >
-                  <tr>
-                    <td>#ORD-7829</td>
-                    <td>John Smith</td>
-                    <td>$245.50</td>
-                  </tr>
-                  <tr>
-                    <td>#ORD-7828</td>
-                    <td>Sarah Johnson</td>
-                    <td>$87.99</td>
-                  </tr>
-                  <tr>
-                    <td>#ORD-7827</td>
-                    <td>Michael Brown</td>
-                    <td>$152.75</td>
-                  </tr>
-                  <tr>
-                    <td>#ORD-7826</td>
-                    <td>Emily Davis</td>
-                    <td>$499.99</td>
-                  </tr>
-                </tbody>
-              </table>
+                  {totals?.lowStock || 0}
+                </span>
+              </div>
+
+              {/* Today's Orders */}
+              <div
+                className={`
+          flex justify-between items-center p-3 rounded-lg transition-colors duration-200
+          ${
+            theme === "dark"
+              ? "bg-gray-700 hover:bg-gray-600"
+              : "bg-gray-50 hover:bg-gray-100"
+          }
+        `}
+              >
+                <span className="flex items-center gap-2">
+                  <div
+                    className={`w-2 h-2 rounded-full ${
+                      theme === "dark" ? "bg-green-400" : "bg-green-500"
+                    }`}
+                  ></div>
+                  Today's Orders
+                </span>
+                <span className="font-semibold">
+                  {totals?.todayOrders || 0}
+                </span>
+              </div>
+
+              {/* Pending Orders */}
+              <div
+                className={`
+          flex justify-between items-center p-3 rounded-lg transition-colors duration-200
+          ${
+            theme === "dark"
+              ? "bg-gray-700 hover:bg-gray-600"
+              : "bg-gray-50 hover:bg-gray-100"
+          }
+        `}
+              >
+                <span className="flex items-center gap-2">
+                  <div
+                    className={`w-2 h-2 rounded-full ${
+                      theme === "dark" ? "bg-cyan-400" : "bg-cyan-500"
+                    }`}
+                  ></div>
+                  Pending Orders
+                </span>
+                <span
+                  className={`font-semibold ${
+                    theme === "dark" ? "text-cyan-300" : "text-cyan-600"
+                  }`}
+                >
+                  {totals?.pendingOrders || 0}
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -575,7 +672,9 @@ export default function Dashboard({
 
       {/* View All Link */}
       <div
-        className={`${role === "Admin" ? "hidden" : "block"} mt-8 text-center`}
+        className={`${
+          role === "Admin" ? "hidden" : "block"
+        } mt-8 text-center px-4 md:px-0`}
       >
         <button
           onClick={() => setActiveTab("View All")}
