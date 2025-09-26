@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Profit from "../../components/UI/Charts/PieChart";
 import Title from "../../components/UI/Title";
 import axios from "axios";
@@ -14,6 +14,7 @@ import {
   FiPackage,
 } from "react-icons/fi";
 import { useTheme } from "../../Main/ThemeContext";
+import Loader from "../../components/UI/loaders/Loader";
 
 const socket = io("https://caferealitea.onrender.com");
 
@@ -96,6 +97,9 @@ export default function Dashboard({
   const [recentOrder, setRecentOrder] = useState([]);
   const [role, setRole] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [pendingOrder, setPendingOrder] = useState(0);
+  const socketRef = useRef(null);
+  const [productCount, setProductCount] = useState();
 
   const { theme, setTheme } = useTheme();
   const toggleTheme = () => {
@@ -108,6 +112,14 @@ export default function Dashboard({
     equipments: 0,
     packaging_cost: 0,
   });
+
+  useEffect(() => {
+    axios
+      .get("https://caferealitea.onrender.com/products", {
+        withCredentials: true,
+      })
+      .then((res) => setProductCount(res.data.length));
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -211,12 +223,53 @@ export default function Dashboard({
     fetchDashboardData();
   }, []);
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="loading loading-spinner loading-lg"></div>
-      </div>
+  //fetch pending order length
+  useEffect(() => {
+    const fetchInitialNotifications = async () => {
+      try {
+        const res = await fetch(
+          "https://caferealitea.onrender.com/pending-orders",
+          {
+            credentials: "include",
+          }
+        );
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data)) setPendingOrder(data.length);
+        }
+      } catch (err) {
+        console.error("Error fetching initial notifications:", err);
+      }
+    };
+
+    fetchInitialNotifications();
+
+    // Initialize socket
+    socketRef.current = io("https://caferealitea.onrender.com", {
+      withCredentials: true,
+    });
+
+    const updateNotifications = (data, increment = 0) => {
+      if (typeof data.count === "number") setPendingOrder(data.count);
+      else setNotifications((prev) => prev + increment);
+    };
+
+    socketRef.current.on("new_pending_order", (data) =>
+      updateNotifications(data, 1)
     );
+    socketRef.current.on("order_cancelled", (data) =>
+      updateNotifications(data, -1)
+    );
+    socketRef.current.on("order_confirmed", (data) =>
+      updateNotifications(data, -1)
+    );
+
+    // Cleanup
+    return () => socketRef.current.disconnect();
+  }, []);
+
+  if (isLoading) {
+    return <Loader />;
   }
 
   return (
@@ -583,7 +636,7 @@ export default function Dashboard({
                   ></div>
                   Total Products
                 </span>
-                <span className="font-semibold">{totals?.products || 0}</span>
+                <span className="font-semibold">{productCount}</span>
               </div>
 
               {/* Low Stock Items */}
@@ -662,7 +715,7 @@ export default function Dashboard({
                     theme === "dark" ? "text-cyan-300" : "text-cyan-600"
                   }`}
                 >
-                  {totals?.pendingOrders || 0}
+                  {pendingOrder}
                 </span>
               </div>
             </div>
