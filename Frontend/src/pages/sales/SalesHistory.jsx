@@ -163,11 +163,10 @@ export default function SalesHistory({
       const query = searchQuery.toLowerCase();
       result = result.filter(
         (item) =>
-          item.id.toString().includes(query) ||
           (item.order_type && item.order_type.toLowerCase().includes(query)) ||
           (item.payment_method &&
             item.payment_method.toLowerCase().includes(query)) ||
-          (item.total && item.total.toString().includes(query))
+          item.order_time_raw.toString().includes(query)
       );
     }
 
@@ -656,13 +655,13 @@ export default function SalesHistory({
             )}
           </div>
         ) : (
-          <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
+          <div className="bg-white rounded-xl min-h-[fit-content] max-h-[400px] shadow-md overflow-x-scroll border border-gray-100">
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-50">
+                <thead className="bg-gray-50 ">
                   <tr>
                     <th
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                      className="px-6 py-3  text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
                       onClick={() => handleSort("order_time")}
                     >
                       <div className="flex items-center">

@@ -3,51 +3,49 @@ import Loader from "../../components/UI/loaders/Loader"; // Adjust path as neede
 import ProductPage from "../products/products";
 import { useTheme } from "../../Main/ThemeContext";
 
-const ViewAll = lazy(() => import("./view_all_data"))
-const Dashboard = lazy(() => import("./dashboard"))
+const ViewAll = lazy(() => import("./view_all_data"));
+const Dashboard = lazy(() => import("./dashboard"));
 
 export default function MainDashboard({ activeTab, setActiveTab }) {
   const [isLoading, setIsLoading] = useState(true);
   const [dashboardData, setDashboardData] = useState(null);
   const [loadedTabs, setLoadedTabs] = useState(new Set(["Dashboard"])); // Track loaded tabs
   const [financialData, setFinancialData] = useState(null);
-  
 
   const handleFinancialDataUpdate = (data) => {
-  setFinancialData(data);
+    setFinancialData(data);
 
-  const totals = {
-    sales: data?.totalSales || 0,
-    orders: data?.totalOrders || 0,
-    revenue: data?.totalRevenue || 0,
+    const totals = {
+      sales: data?.totalSales || 0,
+      orders: data?.totalOrders || 0,
+      revenue: data?.totalRevenue || 0,
+    };
+
+    setDashboardData((prev) => ({ ...prev, financialTotals: totals }));
   };
-
-  setDashboardData(prev => ({ ...prev, financialTotals: totals }));
-};
-
 
   const handleTabChange = (tabName) => {
     setActiveTab(tabName);
-    
+
     // Add the tab to loaded tabs if it hasn't been loaded yet
     if (!loadedTabs.has(tabName)) {
-      setLoadedTabs(prev => new Set([...prev, tabName]));
+      setLoadedTabs((prev) => new Set([...prev, tabName]));
     }
   };
 
   const renderComponent = (tabName, Component) => {
     return (
       <div style={{ display: activeTab === tabName ? "block" : "none" }}>
-        {tabName === 'Dashboard' ? (
-          <Dashboard 
-            setActiveTab={setActiveTab} 
+        {tabName === "Dashboard" ? (
+          <Dashboard
+            setActiveTab={setActiveTab}
             activeTab={activeTab}
             totals={dashboardData?.financialTotals || {}}
             financialData={financialData} // Pass the full financial data if needed
           />
         ) : (
-          <ViewAll 
-            setActiveTab={setActiveTab} 
+          <ViewAll
+            setActiveTab={setActiveTab}
             activeTab={activeTab}
             onDataUpdate={handleFinancialDataUpdate} // Pass callback to receive data
           />
@@ -56,20 +54,19 @@ export default function MainDashboard({ activeTab, setActiveTab }) {
     );
   };
 
-
   // Simulate data fetching
   useEffect(() => {
     const fetchData = async () => {
       try {
         // Simulate API call delay
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+
         // Replace with a   ctual data fetching
         const mockData = {
           message: "Dashboard data loaded successfully",
-          stats: { users: 150, orders: 320, revenue: "$15,230" }
+          stats: { users: 150, orders: 320, revenue: "$15,230" },
         };
-        
+
         setDashboardData(mockData);
       } catch (error) {
         console.error("Failed to load dashboard data:", error);
@@ -86,15 +83,13 @@ export default function MainDashboard({ activeTab, setActiveTab }) {
   }
 
   return (
-      <div className={` w-full min-hfitscreen `}>
-          <main>
-            <Suspense fallback={<Loader />}>
-              {renderComponent('Dashboard', Dashboard)}
-              {renderComponent('View All', ViewAll)}
-            </Suspense>
-
-            
-          </main>
-      </div>
-    );
+    <div className={` w-full min-hfitscreen `}>
+      <main>
+        <Suspense fallback={<Loader />}>
+          {renderComponent("Dashboard", Dashboard)}
+          {renderComponent("View All", ViewAll)}
+        </Suspense>
+      </main>
+    </div>
+  );
 }
