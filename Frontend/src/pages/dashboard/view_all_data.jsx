@@ -1,6 +1,12 @@
 import { useState, useEffect, useMemo } from "react";
 import axios from "axios";
-import { FiPlus, FiEdit, FiTrash2, FiDollarSign } from "react-icons/fi";
+import {
+  FiPlus,
+  FiEdit,
+  FiTrash2,
+  FiDollarSign,
+  FiCalendar,
+} from "react-icons/fi";
 import {
   LineChart,
   Line,
@@ -336,6 +342,10 @@ const CustomTooltip = ({ active, payload, label, formatCurrency, theme }) => {
 // ----------------- Main Component -----------------
 export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
   const [timeRange, setTimeRange] = useState("monthly");
+  const [selectedMonth, setSelectedMonth] = useState("");
+  const [selectedYear, setSelectedYear] = useState("");
+  const [availableMonths, setAvailableMonths] = useState([]);
+  const [availableYears, setAvailableYears] = useState([]);
   const [salesData, setSalesData] = useState([]);
   const [equipment, setEquipment] = useState([]);
   const [grossProfit, setGrossProfit] = useState([]);
@@ -362,7 +372,52 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
 
   const api = import.meta.env.VITE_SERVER_API_NAME;
 
-  // Fetch sales data
+  // Get current date for default selections
+  const currentDate = new Date();
+  const currentYear = currentDate.getFullYear();
+  const currentMonth = currentDate.getMonth() + 1;
+
+  // Fetch all sales data to get available months and years
+  useEffect(() => {
+    const fetchAvailablePeriods = async () => {
+      try {
+        const res = await axios.get(`${api}/summaries/daily`);
+        if (Array.isArray(res.data)) {
+          // Extract unique years and months
+          const years = new Set();
+          const months = new Set();
+
+          res.data.forEach((item) => {
+            if (item.day) {
+              const date = new Date(item.day);
+              years.add(date.getFullYear());
+              months.add(date.getMonth() + 1);
+            }
+          });
+
+          const sortedYears = Array.from(years).sort((a, b) => b - a);
+          const sortedMonths = Array.from(months).sort((a, b) => a - b);
+
+          setAvailableYears(sortedYears);
+          setAvailableMonths(sortedMonths);
+
+          // Set default selections
+          if (!selectedYear && sortedYears.length > 0) {
+            setSelectedYear(sortedYears[0]);
+          }
+          if (!selectedMonth && sortedMonths.length > 0) {
+            setSelectedMonth(sortedMonths[0]);
+          }
+        }
+      } catch (err) {
+        console.error("Error fetching available periods:", err);
+      }
+    };
+
+    fetchAvailablePeriods();
+  }, []);
+
+  // Fetch sales data based on selected time range and period
   useEffect(() => {
     const fetchSales = async () => {
       setLoading(true);
@@ -370,7 +425,25 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
       try {
         let endpoint = `${api}/summaries/${timeRange}`;
         const res = await axios.get(endpoint);
-        setSalesData(Array.isArray(res.data) ? res.data : []);
+        let filteredData = Array.isArray(res.data) ? res.data : [];
+
+        // Filter data based on selected period
+        if (timeRange === "daily" && selectedMonth && selectedYear) {
+          filteredData = filteredData.filter((item) => {
+            if (!item.day) return false;
+            const date = new Date(item.day);
+            return (
+              date.getFullYear() === parseInt(selectedYear) &&
+              date.getMonth() + 1 === parseInt(selectedMonth)
+            );
+          });
+        } else if (timeRange === "monthly" && selectedYear) {
+          filteredData = filteredData.filter(
+            (item) => item.year === parseInt(selectedYear)
+          );
+        }
+
+        setSalesData(filteredData);
       } catch (err) {
         console.error("Error fetching sales data:", err);
         setError("Failed to load sales data");
@@ -380,13 +453,13 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
       }
     };
     fetchSales();
-  }, [timeRange]);
+  }, [timeRange, selectedMonth, selectedYear]);
 
-  // Fetch equipment costs (filtered)
+  // Fetch equipment costs (all data, not filtered by time)
   useEffect(() => {
     const fetchEquipment = async () => {
       try {
-        const res = await axios.get(`${api}/equipment/${timeRange}`);
+        const res = await axios.get(`${api}/equipment`);
         const equipmentData = Array.isArray(res.data)
           ? res.data.map((item) => ({
               ...item,
@@ -400,13 +473,13 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
       }
     };
     fetchEquipment();
-  }, [timeRange]);
+  }, []);
 
-  // Fetch gross profit (filtered)
+  // Fetch gross profit (all data, not filtered by time)
   useEffect(() => {
     const fetchGrossProfit = async () => {
       try {
-        const res = await axios.get(`${api}/gross-profit/${timeRange}`);
+        const res = await axios.get(`${api}/gross-profit`);
         const grossProfitData = Array.isArray(res.data)
           ? res.data.map((item) => ({
               ...item,
@@ -420,7 +493,7 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
       }
     };
     fetchGrossProfit();
-  }, [timeRange]);
+  }, []);
 
   // Fetch packaging costs
   useEffect(() => {
@@ -445,7 +518,66 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
     fetchPackagingCosts();
   }, []);
 
-  // Add this function inside your ViewAllData component, before the return statement
+  // Calculate net profit with time-range specific filtering
+  useEffect(() => {
+    const calculateNetProfit = () => {
+      if (!salesData.length) return [];
+
+      // Get total equipment cost (global, not filtered)
+      const totalEquipment = equipment.reduce(
+        (sum, e) => sum + (parseFloat(e.price) || 0),
+        0
+      );
+
+      return salesData.map((sale) => {
+        // Filter gross profit by the same time period as the sale
+        let periodGrossProfit = 0;
+
+        if (timeRange === "daily") {
+          const saleDateStr = sale.day;
+          periodGrossProfit = grossProfit
+            .filter((g) => {
+              const gDate = new Date(g.created_at || g.updated_at);
+              const gDateStr = gDate.toISOString().split("T")[0];
+              return gDateStr === saleDateStr;
+            })
+            .reduce((sum, g) => sum + (parseFloat(g.amount) || 0), 0);
+        } else if (timeRange === "monthly") {
+          periodGrossProfit = grossProfit
+            .filter((g) => {
+              const gDate = new Date(g.created_at || g.updated_at);
+              return (
+                gDate.getFullYear() === sale.year &&
+                gDate.getMonth() + 1 === sale.month
+              );
+            })
+            .reduce((sum, g) => sum + (parseFloat(g.amount) || 0), 0);
+        } else if (timeRange === "yearly") {
+          periodGrossProfit = grossProfit
+            .filter(
+              (g) =>
+                new Date(g.created_at || g.updated_at).getFullYear() ===
+                sale.year
+            )
+            .reduce((sum, g) => sum + (parseFloat(g.amount) || 0), 0);
+        }
+
+        return {
+          ...sale,
+          gross_profit: periodGrossProfit,
+          net_profit:
+            (sale.revenue || 0) -
+            totalEquipment -
+            periodGrossProfit -
+            (sale.packaging_cost || 0),
+        };
+      });
+    };
+
+    setNetProfit(calculateNetProfit());
+  }, [salesData, equipment, grossProfit, timeRange]);
+
+  // Generate Excel report
   const generateExcelReceipt = () => {
     // Create workbook
     const workbook = XLSX.utils.book_new();
@@ -455,6 +587,8 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
       ["FINANCIAL REPORT - SUMMARY"],
       ["Generated Date:", new Date().toLocaleDateString()],
       ["Time Range:", timeRange.charAt(0).toUpperCase() + timeRange.slice(1)],
+      timeRange === "daily" ? ["Month:", selectedMonth] : [],
+      timeRange !== "yearly" ? ["Year:", selectedYear] : [],
       [],
       ["FINANCIAL OVERVIEW", ""],
       ["Total Sales:", totalSales],
@@ -559,72 +693,17 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
 
     // Generate filename with timestamp
     const timestamp = new Date().toISOString().split("T")[0];
-    const filename = `Financial_Report_${timeRange}_${timestamp}.xlsx`;
+    const periodInfo =
+      timeRange === "daily"
+        ? `${selectedYear}-${selectedMonth}`
+        : timeRange === "monthly"
+        ? selectedYear
+        : "all";
+    const filename = `Financial_Report_${timeRange}_${periodInfo}_${timestamp}.xlsx`;
 
     // Download the file
     XLSX.writeFile(workbook, filename);
   };
-
-  // Calculate net profit with time-range specific filtering
-  useEffect(() => {
-    const calculateNetProfit = () => {
-      if (!salesData.length) return [];
-
-      return salesData.map((sale) => {
-        // Filter equipment costs by date if needed
-        const totalEquipment = equipment.reduce(
-          (sum, e) => sum + (parseFloat(e.price) || 0),
-          0
-        );
-
-        // Filter gross profit by the same time period as the sale
-        let periodGrossProfit = 0;
-
-        if (timeRange === "daily") {
-          const saleDateStr = sale.day;
-
-          periodGrossProfit = grossProfit
-            .filter((g) => {
-              const gDate = new Date(g.created_at || g.updated_at);
-              const gDateStr = gDate.toISOString().split("T")[0];
-              return gDateStr === saleDateStr;
-            })
-            .reduce((sum, g) => sum + (parseFloat(g.amount) || 0), 0);
-        } else if (timeRange === "monthly") {
-          const saleDate = new Date(sale.year, sale.month - 1);
-          periodGrossProfit = grossProfit
-            .filter((g) => {
-              const gDate = new Date(g.created_at || g.updated_at);
-              return (
-                gDate.getFullYear() === saleDate.getFullYear() &&
-                gDate.getMonth() === saleDate.getMonth()
-              );
-            })
-            .reduce((sum, g) => sum + (parseFloat(g.amount) || 0), 0);
-        } else if (timeRange === "yearly") {
-          periodGrossProfit = grossProfit
-            .filter(
-              (g) =>
-                new Date(g.created_at || g.updated_at).getFullYear() ===
-                sale.year
-            )
-            .reduce((sum, g) => sum + (parseFloat(g.amount) || 0), 0);
-        }
-
-        return {
-          ...sale,
-          gross_profit: periodGrossProfit,
-          net_profit:
-            (sale.revenue || 0) -
-            totalEquipment -
-            periodGrossProfit -
-            (sale.packaging_cost || 0),
-        };
-      });
-    };
-
-    setNetProfit(calculateNetProfit());
-  }, [salesData, equipment, grossProfit, timeRange]);
 
   // Handlers for saving and deleting data
   const saveEquipment = async (item) => {
@@ -730,7 +809,7 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
     }).format(amount || 0);
   };
 
-  // Calculate totals with time-range filtering
+  // Calculate totals
   const totalEquipmentCost = useMemo(() => {
     return equipment.reduce(
       (sum, item) => sum + (parseFloat(item.price) || 0),
@@ -739,39 +818,11 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
   }, [equipment]);
 
   const totalGrossProfit = useMemo(() => {
-    if (timeRange === "daily") {
-      const salesDates = salesData.map((sale) => sale.day);
-      return grossProfit
-        .filter((g) => {
-          const gDate = new Date(g.created_at || g.updated_at);
-          const gDateStr = gDate.toISOString().split("T")[0];
-          return salesDates.includes(gDateStr);
-        })
-        .reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
-    } else if (timeRange === "monthly") {
-      const salesMonths = salesData.map((sale) => `${sale.year}-${sale.month}`);
-      return grossProfit
-        .filter((g) => {
-          const gDate = new Date(g.created_at || g.updated_at);
-          const gMonth = `${gDate.getFullYear()}-${gDate.getMonth() + 1}`;
-          return salesMonths.includes(gMonth);
-        })
-        .reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
-    } else if (timeRange === "yearly") {
-      const salesYears = salesData.map((sale) => sale.year);
-      return grossProfit
-        .filter((g) => {
-          const gYear = new Date(g.created_at || g.updated_at).getFullYear();
-          return salesYears.includes(gYear);
-        })
-        .reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
-    }
-
     return grossProfit.reduce(
       (sum, item) => sum + (parseFloat(item.amount) || 0),
       0
     );
-  }, [grossProfit, timeRange, salesData]);
+  }, [grossProfit]);
 
   const totalPackagingCost = useMemo(() => {
     return salesData.reduce(
@@ -794,19 +845,41 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
   }, [totalSales, totalEquipmentCost, totalGrossProfit, totalPackagingCost]);
 
   // Prepare data for Recharts chart
-  const chartData = netProfit.map((item) => ({
-    name:
-      timeRange === "daily"
-        ? `Day ${item.day}`
-        : timeRange === "monthly"
-        ? `Month ${item.month}`
-        : `Year ${item.year}`,
-    revenue: parseFloat(item.revenue) || 0,
-    packaging_cost: parseFloat(item.packaging_cost) || 0,
-    gross_profit: parseFloat(item.gross_profit) || 0,
-    net_profit: parseFloat(item.net_profit) || 0,
-  }));
+  const chartData = netProfit.map((item) => {
+    let name;
+    if (timeRange === "daily") {
+      const date = new Date(item.day);
+      name = `Day ${date.getDate()}`;
+    } else if (timeRange === "monthly") {
+      const monthNames = [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+      ];
+      name = monthNames[item.month - 1];
+    } else {
+      name = `Year ${item.year}`;
+    }
 
+    return {
+      name,
+      revenue: parseFloat(item.revenue) || 0,
+      packaging_cost: parseFloat(item.packaging_cost) || 0,
+      gross_profit: parseFloat(item.gross_profit) || 0,
+      net_profit: parseFloat(item.net_profit) || 0,
+    };
+  });
+
+  // Update parent component with data
   useEffect(() => {
     if (onDataUpdate) {
       onDataUpdate({
@@ -825,6 +898,22 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
     totalPackagingCost,
     onDataUpdate,
   ]);
+
+  // Month names for display
+  const monthNames = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
 
   if (loading) {
     return (
@@ -896,9 +985,10 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
           </div>
         </div>
 
-        <div className="flex gap-2 items-center mt-4">
+        <div className="flex flex-wrap gap-2 items-center mt-4">
+          {/* Time Range Selector */}
           <select
-            className={`select select-sm text-white md:mt-0 ${
+            className={`select select-sm text-white ${
               theme === "dark"
                 ? "black-card text-color-black select-bordered"
                 : "bg-slate-900 text-slate-700 select-bordered"
@@ -911,6 +1001,44 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
             <option value="yearly">Yearly</option>
           </select>
 
+          {/* Month Selector (shown for daily and monthly views) */}
+          {timeRange !== "yearly" && (
+            <select
+              className={`select select-sm text-white ${
+                theme === "dark"
+                  ? "black-card text-color-black select-bordered"
+                  : "bg-slate-900 text-slate-700 select-bordered"
+              }`}
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(e.target.value)}
+            >
+              <option value="">Select Month</option>
+              {availableMonths.map((month) => (
+                <option key={month} value={month}>
+                  {monthNames[month - 1]}
+                </option>
+              ))}
+            </select>
+          )}
+
+          {/* Year Selector */}
+          <select
+            className={`select select-sm text-white ${
+              theme === "dark"
+                ? "black-card text-color-black select-bordered"
+                : "bg-slate-900 text-slate-700 select-bordered"
+            }`}
+            value={selectedYear}
+            onChange={(e) => setSelectedYear(e.target.value)}
+          >
+            <option value="">Select Year</option>
+            {availableYears.map((year) => (
+              <option key={year} value={year}>
+                {year}
+              </option>
+            ))}
+          </select>
+
           <button
             onClick={generateExcelReceipt}
             className="btn btn-success btn-sm text-white text-xs"
@@ -918,6 +1046,26 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
             <FiDollarSign className="mr-2" />
             Export Excel Report
           </button>
+        </div>
+      </div>
+
+      {/* Period Info */}
+      <div className="mb-6">
+        <div
+          className={`text-sm ${
+            theme === "dark" ? "text-gray-400" : "text-gray-600"
+          }`}
+        >
+          Showing data for:{" "}
+          <span className="font-semibold">
+            {timeRange === "daily" && selectedMonth && selectedYear
+              ? `${monthNames[selectedMonth - 1]} ${selectedYear} (Daily View)`
+              : timeRange === "monthly" && selectedYear
+              ? `${selectedYear} (Monthly View)`
+              : timeRange === "yearly"
+              ? "All Years (Yearly View)"
+              : "Select a period to view data"}
+          </span>
         </div>
       </div>
 
@@ -990,6 +1138,7 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
       </div>
 
       {/* Chart */}
+      {/* Chart */}
       <div
         className={`card shadow mb-6 ${
           theme === "dark"
@@ -998,78 +1147,189 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
         }`}
       >
         <div className="card-body px-0 py-4">
-          <h3 className="card-title text-lg mb-4 px-4">Financial Overview</h3>
-          <div className="h-80 min-h-[320px] min-w-[300px] relative">
-            {chartData.length > 0 ? (
-              <ResponsiveContainer
-                width="100%"
-                height="100%"
-                className="outline-none"
-              >
-                <LineChart
-                  data={chartData}
-                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                >
-                  <CartesianGrid
-                    strokeDasharray="3 3"
-                    stroke={theme === "dark" ? "#4B5563" : "#E5E7EB"}
-                  />
-                  <XAxis
-                    dataKey="name"
-                    stroke={theme === "dark" ? "#9CA3AF" : "#6B7280"}
-                  />
-                  <YAxis
-                    tickFormatter={(value) => `₱${value.toLocaleString()}`}
-                    stroke={theme === "dark" ? "#9CA3AF" : "#6B7280"}
-                  />
-                  <Tooltip
-                    content={
-                      <CustomTooltip
-                        formatCurrency={formatCurrency}
-                        theme={theme}
-                      />
-                    }
-                  />
-                  <Legend />
-                  <Line
-                    type="monotone"
-                    dataKey="revenue"
-                    stroke="#8884d8"
-                    activeDot={{ r: 8 }}
-                    strokeWidth={2}
-                    name="Revenue"
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="net_profit"
-                    stroke="#82ca9d"
-                    strokeWidth={2}
-                    name="Net Profit"
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="gross_profit"
-                    stroke="#ffc658"
-                    strokeWidth={2}
-                    name="Gross Profit"
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="packaging_cost"
-                    stroke="#ff7300"
-                    strokeWidth={2}
-                    name="Packaging Cost"
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="flex items-center justify-center h-full">
-                <div className="text-center">
-                  <div className="loading loading-spinner text-primary mb-2"></div>
-                  <p className="text-sm">Loading chart data...</p>
+          <h3 className="card-title text-lg mb-4 px-4">
+            Financial Overview -{" "}
+            {timeRange === "daily" && selectedMonth && selectedYear
+              ? `${monthNames[selectedMonth - 1]} ${selectedYear}`
+              : timeRange === "monthly" && selectedYear
+              ? selectedYear
+              : "All Years"}
+          </h3>
+
+          {/* Mobile-friendly chart container */}
+          <div className="relative">
+            {/* Horizontal scroll container for mobile */}
+            <div className="lg:hidden overflow-x-auto">
+              <div className="min-w-[600px]">
+                {" "}
+                {/* Minimum width to ensure chart is readable */}
+                <div className="h-80 min-h-[320px]">
+                  {chartData.length > 0 ? (
+                    <ResponsiveContainer
+                      width="100%"
+                      height="100%"
+                      className="outline-none"
+                    >
+                      <LineChart
+                        data={chartData}
+                        margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                      >
+                        <CartesianGrid
+                          strokeDasharray="3 3"
+                          stroke={theme === "dark" ? "#4B5563" : "#E5E7EB"}
+                        />
+                        <XAxis
+                          dataKey="name"
+                          stroke={theme === "dark" ? "#9CA3AF" : "#6B7280"}
+                        />
+                        <YAxis
+                          tickFormatter={(value) =>
+                            `₱${value.toLocaleString()}`
+                          }
+                          stroke={theme === "dark" ? "#9CA3AF" : "#6B7280"}
+                        />
+                        <Tooltip
+                          content={
+                            <CustomTooltip
+                              formatCurrency={formatCurrency}
+                              theme={theme}
+                            />
+                          }
+                        />
+                        <Legend />
+                        <Line
+                          type="monotone"
+                          dataKey="revenue"
+                          stroke="#8884d8"
+                          activeDot={{ r: 8 }}
+                          strokeWidth={2}
+                          name="Revenue"
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="net_profit"
+                          stroke="#82ca9d"
+                          strokeWidth={2}
+                          name="Net Profit"
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="gross_profit"
+                          stroke="#ffc658"
+                          strokeWidth={2}
+                          name="Gross Profit"
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="packaging_cost"
+                          stroke="#ff7300"
+                          strokeWidth={2}
+                          name="Packaging Cost"
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="flex items-center justify-center h-full">
+                      <div className="text-center">
+                        <FiCalendar className="text-4xl text-gray-400 mb-2 mx-auto" />
+                        <p className="text-sm">
+                          {!selectedMonth || !selectedYear
+                            ? "Please select a month and year to view data"
+                            : "No data available for the selected period"}
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
-            )}
+            </div>
+
+            {/* Desktop version (no horizontal scroll) */}
+            <div className="hidden lg:block">
+              <div className="h-80 min-h-[320px] min-w-[300px] relative">
+                {chartData.length > 0 ? (
+                  <ResponsiveContainer
+                    width="100%"
+                    height="100%"
+                    className="outline-none"
+                  >
+                    <LineChart
+                      data={chartData}
+                      margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                    >
+                      <CartesianGrid
+                        strokeDasharray="3 3"
+                        stroke={theme === "dark" ? "#4B5563" : "#E5E7EB"}
+                      />
+                      <XAxis
+                        dataKey="name"
+                        stroke={theme === "dark" ? "#9CA3AF" : "#6B7280"}
+                      />
+                      <YAxis
+                        tickFormatter={(value) => `₱${value.toLocaleString()}`}
+                        stroke={theme === "dark" ? "#9CA3AF" : "#6B7280"}
+                      />
+                      <Tooltip
+                        content={
+                          <CustomTooltip
+                            formatCurrency={formatCurrency}
+                            theme={theme}
+                          />
+                        }
+                      />
+                      <Legend />
+                      <Line
+                        type="monotone"
+                        dataKey="revenue"
+                        stroke="#8884d8"
+                        activeDot={{ r: 8 }}
+                        strokeWidth={2}
+                        name="Revenue"
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="net_profit"
+                        stroke="#82ca9d"
+                        strokeWidth={2}
+                        name="Net Profit"
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="gross_profit"
+                        stroke="#ffc658"
+                        strokeWidth={2}
+                        name="Gross Profit"
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="packaging_cost"
+                        stroke="#ff7300"
+                        strokeWidth={2}
+                        name="Packaging Cost"
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="flex items-center justify-center h-full">
+                    <div className="text-center">
+                      <FiCalendar className="text-4xl text-gray-400 mb-2 mx-auto" />
+                      <p className="text-sm">
+                        {!selectedMonth || !selectedYear
+                          ? "Please select a month and year to view data"
+                          : "No data available for the selected period"}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Mobile scroll hint */}
+          <div className="lg:hidden text-center mt-2">
+            <p className="text-xs text-gray-500">
+              ← Scroll horizontally to view full chart →
+            </p>
           </div>
         </div>
       </div>
@@ -1220,7 +1480,7 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
                     {grossProfit.length === 0 && (
                       <tr>
                         <td colSpan="4" className="text-center py-4">
-                          No gross profit items for selected period
+                          No gross profit items
                         </td>
                       </tr>
                     )}
@@ -1232,14 +1492,6 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
             <div className="mt-4 pt-2 border-t border-gray-200">
               <p className="font-semibold">
                 Total: {formatCurrency(totalGrossProfit)}
-              </p>
-              <p className="text-sm">
-                Filtered by:{" "}
-                {timeRange === "daily"
-                  ? "daily"
-                  : timeRange === "monthly"
-                  ? "This Month"
-                  : "This Year"}
               </p>
             </div>
           </div>
