@@ -6,6 +6,7 @@ import {
   FiTrash2,
   FiDollarSign,
   FiCalendar,
+  FiPackage,
 } from "react-icons/fi";
 import {
   LineChart,
@@ -118,10 +119,9 @@ function EquipmentModal({ isOpen, onClose, onSave, editing, theme }) {
   );
 }
 
-// ----------------- Gross Profit Modal -----------------
-function GrossProfitModal({ isOpen, onClose, onSave, editing, theme }) {
-  const [name, setName] = useState("");
-  const [amount, setAmount] = useState("");
+// ----------------- Product Gross Profit Modal -----------------
+function ProductGrossProfitModal({ isOpen, onClose, onSave, editing, theme }) {
+  const [grossProfit, setGrossProfit] = useState("");
 
   useEffect(() => {
     const handleEsc = (e) => {
@@ -136,11 +136,9 @@ function GrossProfitModal({ isOpen, onClose, onSave, editing, theme }) {
 
   useEffect(() => {
     if (editing) {
-      setName(editing.name);
-      setAmount(editing.amount);
+      setGrossProfit(editing.gross_profit || "");
     } else {
-      setName("");
-      setAmount("");
+      setGrossProfit("");
     }
   }, [editing, isOpen]);
 
@@ -154,33 +152,22 @@ function GrossProfitModal({ isOpen, onClose, onSave, editing, theme }) {
         }`}
       >
         <h3 className="font-bold text-lg mb-4">
-          {editing ? "Edit Gross Profit" : "Add Gross Profit"}
+          {editing
+            ? `Edit Gross Profit - ${editing.product_name}`
+            : "Add Gross Profit"}
         </h3>
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            onSave({ name, amount: parseFloat(amount) || 0 });
+            onSave({
+              product_id: editing?.product_id,
+              gross_profit: parseFloat(grossProfit) || 0,
+            });
           }}
         >
-          <div className="form-control mb-4">
-            <label className="label">
-              <span className="label-text">Name</span>
-            </label>
-            <input
-              type="text"
-              className={`input ${
-                theme === "dark"
-                  ? "bg-gray-700 text-white border-gray-600"
-                  : "input-bordered text-white"
-              }`}
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
-          </div>
           <div className="form-control mb-6">
             <label className="label">
-              <span className="label-text">Amount (₱)</span>
+              <span className="label-text">Gross Profit Per Unit (₱)</span>
             </label>
             <input
               type="number"
@@ -190,10 +177,15 @@ function GrossProfitModal({ isOpen, onClose, onSave, editing, theme }) {
                   ? "bg-gray-700 text-white border-gray-600"
                   : "input-bordered text-white"
               }`}
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
+              value={grossProfit}
+              onChange={(e) => setGrossProfit(e.target.value)}
               required
             />
+            <label className="label">
+              <span className="label-text-alt">
+                This is the profit amount per unit sold
+              </span>
+            </label>
           </div>
           <div className="modal-action">
             <button
@@ -210,6 +202,128 @@ function GrossProfitModal({ isOpen, onClose, onSave, editing, theme }) {
             </button>
           </div>
         </form>
+      </div>
+    </div>
+  );
+}
+
+// ----------------- Bulk Product Gross Profit Modal -----------------
+function BulkProductGrossProfitModal({
+  isOpen,
+  onClose,
+  onSave,
+  products,
+  theme,
+}) {
+  const [productProfits, setProductProfits] = useState({});
+
+  useEffect(() => {
+    const handleEsc = (e) => {
+      if (e.key === "Escape") {
+        console.log("Escape pressed - closing modal");
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
+  }, []);
+
+  useEffect(() => {
+    if (products && isOpen) {
+      const initialProfits = {};
+      products.forEach((product) => {
+        initialProfits[product.product_id] = product.gross_profit || 0;
+      });
+      setProductProfits(initialProfits);
+    }
+  }, [products, isOpen]);
+
+  const handleProfitChange = (productId, value) => {
+    setProductProfits((prev) => ({
+      ...prev,
+      [productId]: parseFloat(value) || 0,
+    }));
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="modal modal-open">
+      <div
+        className={`modal-box max-w-4xl ${
+          theme === "dark" ? "bg-gray-800 text-white" : "bg-white text-gray-900"
+        }`}
+      >
+        <h3 className="font-bold text-lg mb-4">
+          Bulk Update Product Gross Profits
+        </h3>
+        <div className="max-h-96 overflow-y-auto mb-6">
+          <table className="table table-sm w-full">
+            <thead>
+              <tr className={theme === "dark" ? "bg-gray-700" : "bg-gray-200"}>
+                <th>Product</th>
+                <th>Price</th>
+                <th>Gross Profit</th>
+              </tr>
+            </thead>
+            <tbody>
+              {products.map((product) => (
+                <tr key={product.product_id}>
+                  <td>
+                    <div>
+                      <div className="font-medium">{product.product_name}</div>
+                    </div>
+                  </td>
+                  <td>
+                    {new Intl.NumberFormat("en-PH", {
+                      style: "currency",
+                      currency: "PHP",
+                    }).format(product.product_price || 0)}
+                  </td>
+                  <td>
+                    <input
+                      type="number"
+                      step="0.01"
+                      className={`input input-sm input-bordered w-32 ${
+                        theme === "dark" ? "bg-gray-700" : "bg-white"
+                      }`}
+                      value={productProfits[product.product_id] || 0}
+                      onChange={(e) =>
+                        handleProfitChange(product.product_id, e.target.value)
+                      }
+                    />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="modal-action">
+          <button
+            type="button"
+            className={`btn ${
+              theme === "dark" ? "btn-ghost text-white" : "btn-ghost"
+            }`}
+            onClick={onClose}
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={() => {
+              const updates = Object.entries(productProfits).map(
+                ([product_id, gross_profit]) => ({
+                  product_id: parseInt(product_id),
+                  gross_profit: parseFloat(gross_profit) || 0,
+                })
+              );
+              onSave(updates);
+            }}
+          >
+            Update All
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -348,7 +462,7 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
   const [availableYears, setAvailableYears] = useState([]);
   const [salesData, setSalesData] = useState([]);
   const [equipment, setEquipment] = useState([]);
-  const [grossProfit, setGrossProfit] = useState([]);
+  const [productGrossProfits, setProductGrossProfits] = useState([]);
   const [packagingCosts, setPackagingCosts] = useState({
     Milktea: { Cup: 5, Straw: 2, Logo: 1, Paper: 0.5 },
     "Coffee Hot": { Cup: 6, Lid: 1.5 },
@@ -362,8 +476,9 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
   const [equipmentModal, setEquipmentModal] = useState(false);
   const [editingEquipment, setEditingEquipment] = useState(null);
 
-  const [grossModal, setGrossModal] = useState(false);
-  const [editingGross, setEditingGross] = useState(null);
+  const [productGrossModal, setProductGrossModal] = useState(false);
+  const [bulkProductGrossModal, setBulkProductGrossModal] = useState(false);
+  const [editingProductGross, setEditingProductGross] = useState(null);
 
   const [packagingModal, setPackagingModal] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
@@ -418,30 +533,30 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
   }, []);
 
   // Fetch sales data based on selected time range and period
+  // Fetch sales data based on selected time range and period
   useEffect(() => {
     const fetchSales = async () => {
       setLoading(true);
       setError(null);
       try {
         let endpoint = `${api}/summaries/${timeRange}`;
-        const res = await axios.get(endpoint);
-        let filteredData = Array.isArray(res.data) ? res.data : [];
 
-        // Filter data based on selected period
+        // Add query parameters for filtering
+        const params = new URLSearchParams();
+
         if (timeRange === "daily" && selectedMonth && selectedYear) {
-          filteredData = filteredData.filter((item) => {
-            if (!item.day) return false;
-            const date = new Date(item.day);
-            return (
-              date.getFullYear() === parseInt(selectedYear) &&
-              date.getMonth() + 1 === parseInt(selectedMonth)
-            );
-          });
+          params.append("month", selectedMonth);
+          params.append("year", selectedYear);
         } else if (timeRange === "monthly" && selectedYear) {
-          filteredData = filteredData.filter(
-            (item) => item.year === parseInt(selectedYear)
-          );
+          params.append("year", selectedYear);
         }
+
+        const url = params.toString()
+          ? `${endpoint}?${params.toString()}`
+          : endpoint;
+
+        const res = await axios.get(url);
+        const filteredData = Array.isArray(res.data) ? res.data : [];
 
         setSalesData(filteredData);
       } catch (err) {
@@ -452,7 +567,14 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
         setLoading(false);
       }
     };
-    fetchSales();
+
+    if (
+      (timeRange === "daily" && selectedMonth && selectedYear) ||
+      (timeRange === "monthly" && selectedYear) ||
+      timeRange === "yearly"
+    ) {
+      fetchSales();
+    }
   }, [timeRange, selectedMonth, selectedYear]);
 
   // Fetch equipment costs (all data, not filtered by time)
@@ -475,24 +597,25 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
     fetchEquipment();
   }, []);
 
-  // Fetch gross profit (all data, not filtered by time)
+  // Fetch product gross profits
   useEffect(() => {
-    const fetchGrossProfit = async () => {
+    const fetchProductGrossProfits = async () => {
       try {
-        const res = await axios.get(`${api}/gross-profit`);
-        const grossProfitData = Array.isArray(res.data)
+        const res = await axios.get(`${api}/product-gross-profit`);
+        const productGrossProfitData = Array.isArray(res.data)
           ? res.data.map((item) => ({
               ...item,
-              amount: parseFloat(item.amount) || 0,
+              gross_profit: parseFloat(item.gross_profit) || 0,
+              product_price: parseFloat(item.product_price) || 0,
             }))
           : [];
-        setGrossProfit(grossProfitData);
+        setProductGrossProfits(productGrossProfitData);
       } catch (err) {
-        console.error("Error fetching gross profit:", err);
-        setGrossProfit([]);
+        console.error("Error fetching product gross profits:", err);
+        setProductGrossProfits([]);
       }
     };
-    fetchGrossProfit();
+    fetchProductGrossProfits();
   }, []);
 
   // Fetch packaging costs
@@ -530,37 +653,9 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
       );
 
       return salesData.map((sale) => {
-        // Filter gross profit by the same time period as the sale
-        let periodGrossProfit = 0;
-
-        if (timeRange === "daily") {
-          const saleDateStr = sale.day;
-          periodGrossProfit = grossProfit
-            .filter((g) => {
-              const gDate = new Date(g.created_at || g.updated_at);
-              const gDateStr = gDate.toISOString().split("T")[0];
-              return gDateStr === saleDateStr;
-            })
-            .reduce((sum, g) => sum + (parseFloat(g.amount) || 0), 0);
-        } else if (timeRange === "monthly") {
-          periodGrossProfit = grossProfit
-            .filter((g) => {
-              const gDate = new Date(g.created_at || g.updated_at);
-              return (
-                gDate.getFullYear() === sale.year &&
-                gDate.getMonth() + 1 === sale.month
-              );
-            })
-            .reduce((sum, g) => sum + (parseFloat(g.amount) || 0), 0);
-        } else if (timeRange === "yearly") {
-          periodGrossProfit = grossProfit
-            .filter(
-              (g) =>
-                new Date(g.created_at || g.updated_at).getFullYear() ===
-                sale.year
-            )
-            .reduce((sum, g) => sum + (parseFloat(g.amount) || 0), 0);
-        }
+        // Gross profit is now calculated automatically from product gross profits
+        // and included in the salesData from the backend
+        const periodGrossProfit = parseFloat(sale.gross_profit) || 0;
 
         return {
           ...sale,
@@ -575,7 +670,7 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
     };
 
     setNetProfit(calculateNetProfit());
-  }, [salesData, equipment, grossProfit, timeRange]);
+  }, [salesData, equipment, timeRange]);
 
   // Generate Excel report
   const generateExcelReceipt = () => {
@@ -613,10 +708,17 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
     if (salesData.length > 0) {
       const salesHeaders =
         timeRange === "daily"
-          ? ["Day", "Revenue", "Packaging Cost"]
+          ? ["Day", "Revenue", "Packaging Cost", "Gross Profit", "Net Profit"]
           : timeRange === "monthly"
-          ? ["Month", "Year", "Revenue", "Packaging Cost"]
-          : ["Year", "Revenue", "Packaging Cost"];
+          ? [
+              "Month",
+              "Year",
+              "Revenue",
+              "Packaging Cost",
+              "Gross Profit",
+              "Net Profit",
+            ]
+          : ["Year", "Revenue", "Packaging Cost", "Gross Profit", "Net Profit"];
 
       const salesSheetData = [
         ["SALES DATA"],
@@ -624,15 +726,38 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
         salesHeaders,
         ...salesData.map((sale) =>
           timeRange === "daily"
-            ? [sale.day, sale.revenue || 0, sale.packaging_cost || 0]
+            ? [
+                sale.day,
+                sale.revenue || 0,
+                sale.packaging_cost || 0,
+                sale.gross_profit || 0,
+                sale.revenue -
+                  totalEquipmentCost -
+                  (sale.gross_profit || 0) -
+                  (sale.packaging_cost || 0),
+              ]
             : timeRange === "monthly"
             ? [
                 sale.month,
                 sale.year,
                 sale.revenue || 0,
                 sale.packaging_cost || 0,
+                sale.gross_profit || 0,
+                sale.revenue -
+                  totalEquipmentCost -
+                  (sale.gross_profit || 0) -
+                  (sale.packaging_cost || 0),
               ]
-            : [sale.year, sale.revenue || 0, sale.packaging_cost || 0]
+            : [
+                sale.year,
+                sale.revenue || 0,
+                sale.packaging_cost || 0,
+                sale.gross_profit || 0,
+                sale.revenue -
+                  totalEquipmentCost -
+                  (sale.gross_profit || 0) -
+                  (sale.packaging_cost || 0),
+              ]
         ),
       ];
 
@@ -657,24 +782,34 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
       XLSX.utils.book_append_sheet(workbook, equipmentWorksheet, "Equipment");
     }
 
-    // Gross Profit Sheet
-    if (grossProfit.length > 0) {
-      const grossProfitData = [
-        ["GROSS PROFIT ITEMS"],
+    // Product Gross Profit Sheet
+    if (productGrossProfits.length > 0) {
+      const productGrossProfitData = [
+        ["PRODUCT GROSS PROFITS"],
         [],
-        ["Name", "Amount", "Date"],
-        ...grossProfit.map((item) => [
-          item.name,
-          item.amount || 0,
-          new Date(item.created_at).toLocaleDateString(),
+        [
+          "Product Name",
+          "Selling Price",
+          "Gross Profit Per Unit",
+          "Profit Margin",
+        ],
+        ...productGrossProfits.map((item) => [
+          item.product_name,
+          item.product_price || 0,
+          item.gross_profit || 0,
+          item.product_price > 0
+            ? `${((item.gross_profit / item.product_price) * 100).toFixed(1)}%`
+            : "0%",
         ]),
       ];
 
-      const grossProfitWorksheet = XLSX.utils.aoa_to_sheet(grossProfitData);
+      const productGrossProfitWorksheet = XLSX.utils.aoa_to_sheet(
+        productGrossProfitData
+      );
       XLSX.utils.book_append_sheet(
         workbook,
-        grossProfitWorksheet,
-        "Gross Profit"
+        productGrossProfitWorksheet,
+        "Product Gross Profit"
       );
     }
 
@@ -743,31 +878,50 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
     }
   };
 
-  const saveGross = async (item) => {
+  const saveProductGrossProfit = async (item) => {
     try {
-      if (editingGross) {
-        const res = await axios.put(
-          `${api}/gross-profit/${editingGross.id}`,
-          item
-        );
-        setGrossProfit(
-          grossProfit.map((g) =>
-            g.id === editingGross.id
-              ? { ...res.data, amount: parseFloat(res.data.amount) || 0 }
-              : g
-          )
-        );
-      } else {
-        const res = await axios.post(`${api}/gross-profit`, item);
-        setGrossProfit([
-          ...grossProfit,
-          { ...res.data, amount: parseFloat(res.data.amount) || 0 },
-        ]);
-      }
-      setGrossModal(false);
-      setEditingGross(null);
+      const res = await axios.put(
+        `${api}/product-gross-profit/${item.product_id}`,
+        item
+      );
+
+      setProductGrossProfits(
+        productGrossProfits.map((p) =>
+          p.product_id === item.product_id
+            ? {
+                ...res.data,
+                gross_profit: parseFloat(res.data.gross_profit) || 0,
+              }
+            : p
+        )
+      );
+
+      setProductGrossModal(false);
+      setEditingProductGross(null);
     } catch (err) {
-      console.error("Error saving gross profit:", err);
+      console.error("Error saving product gross profit:", err);
+    }
+  };
+
+  const saveBulkProductGrossProfit = async (updates) => {
+    try {
+      const res = await axios.post(`${api}/product-gross-profit/bulk-update`, {
+        updates,
+      });
+
+      if (Array.isArray(res.data)) {
+        setProductGrossProfits(
+          res.data.map((item) => ({
+            ...item,
+            gross_profit: parseFloat(item.gross_profit) || 0,
+            product_price: parseFloat(item.product_price) || 0,
+          }))
+        );
+      }
+
+      setBulkProductGrossModal(false);
+    } catch (err) {
+      console.error("Error saving bulk product gross profits:", err);
     }
   };
 
@@ -792,15 +946,6 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
     }
   };
 
-  const deleteGrossProfit = async (id) => {
-    try {
-      await axios.delete(`${api}/gross-profit/${id}`);
-      setGrossProfit(grossProfit.filter((x) => x.id !== id));
-    } catch (err) {
-      console.error("Error deleting gross profit:", err);
-    }
-  };
-
   // Format currency
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat("en-PH", {
@@ -810,7 +955,9 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
   };
 
   // Calculate totals
+  // Calculate totals - now properly filtered
   const totalEquipmentCost = useMemo(() => {
+    // Equipment is global, not filtered by time
     return equipment.reduce(
       (sum, item) => sum + (parseFloat(item.price) || 0),
       0
@@ -818,13 +965,15 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
   }, [equipment]);
 
   const totalGrossProfit = useMemo(() => {
-    return grossProfit.reduce(
-      (sum, item) => sum + (parseFloat(item.amount) || 0),
+    // This is now properly filtered by the backend
+    return salesData.reduce(
+      (sum, sale) => sum + (parseFloat(sale.gross_profit) || 0),
       0
     );
-  }, [grossProfit]);
+  }, [salesData]);
 
   const totalPackagingCost = useMemo(() => {
+    // This is now properly filtered by the backend
     return salesData.reduce(
       (sum, sale) => sum + (parseFloat(sale.packaging_cost) || 0),
       0
@@ -832,6 +981,7 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
   }, [salesData]);
 
   const totalSales = useMemo(() => {
+    // This is now properly filtered by the backend
     return salesData.reduce(
       (sum, sale) => sum + (parseFloat(sale.revenue) || 0),
       0
@@ -1094,7 +1244,7 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
             title: "Profit Margin",
             value:
               totalSales > 0
-                ? ((totalNetProfit / totalSales) * 100).toFixed(1) + "%"
+                ? `${((totalNetProfit / totalSales) * 100).toFixed(1)}%`
                 : "0%",
             icon: <FiDollarSign className="text-purple-600" />,
             bg: "purple",
@@ -1137,7 +1287,6 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
         ))}
       </div>
 
-      {/* Chart */}
       {/* Chart */}
       <div
         className={`card shadow mb-6 ${
@@ -1415,7 +1564,7 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
           </div>
         </div>
 
-        {/* Gross Profit Items */}
+        {/* Product Gross Profit Items */}
         <div
           className={`card shadow h-fit ${
             theme === "dark"
@@ -1425,13 +1574,15 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
         >
           <div className="card-body">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="font-bold text-lg">Gross Profit Items</h3>
-              <button
-                className="btn btn-sm btn-primary"
-                onClick={() => setGrossModal(true)}
-              >
-                <FiPlus className="mr-1" /> Add
-              </button>
+              <h3 className="font-bold text-lg">Product Gross Profits</h3>
+              <div className="flex gap-2">
+                <button
+                  className="btn btn-sm btn-primary"
+                  onClick={() => setBulkProductGrossModal(true)}
+                >
+                  <FiPackage className="mr-1" /> Bulk Edit
+                </button>
+              </div>
             </div>
             <div className="overflow-x-auto">
               <div className="max-h-100 min-h-80 overflow-y-auto">
@@ -1444,43 +1595,52 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
                     }`}
                   >
                     <tr>
-                      <th>Name</th>
-                      <th>Amount</th>
-                      <th>Date</th>
+                      <th>Product</th>
+                      <th>Price</th>
+                      <th>Gross Profit</th>
+                      <th>Margin</th>
                       <th>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {grossProfit.map((g) => (
-                      <tr key={g.id}>
-                        <td>{g.name}</td>
-                        <td>{formatCurrency(parseFloat(g.amount) || 0)}</td>
-                        <td>{new Date(g.created_at).toLocaleDateString()}</td>
+                    {productGrossProfits.map((product) => (
+                      <tr key={product.product_id}>
+                        <td>
+                          <div>
+                            <div className="font-medium">
+                              {product.product_name}
+                            </div>
+                          </div>
+                        </td>
+                        <td>{formatCurrency(product.product_price || 0)}</td>
+                        <td>{formatCurrency(product.gross_profit || 0)}</td>
+                        <td>
+                          {product.product_price > 0
+                            ? `${(
+                                (product.gross_profit / product.product_price) *
+                                100
+                              ).toFixed(1)}%`
+                            : "0%"}
+                        </td>
                         <td>
                           <div className="flex gap-2">
                             <button
                               className="btn btn-xs btn-warning"
                               onClick={() => {
-                                setEditingGross(g);
-                                setGrossModal(true);
+                                setEditingProductGross(product);
+                                setProductGrossModal(true);
                               }}
                             >
                               <FiEdit />
-                            </button>
-                            <button
-                              className="btn btn-xs btn-error"
-                              onClick={() => deleteGrossProfit(g.id)}
-                            >
-                              <FiTrash2 />
                             </button>
                           </div>
                         </td>
                       </tr>
                     ))}
-                    {grossProfit.length === 0 && (
+                    {productGrossProfits.length === 0 && (
                       <tr>
-                        <td colSpan="4" className="text-center py-4">
-                          No gross profit items
+                        <td colSpan="5" className="text-center py-4">
+                          No product gross profits configured
                         </td>
                       </tr>
                     )}
@@ -1491,7 +1651,11 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
 
             <div className="mt-4 pt-2 border-t border-gray-200">
               <p className="font-semibold">
-                Total: {formatCurrency(totalGrossProfit)}
+                Total Gross Profit from Sales:{" "}
+                {formatCurrency(totalGrossProfit)}
+              </p>
+              <p className="text-sm text-gray-500">
+                Calculated automatically from product sales
               </p>
             </div>
           </div>
@@ -1571,14 +1735,24 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
         theme={theme}
       />
 
-      <GrossProfitModal
-        isOpen={grossModal}
+      <ProductGrossProfitModal
+        isOpen={productGrossModal}
         onClose={() => {
-          setGrossModal(false);
-          setEditingGross(null);
+          setProductGrossModal(false);
+          setEditingProductGross(null);
         }}
-        onSave={saveGross}
-        editing={editingGross}
+        onSave={saveProductGrossProfit}
+        editing={editingProductGross}
+        theme={theme}
+      />
+
+      <BulkProductGrossProfitModal
+        isOpen={bulkProductGrossModal}
+        onClose={() => {
+          setBulkProductGrossModal(false);
+        }}
+        onSave={saveBulkProductGrossProfit}
+        products={productGrossProfits}
         theme={theme}
       />
 
