@@ -29,7 +29,7 @@ const Profit = ({
           animationEnabled: true,
           backgroundColor: "transparent",
           title: {
-            text: "Monthly Profit",
+            text: "Profit Overview",
             fontFamily: "Inter, sans-serif",
             fontSize: 20,
             fontColor: theme === "dark" ? "#F1F5F9" : "#1F2937", // Dynamic text color

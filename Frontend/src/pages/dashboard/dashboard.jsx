@@ -383,13 +383,6 @@ export default function Dashboard({
             <div className="card-body">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                 <h3 className="text-lg font-semibold">Profit Overview</h3>
-                <button
-                  disabled={!["Admin", "Staff"].includes(role)}
-                  onClick={() => setActiveTab("View All")}
-                  className="btn btn-neutral btn-sm"
-                >
-                  View All Data
-                </button>
               </div>
               <div className="h-64 sm:h-80">
                 <Profit
@@ -730,6 +723,7 @@ export default function Dashboard({
         } mt-8 text-center px-4 md:px-0`}
       >
         <button
+          disabled={!["System Administrator"].includes(role)}
           onClick={() => setActiveTab("View All")}
           className="btn btn-neutral btn-wide"
         >

@@ -24,6 +24,7 @@ export default function SalesHistory({
   setSelectedUserId,
 }) {
   const navigate = useNavigate();
+  const [role, setRole] = useState("");
   const [dailySalesData, setDailySalesData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -371,6 +372,30 @@ export default function SalesHistory({
   };
 
   const groupedSales = groupSalesByMonth();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const userRes = await axios.get(
+          "https://caferealitea.onrender.com/user",
+          {
+            withCredentials: true,
+          }
+        );
+
+        if (!userRes.data.logged_in || userRes.data.role === "") {
+          navigate("/");
+          return;
+        }
+        setRole(userRes.data.role);
+      } catch (err) {
+        console.error("Data fetch failed:", err);
+        navigate("/");
+      }
+    };
+
+    fetchData();
+  }, []);
 
   return (
     <>
@@ -876,6 +901,11 @@ export default function SalesHistory({
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap text-sm">
                                 <button
+                                  disabled={
+                                    !["System Administrator", "Admin"].includes(
+                                      role
+                                    )
+                                  }
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     setSelectedUserId(sale.id);

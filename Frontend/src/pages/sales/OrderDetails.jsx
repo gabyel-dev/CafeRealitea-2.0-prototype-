@@ -28,6 +28,7 @@ export default function OrderDetails({ setActiveTab, activeTab, orderID }) {
   const navigate = useNavigate();
   const [visible, setVisible] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState();
+  const [role, setRole] = useState("");
 
   useEffect(() => {
     axios
@@ -54,6 +55,7 @@ export default function OrderDetails({ setActiveTab, activeTab, orderID }) {
           return;
         }
         setUserData(res.data);
+        setRole(res.data?.role);
       });
   }, []);
 
@@ -342,6 +344,7 @@ export default function OrderDetails({ setActiveTab, activeTab, orderID }) {
             </button>
 
             <button
+              disabled={!["System Administrator"].includes(role)}
               onClick={() => {
                 setErrorAppear(true);
                 setVisible(true);
