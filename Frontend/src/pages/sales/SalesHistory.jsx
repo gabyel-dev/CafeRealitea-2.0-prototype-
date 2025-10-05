@@ -14,6 +14,7 @@ import {
   FiSearch,
   FiChevronDown,
   FiChevronUp,
+  FiChevronRight,
 } from "react-icons/fi";
 import { useTheme } from "../../Main/ThemeContext";
 
@@ -39,6 +40,7 @@ export default function SalesHistory({
     year: "all",
     month: "all",
   });
+  const [expandedMonths, setExpandedMonths] = useState(new Set());
   const { theme } = useTheme();
 
   useEffect(() => {
@@ -63,6 +65,18 @@ export default function SalesHistory({
           ...new Set(dataWithDateInfo.map((item) => item.year)),
         ].sort((a, b) => b - a);
         setAvailableYears(years);
+
+        // Auto-expand current month and previous month
+        const currentDate = new Date();
+        const currentMonth = currentDate.getMonth() + 1;
+        const currentYear = currentDate.getFullYear();
+        const prevMonth = currentMonth === 1 ? 12 : currentMonth - 1;
+        const prevYear = currentMonth === 1 ? currentYear - 1 : currentYear;
+
+        const autoExpanded = new Set();
+        autoExpanded.add(`${currentYear}-${currentMonth}`);
+        autoExpanded.add(`${prevYear}-${prevMonth}`);
+        setExpandedMonths(autoExpanded);
       })
       .catch((error) => {
         console.error("Error fetching sales data:", error);
@@ -163,7 +177,6 @@ export default function SalesHistory({
       const query = searchQuery.toLowerCase();
       result = result.filter(
         (item) =>
-          (item.order_type && item.order_type.toLowerCase().includes(query)) ||
           (item.payment_method &&
             item.payment_method.toLowerCase().includes(query)) ||
           item.order_time_raw.toString().includes(query)
@@ -298,6 +311,66 @@ export default function SalesHistory({
 
     return months;
   };
+
+  // Group sales by month
+  const groupSalesByMonth = () => {
+    const grouped = {};
+
+    filteredData.forEach((sale) => {
+      const monthKey = `${sale.year}-${sale.month}`;
+      const monthName = getMonthName(sale.month);
+      const displayName = `${monthName} ${sale.year}`;
+
+      if (!grouped[monthKey]) {
+        grouped[monthKey] = {
+          displayName,
+          month: sale.month,
+          year: sale.year,
+          sales: [],
+          total: 0,
+          orderCount: 0,
+        };
+      }
+
+      grouped[monthKey].sales.push(sale);
+      grouped[monthKey].total += parseFloat(sale.total || 0);
+      grouped[monthKey].orderCount += 1;
+    });
+
+    // Convert to array and sort by year and month (newest first)
+    return Object.values(grouped).sort((a, b) => {
+      if (a.year !== b.year) return b.year - a.year;
+      return b.month - a.month;
+    });
+  };
+
+  const toggleMonth = (monthKey) => {
+    setExpandedMonths((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(monthKey)) {
+        newSet.delete(monthKey);
+      } else {
+        newSet.add(monthKey);
+      }
+      return newSet;
+    });
+  };
+
+  const toggleAllMonths = () => {
+    const groupedData = groupSalesByMonth();
+    if (expandedMonths.size === groupedData.length) {
+      // Collapse all
+      setExpandedMonths(new Set());
+    } else {
+      // Expand all
+      const allMonthKeys = groupedData.map(
+        (month) => `${month.year}-${month.month}`
+      );
+      setExpandedMonths(new Set(allMonthKeys));
+    }
+  };
+
+  const groupedSales = groupSalesByMonth();
 
   return (
     <>
@@ -619,19 +692,33 @@ export default function SalesHistory({
           </div>
         </div>
 
-        {/* Results Count */}
+        {/* Results Count and Controls */}
         <div className="mb-4 flex justify-between items-center">
           <p className="text-sm text-gray-600">
             Showing {filteredData.length} of {dailySalesData.length} records
+            {groupedSales.length > 0 && ` across ${groupedSales.length} months`}
           </p>
-          {filteredData.length > 0 && (
-            <p className="text-sm font-medium text-gray-700">
-              Total: {formatCurrency(totalSales)}
-            </p>
-          )}
+
+          <div className="flex items-center space-x-4">
+            {filteredData.length > 0 && (
+              <p className="text-sm font-medium text-gray-700">
+                Total: {formatCurrency(totalSales)}
+              </p>
+            )}
+            {groupedSales.length > 1 && (
+              <button
+                onClick={toggleAllMonths}
+                className="text-sm text-blue-600 hover:text-blue-800 font-medium transition-colors"
+              >
+                {expandedMonths.size === groupedSales.length
+                  ? "Collapse All"
+                  : "Expand All"}
+              </button>
+            )}
+          </div>
         </div>
 
-        {/* Sales List */}
+        {/* Sales List with Collapsible Months */}
         {loading ? (
           <div className="flex justify-center items-center h-64 bg-white rounded-xl shadow-md border border-gray-100">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
@@ -655,107 +742,160 @@ export default function SalesHistory({
             )}
           </div>
         ) : (
-          <div className="bg-white rounded-xl min-h-[fit-content] max-h-[400px] shadow-md overflow-x-scroll border border-gray-100">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50 ">
-                  <tr>
-                    <th
-                      className="px-6 py-3  text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                      onClick={() => handleSort("order_time")}
-                    >
-                      <div className="flex items-center">
-                        Date & Time
-                        {getSortIndicator("order_time")}
-                      </div>
-                    </th>
-                    <th
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                      onClick={() => handleSort("id")}
-                    >
-                      <div className="flex items-center">
-                        Order ID
-                        {getSortIndicator("id")}
-                      </div>
-                    </th>
+          <div className="space-y-4">
+            {groupedSales.map((monthData) => {
+              const monthKey = `${monthData.year}-${monthData.month}`;
+              const isExpanded = expandedMonths.has(monthKey);
 
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Type
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Payment
-                    </th>
-                    <th
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                      onClick={() => handleSort("total")}
-                    >
+              return (
+                <div
+                  key={monthKey}
+                  className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden"
+                >
+                  {/* Month Header */}
+                  <div
+                    className={`px-6 py-4 cursor-pointer transition-colors ${
+                      theme === "dark"
+                        ? "bg-gray-800 hover:bg-gray-700"
+                        : "bg-gray-50 hover:bg-gray-100"
+                    } border-b border-gray-200`}
+                    onClick={() => toggleMonth(monthKey)}
+                  >
+                    <div className="flex items-center justify-between">
                       <div className="flex items-center">
-                        Amount
-                        {getSortIndicator("total")}
+                        {isExpanded ? (
+                          <FiChevronDown className="text-gray-500 mr-3" />
+                        ) : (
+                          <FiChevronRight className="text-gray-500 mr-3" />
+                        )}
+                        <h3 className="text-lg font-semibold text-gray-800">
+                          {monthData.displayName}
+                        </h3>
                       </div>
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredData.map((sale) => (
-                    <tr key={sale.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">
-                          {sale.order_time}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">
-                          #{sale.id}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span
-                          className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            sale.order_type === "Dine-in"
-                              ? "bg-blue-100 text-blue-800"
-                              : "bg-green-100 text-green-800"
-                          }`}
-                        >
-                          {sale.order_type}
+                      <div className="flex items-center space-x-6 text-sm text-gray-600">
+                        <span>{monthData.orderCount} orders</span>
+                        <span className="font-semibold text-gray-800">
+                          {formatCurrency(monthData.total)}
                         </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span
-                          className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            sale.payment_method === "Cash"
-                              ? "bg-yellow-100 text-yellow-800"
-                              : "bg-purple-100 text-purple-800"
-                          }`}
-                        >
-                          {sale.payment_method}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-semibold text-gray-900">
-                          {formatCurrency(sale.total)}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
-                        <button
-                          onClick={() => {
-                            setSelectedUserId(sale.id);
-                            setActiveTab("Order Details");
-                          }}
-                          className="text-blue-600 hover:text-blue-900 flex items-center transition-colors"
-                        >
-                          <FiEye className="mr-1" />
-                          View Details
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Month Content */}
+                  {isExpanded && (
+                    <div className="overflow-x-auto">
+                      <table className="w-full">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th
+                              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleSort("order_time");
+                              }}
+                            >
+                              <div className="flex items-center">
+                                Date & Time
+                                {getSortIndicator("order_time")}
+                              </div>
+                            </th>
+                            <th
+                              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleSort("id");
+                              }}
+                            >
+                              <div className="flex items-center">
+                                Order ID
+                                {getSortIndicator("id")}
+                              </div>
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Type
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Payment
+                            </th>
+                            <th
+                              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleSort("total");
+                              }}
+                            >
+                              <div className="flex items-center">
+                                Amount
+                                {getSortIndicator("total")}
+                              </div>
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Actions
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {monthData.sales.map((sale) => (
+                            <tr key={sale.id} className="hover:bg-gray-50">
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-sm text-gray-900">
+                                  {sale.order_time}
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-sm font-medium text-gray-900">
+                                  #{sale.id}
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <span
+                                  className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                    sale.order_type === "Dine-in"
+                                      ? "bg-blue-100 text-blue-800"
+                                      : "bg-green-100 text-green-800"
+                                  }`}
+                                >
+                                  {sale.order_type}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <span
+                                  className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                    sale.payment_method === "Cash"
+                                      ? "bg-yellow-100 text-yellow-800"
+                                      : "bg-purple-100 text-purple-800"
+                                  }`}
+                                >
+                                  {sale.payment_method}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-sm font-semibold text-gray-900">
+                                  {formatCurrency(sale.total)}
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedUserId(sale.id);
+                                    setActiveTab("Order Details");
+                                  }}
+                                  className="text-blue-600 hover:text-blue-900 flex items-center transition-colors"
+                                >
+                                  <FiEye className="mr-1" />
+                                  View Details
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
       </div>

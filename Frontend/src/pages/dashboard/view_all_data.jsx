@@ -7,6 +7,7 @@ import {
   FiDollarSign,
   FiCalendar,
   FiPackage,
+  FiChevronDown,
 } from "react-icons/fi";
 import {
   LineChart,
@@ -453,6 +454,183 @@ const CustomTooltip = ({ active, payload, label, formatCurrency, theme }) => {
   return null;
 };
 
+// ----------------- Time Range Selector Component -----------------
+function TimeRangeSelector({
+  timeRange,
+  setTimeRange,
+  selectedMonth,
+  setSelectedMonth,
+  selectedYear,
+  setSelectedYear,
+  availableMonths,
+  availableYears,
+  theme,
+}) {
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  const monthNames = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+
+  const getDisplayText = () => {
+    if (timeRange === "daily" && selectedMonth && selectedYear) {
+      return `${monthNames[selectedMonth - 1]} ${selectedYear} (Daily)`;
+    } else if (timeRange === "monthly" && selectedYear) {
+      return `${selectedYear} (Monthly)`;
+    } else if (timeRange === "yearly") {
+      return "All Years (Yearly)";
+    }
+    return "Select Time Range";
+  };
+
+  return (
+    <div className="relative">
+      {/* Compact Dropdown Trigger */}
+      <div className="dropdown dropdown-bottom">
+        <label
+          tabIndex={0}
+          className={`btn btn-sm flex items-center gap-2 ${
+            theme === "dark"
+              ? "bg-gray-700 border-gray-600 text-white hover:bg-gray-600"
+              : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+          } border`}
+        >
+          <FiCalendar className="text-sm" />
+          <span className="text-xs font-medium">{getDisplayText()}</span>
+          <FiChevronDown className="text-xs" />
+        </label>
+
+        <div
+          tabIndex={0}
+          className={`dropdown-content menu p-2 shadow-lg rounded-box w-64 z-50 ${
+            theme === "dark"
+              ? "bg-gray-800 text-white"
+              : "bg-white text-gray-900"
+          }`}
+        >
+          {/* Time Range Selection */}
+          <div className="mb-4">
+            <h4 className="font-semibold text-sm mb-2 px-2">Time Range</h4>
+            <div className="grid grid-cols-3 gap-1">
+              {[
+                { value: "daily", label: "Daily" },
+                { value: "monthly", label: "Monthly" },
+                { value: "yearly", label: "Yearly" },
+              ].map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  className={`btn btn-xs ${
+                    timeRange === option.value
+                      ? "btn-primary text-white"
+                      : theme === "dark"
+                      ? "btn-ghost text-gray-300 hover:bg-gray-700"
+                      : "btn-ghost text-gray-600 hover:bg-gray-100"
+                  }`}
+                  onClick={() => setTimeRange(option.value)}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Year Selection */}
+          <div className="mb-3">
+            <label className="label py-1">
+              <span className="label-text font-medium text-sm">Year</span>
+            </label>
+            <select
+              className={`select select-sm select-bordered w-full ${
+                theme === "dark"
+                  ? "bg-gray-700 border-gray-600 text-white"
+                  : "bg-white border-gray-300 text-gray-900"
+              }`}
+              value={selectedYear}
+              onChange={(e) => setSelectedYear(e.target.value)}
+            >
+              <option value="">Select Year</option>
+              {availableYears.map((year) => (
+                <option key={year} value={year}>
+                  {year}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Month Selection (only for daily and monthly views) */}
+          {timeRange !== "yearly" && (
+            <div className="mb-3">
+              <label className="label py-1">
+                <span className="label-text font-medium text-sm">
+                  {timeRange === "daily" ? "Month" : "Start Month"}
+                </span>
+              </label>
+              <select
+                className={`select select-sm select-bordered w-full ${
+                  theme === "dark"
+                    ? "bg-gray-700 border-gray-600 text-white"
+                    : "bg-white border-gray-300 text-gray-900"
+                }`}
+                value={selectedMonth}
+                onChange={(e) => setSelectedMonth(e.target.value)}
+                disabled={!selectedYear}
+              >
+                <option value="">Select Month</option>
+                {availableMonths.map((month) => (
+                  <option key={month} value={month}>
+                    {monthNames[month - 1]}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {/* Quick Actions */}
+          <div className="border-t pt-2 mt-2 border-gray-600">
+            <div className="flex justify-between">
+              <button
+                type="button"
+                className="btn btn-xs btn-ghost"
+                onClick={() => {
+                  const currentDate = new Date();
+                  setSelectedYear(currentDate.getFullYear());
+                  setSelectedMonth(currentDate.getMonth() + 1);
+                  setTimeRange("daily");
+                }}
+              >
+                This Month
+              </button>
+              <button
+                type="button"
+                className="btn btn-xs btn-ghost"
+                onClick={() => {
+                  const currentDate = new Date();
+                  setSelectedYear(currentDate.getFullYear());
+                  setTimeRange("monthly");
+                }}
+              >
+                This Year
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ----------------- Main Component -----------------
 export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
   const [timeRange, setTimeRange] = useState("monthly");
@@ -532,7 +710,6 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
     fetchAvailablePeriods();
   }, []);
 
-  // Fetch sales data based on selected time range and period
   // Fetch sales data based on selected time range and period
   useEffect(() => {
     const fetchSales = async () => {
@@ -955,7 +1132,6 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
   };
 
   // Calculate totals
-  // Calculate totals - now properly filtered
   const totalEquipmentCost = useMemo(() => {
     // Equipment is global, not filtered by time
     return equipment.reduce(
@@ -1136,65 +1312,25 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
         </div>
 
         <div className="flex flex-wrap gap-2 items-center mt-4">
-          {/* Time Range Selector */}
-          <select
-            className={`select select-sm text-white ${
-              theme === "dark"
-                ? "black-card text-color-black select-bordered"
-                : "bg-slate-900 text-slate-700 select-bordered"
-            }`}
-            value={timeRange}
-            onChange={(e) => setTimeRange(e.target.value)}
-          >
-            <option value="daily">Daily</option>
-            <option value="monthly">Monthly</option>
-            <option value="yearly">Yearly</option>
-          </select>
-
-          {/* Month Selector (shown for daily and monthly views) */}
-          {timeRange !== "yearly" && (
-            <select
-              className={`select select-sm text-white ${
-                theme === "dark"
-                  ? "black-card text-color-black select-bordered"
-                  : "bg-slate-900 text-slate-700 select-bordered"
-              }`}
-              value={selectedMonth}
-              onChange={(e) => setSelectedMonth(e.target.value)}
-            >
-              <option value="">Select Month</option>
-              {availableMonths.map((month) => (
-                <option key={month} value={month}>
-                  {monthNames[month - 1]}
-                </option>
-              ))}
-            </select>
-          )}
-
-          {/* Year Selector */}
-          <select
-            className={`select select-sm text-white ${
-              theme === "dark"
-                ? "black-card text-color-black select-bordered"
-                : "bg-slate-900 text-slate-700 select-bordered"
-            }`}
-            value={selectedYear}
-            onChange={(e) => setSelectedYear(e.target.value)}
-          >
-            <option value="">Select Year</option>
-            {availableYears.map((year) => (
-              <option key={year} value={year}>
-                {year}
-              </option>
-            ))}
-          </select>
+          {/* Enhanced Time Range Selector */}
+          <TimeRangeSelector
+            timeRange={timeRange}
+            setTimeRange={setTimeRange}
+            selectedMonth={selectedMonth}
+            setSelectedMonth={setSelectedMonth}
+            selectedYear={selectedYear}
+            setSelectedYear={setSelectedYear}
+            availableMonths={availableMonths}
+            availableYears={availableYears}
+            theme={theme}
+          />
 
           <button
             onClick={generateExcelReceipt}
             className="btn btn-success btn-sm text-white text-xs"
           >
             <FiDollarSign className="mr-2" />
-            Export Excel Report
+            Export Excel
           </button>
         </div>
       </div>

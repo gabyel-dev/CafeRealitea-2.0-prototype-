@@ -2,17 +2,24 @@ import { useEffect, useRef, useState } from "react";
 import CanvasJS from "@canvasjs/charts";
 import axios from "axios";
 
-const Profit = ({ gross, net, equipments, packaging_cost, theme = "light" }) => {
+const Profit = ({
+  gross,
+  net,
+  equipments,
+  packaging_cost,
+  theme = "light",
+}) => {
   const containerRef = useRef(null);
   const chartRef = useRef(null);
   const [role, setRole] = useState(null);
 
   useEffect(() => {
-          axios.get("https://caferealitea.onrender.com/user", { withCredentials: true })
-          .then((res) => {
-            setRole(res.data.role);
-          })
-      }, [])
+    axios
+      .get("https://caferealitea.onrender.com/user", { withCredentials: true })
+      .then((res) => {
+        setRole(res.data.role);
+      });
+  }, []);
 
   useEffect(() => {
     if (containerRef.current) {
@@ -51,12 +58,13 @@ const Profit = ({ gross, net, equipments, packaging_cost, theme = "light" }) => 
         });
       }
 
-      
-
       // Update chart colors based on theme
-      chartRef.current.options.title.fontColor = theme === "dark" ? "#F1F5F9" : "#1F2937";
-      chartRef.current.options.legend.fontColor = theme === "dark" ? "#F1F5F9" : "#1F2937";
-      chartRef.current.options.data[0].indexLabelFontColor = theme === "dark" ? "#F1F5F9" : "#1F2937";
+      chartRef.current.options.title.fontColor =
+        theme === "dark" ? "#F1F5F9" : "#1F2937";
+      chartRef.current.options.legend.fontColor =
+        theme === "dark" ? "#F1F5F9" : "#1F2937";
+      chartRef.current.options.data[0].indexLabelFontColor =
+        theme === "dark" ? "#F1F5F9" : "#1F2937";
 
       // sanitize values
       const safeGross = gross > 0 ? gross : 0;
@@ -68,10 +76,10 @@ const Profit = ({ gross, net, equipments, packaging_cost, theme = "light" }) => 
 
       if (total === 0) {
         chartRef.current.options.data[0].dataPoints = [
-          { 
-            name: "No Data", 
-            y: 100, 
-            color: theme === "dark" ? "#374151" : "#D1D5DB" // Dynamic no data color
+          {
+            name: "No Data",
+            y: 100,
+            color: theme === "dark" ? "#374151" : "#D1D5DB", // Dynamic no data color
           },
         ];
       } else {
@@ -79,7 +87,7 @@ const Profit = ({ gross, net, equipments, packaging_cost, theme = "light" }) => 
           {
             name: "Gross Profit",
             y: Math.round((safeGross / total) * 100),
-            color: "#4ADE80", // green-600
+            color: "#964B00", // green-600
           },
           {
             name: "Net Profit",
@@ -132,27 +140,28 @@ const Profit = ({ gross, net, equipments, packaging_cost, theme = "light" }) => 
   const restricted = () => {
     return (
       <div className="h-fit w-full flex items-end text-xs md:text-xl text-center relative  text-red-500 rounded-md">
-  <p className="whitespace-normal break-words">
-    <span >This content is restricted to certain user roles!</span>
-  </p>
-</div>
-
-    )
-  }
+        <p className="whitespace-normal break-words">
+          <span>This content is restricted to certain user roles!</span>
+        </p>
+      </div>
+    );
+  };
 
   return (
     <>
-    <div
-      ref={containerRef}
-      className={`rounded-xl w-full p-4 md:p-6 border ${['Admin', 'Staff'].includes(role) ? 'blur-sm ' : ''} ${
-        theme === "dark" 
-          ? "bg-[#243049] border-gray-700" 
-          : "bg-white border-slate-300"
-      }`}
-      style={{ height: 350 }}
-    />
-      {(['Admin', 'Staff'].includes(role)) && restricted()}
-      </>
+      <div
+        ref={containerRef}
+        className={`rounded-xl w-full p-4 md:p-6 border ${
+          ["Admin", "Staff"].includes(role) ? "blur-sm " : ""
+        } ${
+          theme === "dark"
+            ? "bg-[#243049] border-gray-700"
+            : "bg-white border-slate-300"
+        }`}
+        style={{ height: 350 }}
+      />
+      {["Admin", "Staff"].includes(role) && restricted()}
+    </>
   );
 };
 
