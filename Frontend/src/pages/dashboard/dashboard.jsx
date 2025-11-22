@@ -15,6 +15,7 @@ import {
 } from "react-icons/fi";
 import { useTheme } from "../../Main/ThemeContext";
 import Loader from "../../components/UI/loaders/Loader";
+import { useOrderContext } from "../../Main/OrderDetailContext";
 
 const socket = io("https://caferealitea.onrender.com");
 
@@ -84,6 +85,8 @@ export default function Dashboard({
   financialData,
 }) {
   const navigate = useNavigate();
+
+  const { setOrderID, orderID } = useOrderContext();
 
   // State variables
   const [timeRange, setTimeRange] = useState("monthly");
@@ -559,7 +562,7 @@ export default function Dashboard({
                     <tr
                       key={order.id}
                       className={`
-                  transition-colors duration-200
+                  transition-colors duration-200 cursor-pointer
                   ${
                     index % 2 === 0
                       ? theme === "dark"
@@ -571,6 +574,12 @@ export default function Dashboard({
                   }
                   ${theme === "dark" ? "border-gray-700" : "border-gray-200"}
                 `}
+                      onClick={() => {
+                        setOrderID(order.id);
+                        if (orderID) {
+                          setActiveTab("Order Details");
+                        }
+                      }}
                     >
                       <td className="py-3 px-2 font-mono text-sm">
                         #ORD-{order.id}
@@ -621,7 +630,10 @@ export default function Dashboard({
           }
         `}
               >
-                <span className="flex items-center gap-2">
+                <span
+                  className="flex items-center gap-2"
+                  onClick={() => setActiveTab("Products")}
+                >
                   <div
                     className={`w-2 h-2 rounded-full ${
                       theme === "dark" ? "bg-blue-400" : "bg-blue-500"

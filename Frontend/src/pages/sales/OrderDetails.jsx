@@ -24,7 +24,6 @@ export default function OrderDetails({ setActiveTab, activeTab, orderID }) {
   const [userData, setUserData] = useState({});
   const [errorMsg, setErrorMsg] = useState("");
   const [errorAppear, setErrorAppear] = useState(false);
-  const id = orderID;
   const navigate = useNavigate();
   const [visible, setVisible] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState();
@@ -32,7 +31,7 @@ export default function OrderDetails({ setActiveTab, activeTab, orderID }) {
 
   useEffect(() => {
     axios
-      .get(`https://caferealitea.onrender.com/api/order/${id}`)
+      .get(`https://caferealitea.onrender.com/api/order/${orderID}`)
       .then((res) => {
         setOrderDetails(res.data);
         setLoading(false);
@@ -42,7 +41,7 @@ export default function OrderDetails({ setActiveTab, activeTab, orderID }) {
         setLoading(false);
         console.error(err);
       });
-  }, [id]);
+  }, [orderID]);
 
   useEffect(() => {
     document.title = "Café Realitea - Order Details";
@@ -61,7 +60,7 @@ export default function OrderDetails({ setActiveTab, activeTab, orderID }) {
 
   const delete_order = async (e) => {
     const res = axios
-      .post(`https://caferealitea.onrender.com/api/delete/${id}`, {
+      .post(`https://caferealitea.onrender.com/api/delete/${orderID}`, {
         withCredentials: true,
       })
       .then((res) => {
@@ -101,7 +100,7 @@ export default function OrderDetails({ setActiveTab, activeTab, orderID }) {
     <>
       {visible && (
         <DeleteModal
-          orderID={id}
+          orderID={orderID}
           setVisible={setVisible}
           orderNumber={selectedOrder.order_id}
           setActiveTab={setActiveTab}

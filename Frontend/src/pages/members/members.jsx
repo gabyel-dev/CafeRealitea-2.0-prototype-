@@ -49,9 +49,6 @@ export default function UsersManagement({
   const { avatarVersion } = useUser();
 
   const handleViewProfile = (userId) => {
-    console.log("Clicked userId:", userId);
-    console.log("setSelectedUserId type:", typeof setSelectedUserId);
-
     if (typeof setSelectedUserId === "function") {
       setSelectedUserId(userId);
       setActiveTab("member_profile");
