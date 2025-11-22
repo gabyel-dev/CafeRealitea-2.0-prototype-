@@ -387,7 +387,7 @@ function PackagingModal({ isOpen, onClose, onSave, category, costs, theme }) {
                 </label>
                 <input
                   type="number"
-                  step="0.01"
+                  step="1"
                   className={`input ${
                     theme === "dark"
                       ? "bg-gray-700 text-white border-gray-600"

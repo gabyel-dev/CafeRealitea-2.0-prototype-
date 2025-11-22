@@ -622,18 +622,16 @@ export default function Dashboard({
               {/* Total Products */}
               <div
                 className={`
-          flex justify-between items-center p-3 rounded-lg transition-colors duration-200
+          flex justify-between items-center p-3 rounded-lg transition-colors duration-200 cursor-pointer
           ${
             theme === "dark"
               ? "bg-gray-700 hover:bg-gray-600"
               : "bg-gray-50 hover:bg-gray-100"
           }
         `}
+                onClick={() => setActiveTab("Products")}
               >
-                <span
-                  className="flex items-center gap-2"
-                  onClick={() => setActiveTab("Products")}
-                >
+                <span className="flex items-center gap-2">
                   <div
                     className={`w-2 h-2 rounded-full ${
                       theme === "dark" ? "bg-blue-400" : "bg-blue-500"
