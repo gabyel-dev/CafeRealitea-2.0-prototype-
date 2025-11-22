@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import {
@@ -14,6 +14,9 @@ import {
   FiChevronDown,
   FiChevronUp,
   FiChevronRight,
+  FiLoader,
+  FiDownload,
+  FiTrash2,
 } from "react-icons/fi";
 import { useTheme } from "../../Main/ThemeContext";
 
@@ -26,7 +29,9 @@ export default function SalesHistory({
   const [role, setRole] = useState("");
   const [dailySalesData, setDailySalesData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
+  const [displayedData, setDisplayedData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [paymentFilter, setPaymentFilter] = useState("all");
   const [availableYears, setAvailableYears] = useState([]);
   const [availableMonths, setAvailableMonths] = useState([]);
@@ -41,63 +46,237 @@ export default function SalesHistory({
     month: "all",
   });
   const [expandedMonths, setExpandedMonths] = useState(new Set());
+  const [lastUpdated, setLastUpdated] = useState(null);
+  const [showCacheControls, setShowCacheControls] = useState(false);
   const { theme } = useTheme();
 
+  const ITEMS_PER_PAGE = 20;
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const observerRef = useRef(null);
+
+  // Cache keys
+  const CACHE_KEYS = {
+    SALES_DATA: "cafe_sales_data",
+    LAST_UPDATED: "cafe_sales_last_updated",
+    CACHE_DURATION: 30 * 60 * 1000, // 30 minutes in milliseconds
+  };
+
   useEffect(() => {
-    axios
-      .get("https://caferealitea.onrender.com/daily-sales")
-      .then((res) => {
-        // Parse the formatted date strings to extract year and month
-        const dataWithDateInfo = res.data.map((item) => {
-          const dateInfo = parseFormattedDate(item.order_time);
-          return {
-            ...item,
-            ...dateInfo,
-          };
-        });
-
-        setDailySalesData(dataWithDateInfo);
-        setFilteredData(dataWithDateInfo);
-        setLoading(false);
-
-        // Extract available years from the data
-        const years = [
-          ...new Set(dataWithDateInfo.map((item) => item.year)),
-        ].sort((a, b) => b - a);
-        setAvailableYears(years);
-
-        // Auto-expand current month and previous month
-        const currentDate = new Date();
-        const currentMonth = currentDate.getMonth() + 1;
-        const currentYear = currentDate.getFullYear();
-        const prevMonth = currentMonth === 1 ? 12 : currentMonth - 1;
-        const prevYear = currentMonth === 1 ? currentYear - 1 : currentYear;
-
-        const autoExpanded = new Set();
-        autoExpanded.add(`${currentYear}-${currentMonth}`);
-        autoExpanded.add(`${prevYear}-${prevMonth}`);
-        setExpandedMonths(autoExpanded);
-      })
-      .catch((error) => {
-        console.error("Error fetching sales data:", error);
-        setLoading(false);
-      });
+    loadSalesData();
   }, []);
 
   useEffect(() => {
     document.title = "Café Realitea - Sales History";
-    axios
-      .get("https://caferealitea.onrender.com/user", { withCredentials: true })
-      .then((res) => {
-        const { logged_in } = res.data;
-        if (!logged_in) {
-          navigate("/");
-        }
-      })
-      .catch(() => navigate("/"));
+    checkAuthentication();
   }, []);
 
-  // Parse the formatted date string (e.g., "Today • 07:27 PM", "Yesterday • 02:15 PM", "Dec 15, 2023 • 11:30 AM")
+  const checkAuthentication = async () => {
+    try {
+      const userRes = await axios.get(
+        "https://caferealitea.onrender.com/user",
+        { withCredentials: true }
+      );
+
+      if (!userRes.data.logged_in || userRes.data.role === "") {
+        navigate("/");
+        return;
+      }
+      setRole(userRes.data.role);
+    } catch (err) {
+      console.error("Authentication check failed:", err);
+      navigate("/");
+    }
+  };
+
+  const loadSalesData = async () => {
+    setLoading(true);
+
+    // Check if we have cached data that's still valid
+    const cachedData = getCachedData();
+
+    if (cachedData && isCacheValid()) {
+      console.log("Loading sales data from cache");
+      processSalesData(cachedData);
+      setLoading(false);
+      return;
+    }
+
+    // If no cache or cache expired, fetch from API
+    try {
+      console.log("Fetching fresh sales data from API");
+      const res = await axios.get(
+        "https://caferealitea.onrender.com/daily-sales"
+      );
+
+      // Cache the new data
+      cacheSalesData(res.data);
+      processSalesData(res.data);
+    } catch (error) {
+      console.error("Error fetching sales data:", error);
+
+      // If API fails, try to use cached data even if expired
+      const cachedData = getCachedData();
+      if (cachedData) {
+        console.log("API failed, using cached data as fallback");
+        processSalesData(cachedData);
+      } else {
+        setLoading(false);
+      }
+    }
+  };
+
+  const getCachedData = () => {
+    try {
+      const cached = localStorage.getItem(CACHE_KEYS.SALES_DATA);
+      return cached ? JSON.parse(cached) : null;
+    } catch (error) {
+      console.error("Error reading cache:", error);
+      return null;
+    }
+  };
+
+  const isCacheValid = () => {
+    try {
+      const lastUpdated = localStorage.getItem(CACHE_KEYS.LAST_UPDATED);
+      if (!lastUpdated) return false;
+
+      const cacheAge = Date.now() - parseInt(lastUpdated);
+      return cacheAge < CACHE_KEYS.CACHE_DURATION;
+    } catch (error) {
+      console.error("Error checking cache validity:", error);
+      return false;
+    }
+  };
+
+  const cacheSalesData = (data) => {
+    try {
+      localStorage.setItem(CACHE_KEYS.SALES_DATA, JSON.stringify(data));
+      localStorage.setItem(CACHE_KEYS.LAST_UPDATED, Date.now().toString());
+      setLastUpdated(Date.now());
+    } catch (error) {
+      console.error("Error caching data:", error);
+    }
+  };
+
+  const processSalesData = (data) => {
+    const dataWithDateInfo = data.map((item) => {
+      const dateInfo = parseFormattedDate(item.order_time);
+      return {
+        ...item,
+        ...dateInfo,
+      };
+    });
+
+    setDailySalesData(dataWithDateInfo);
+    setFilteredData(dataWithDateInfo);
+
+    const years = [...new Set(dataWithDateInfo.map((item) => item.year))].sort(
+      (a, b) => b - a
+    );
+    setAvailableYears(years);
+
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth() + 1;
+    const currentYear = currentDate.getFullYear();
+    const prevMonth = currentMonth === 1 ? 12 : currentMonth - 1;
+    const prevYear = currentMonth === 1 ? currentYear - 1 : currentYear;
+
+    const autoExpanded = new Set();
+    autoExpanded.add(`${currentYear}-${currentMonth}`);
+    autoExpanded.add(`${prevYear}-${prevMonth}`);
+    setExpandedMonths(autoExpanded);
+
+    setLoading(false);
+  };
+
+  const refreshData = async () => {
+    setLoading(true);
+    try {
+      console.log("Manually refreshing sales data");
+      const res = await axios.get(
+        "https://caferealitea.onrender.com/daily-sales"
+      );
+      cacheSalesData(res.data);
+      processSalesData(res.data);
+    } catch (error) {
+      console.error("Error refreshing sales data:", error);
+      setLoading(false);
+    }
+  };
+
+  const clearCache = () => {
+    try {
+      localStorage.removeItem(CACHE_KEYS.SALES_DATA);
+      localStorage.removeItem(CACHE_KEYS.LAST_UPDATED);
+      setLastUpdated(null);
+      setShowCacheControls(false);
+      // Reload data which will now fetch fresh from API
+      loadSalesData();
+    } catch (error) {
+      console.error("Error clearing cache:", error);
+    }
+  };
+
+  const getCacheInfo = () => {
+    const cachedData = getCachedData();
+    const lastUpdated = localStorage.getItem(CACHE_KEYS.LAST_UPDATED);
+
+    if (!cachedData || !lastUpdated) {
+      return { hasCache: false };
+    }
+
+    const cacheAge = Date.now() - parseInt(lastUpdated);
+    const minutesOld = Math.floor(cacheAge / (60 * 1000));
+    const isValid = cacheAge < CACHE_KEYS.CACHE_DURATION;
+
+    return {
+      hasCache: true,
+      recordCount: cachedData.length,
+      minutesOld,
+      isValid,
+      lastUpdated: new Date(parseInt(lastUpdated)).toLocaleString(),
+    };
+  };
+
+  // Apply filters and reset pagination
+  useEffect(() => {
+    applyFilters();
+  }, [
+    paymentFilter,
+    orderTypeFilter,
+    filters,
+    searchQuery,
+    dailySalesData,
+    sortConfig,
+  ]);
+
+  // Load more data when page changes
+  useEffect(() => {
+    if (page === 1) return;
+    loadMoreData();
+  }, [page]);
+
+  // Set up Intersection Observer for infinite scrolling
+  useEffect(() => {
+    if (!hasMore || loadingMore) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setPage((prev) => prev + 1);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (observerRef.current) {
+      observer.observe(observerRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [hasMore, loadingMore]);
+
   const parseFormattedDate = (dateString) => {
     const today = new Date();
     const yesterday = new Date();
@@ -116,7 +295,6 @@ export default function SalesHistory({
         day: yesterday.getDate(),
       };
     } else {
-      // Parse dates like "Dec 15, 2023 • 11:30 AM"
       const datePart = dateString.split(" • ")[0];
       const date = new Date(datePart);
 
@@ -128,7 +306,6 @@ export default function SalesHistory({
         };
       }
 
-      // Fallback if parsing fails
       return {
         year: today.getFullYear(),
         month: today.getMonth() + 1,
@@ -137,42 +314,25 @@ export default function SalesHistory({
     }
   };
 
-  // Apply filters automatically when any filter changes
-  useEffect(() => {
-    applyFilters();
-  }, [
-    paymentFilter,
-    orderTypeFilter,
-    filters,
-    searchQuery,
-    dailySalesData,
-    sortConfig,
-  ]);
-
   const applyFilters = () => {
     let result = [...dailySalesData];
 
-    // Apply payment method filter
     if (paymentFilter !== "all") {
       result = result.filter((item) => item.payment_method === paymentFilter);
     }
 
-    // Apply order type filter
     if (orderTypeFilter !== "all") {
       result = result.filter((item) => item.order_type === orderTypeFilter);
     }
 
-    // Apply year filter
     if (filters.year !== "all") {
       result = result.filter((item) => item.year == filters.year);
     }
 
-    // Apply month filter
     if (filters.month !== "all") {
       result = result.filter((item) => item.month == filters.month);
     }
 
-    // Apply search filter
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       result = result.filter(
@@ -183,12 +343,9 @@ export default function SalesHistory({
       );
     }
 
-    // Apply sorting
     if (sortConfig.key) {
       result.sort((a, b) => {
-        // For date sorting, we need to compare the actual dates
         if (sortConfig.key === "order_time") {
-          // Create comparable date objects from the extracted year, month, day
           const aDate = new Date(a.year, a.month - 1, a.day);
           const bDate = new Date(b.year, b.month - 1, b.day);
 
@@ -200,7 +357,6 @@ export default function SalesHistory({
           }
           return 0;
         } else {
-          // For other fields, use regular comparison
           if (a[sortConfig.key] < b[sortConfig.key]) {
             return sortConfig.direction === "ascending" ? -1 : 1;
           }
@@ -213,6 +369,25 @@ export default function SalesHistory({
     }
 
     setFilteredData(result);
+    setPage(1);
+    setDisplayedData(result.slice(0, ITEMS_PER_PAGE));
+    setHasMore(result.length > ITEMS_PER_PAGE);
+  };
+
+  const loadMoreData = () => {
+    if (loadingMore) return;
+
+    setLoadingMore(true);
+
+    setTimeout(() => {
+      const start = (page - 1) * ITEMS_PER_PAGE;
+      const end = start + ITEMS_PER_PAGE;
+      const moreData = filteredData.slice(start, end);
+
+      setDisplayedData((prev) => [...prev, ...moreData]);
+      setHasMore(end < filteredData.length);
+      setLoadingMore(false);
+    }, 300);
   };
 
   const handleSort = (key) => {
@@ -268,7 +443,7 @@ export default function SalesHistory({
     }).format(amount);
   };
 
-  // Calculate statistics - using 'total' instead of 'total_amount'
+  // Calculate statistics from displayed data for accurate representation
   const totalSales = filteredData.reduce(
     (sum, sale) => sum + parseFloat(sale.total || 0),
     0
@@ -287,7 +462,6 @@ export default function SalesHistory({
     (item) => item.order_type === "Dine-in"
   ).length;
 
-  // Get sort indicator
   const getSortIndicator = (key) => {
     if (sortConfig.key !== key) return null;
     return sortConfig.direction === "ascending" ? (
@@ -297,7 +471,6 @@ export default function SalesHistory({
     );
   };
 
-  // Get available months based on selected year
   const getAvailableMonths = () => {
     if (filters.year === "all") return [];
 
@@ -312,11 +485,10 @@ export default function SalesHistory({
     return months;
   };
 
-  // Group sales by month
   const groupSalesByMonth = () => {
     const grouped = {};
 
-    filteredData.forEach((sale) => {
+    displayedData.forEach((sale) => {
       const monthKey = `${sale.year}-${sale.month}`;
       const monthName = getMonthName(sale.month);
       const displayName = `${monthName} ${sale.year}`;
@@ -337,7 +509,6 @@ export default function SalesHistory({
       grouped[monthKey].orderCount += 1;
     });
 
-    // Convert to array and sort by year and month (newest first)
     return Object.values(grouped).sort((a, b) => {
       if (a.year !== b.year) return b.year - a.year;
       return b.month - a.month;
@@ -359,10 +530,8 @@ export default function SalesHistory({
   const toggleAllMonths = () => {
     const groupedData = groupSalesByMonth();
     if (expandedMonths.size === groupedData.length) {
-      // Collapse all
       setExpandedMonths(new Set());
     } else {
-      // Expand all
       const allMonthKeys = groupedData.map(
         (month) => `${month.year}-${month.month}`
       );
@@ -372,54 +541,130 @@ export default function SalesHistory({
 
   const groupedSales = groupSalesByMonth();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const userRes = await axios.get(
-          "https://caferealitea.onrender.com/user",
-          {
-            withCredentials: true,
-          }
-        );
-
-        if (!userRes.data.logged_in || userRes.data.role === "") {
-          navigate("/");
-          return;
-        }
-        setRole(userRes.data.role);
-      } catch (err) {
-        console.error("Data fetch failed:", err);
-        navigate("/");
-      }
-    };
-
-    fetchData();
-  }, []);
+  const cacheInfo = getCacheInfo();
 
   return (
     <>
       <div
         className={`lg:pt-4 lg:py-4 lg:px-4 min-h-screen ${
           theme === "dark" ? "bg-gray-900" : "bg-indigo-50"
-        } `}
+        }`}
       >
         <div className="w-full mb-6">
-          <h1
-            className={`${
-              theme === "dark" ? "text-white" : "text-slate-700"
-            } text-2xl font-bold`}
-          >
-            Sales History
-          </h1>
-          <p
-            className={`${
-              theme === "dark" ? "text-gray-400" : "text-gray-500"
-            } text-sm mt-1`}
-          >
-            View and manage all sales records
-          </p>
+          <div className="flex justify-between items-start">
+            <div>
+              <h1
+                className={`${
+                  theme === "dark" ? "text-white" : "text-slate-700"
+                } text-2xl font-bold`}
+              >
+                Sales History
+              </h1>
+              <p
+                className={`${
+                  theme === "dark" ? "text-gray-400" : "text-gray-500"
+                } text-sm mt-1`}
+              >
+                View and manage all sales records
+                {cacheInfo.hasCache && (
+                  <span
+                    className={`ml-2 ${
+                      cacheInfo.isValid ? "text-green-600" : "text-yellow-600"
+                    }`}
+                  >
+                    •{" "}
+                    {cacheInfo.isValid ? "Using cached data" : "Cache expired"}
+                  </span>
+                )}
+              </p>
+            </div>
+
+            {/* Cache Controls */}
+            <div className="flex items-center space-x-2">
+              {cacheInfo.hasCache && (
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={() => setShowCacheControls(!showCacheControls)}
+                    className={`text-sm ${
+                      theme === "dark"
+                        ? "text-gray-400 hover:text-gray-300"
+                        : "text-gray-600 hover:text-gray-800"
+                    }`}
+                  >
+                    Cache Info
+                  </button>
+                  <button
+                    onClick={refreshData}
+                    disabled={loading}
+                    className={`btn btn-sm ${
+                      theme === "dark"
+                        ? "btn-outline text-white"
+                        : "btn-outline"
+                    }`}
+                  >
+                    <FiDownload className="mr-1" />
+                    Refresh
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Cache Info Panel */}
+          {showCacheControls && cacheInfo.hasCache && (
+            <div
+              className={`mt-4 p-4 rounded-lg border ${
+                theme === "dark"
+                  ? "bg-gray-800 border-gray-700"
+                  : "bg-blue-50 border-blue-200"
+              }`}
+            >
+              <div className="flex justify-between items-center">
+                <div>
+                  <h4
+                    className={`font-semibold ${
+                      theme === "dark" ? "text-white" : "text-gray-800"
+                    }`}
+                  >
+                    Cache Information
+                  </h4>
+                  <p
+                    className={`text-sm ${
+                      theme === "dark" ? "text-gray-400" : "text-gray-600"
+                    }`}
+                  >
+                    {cacheInfo.recordCount} records • {cacheInfo.minutesOld}{" "}
+                    minutes old
+                    {cacheInfo.isValid ? " • Valid" : " • Expired"}
+                  </p>
+                  <p
+                    className={`text-xs ${
+                      theme === "dark" ? "text-gray-500" : "text-gray-500"
+                    }`}
+                  >
+                    Last updated: {cacheInfo.lastUpdated}
+                  </p>
+                </div>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={refreshData}
+                    disabled={loading}
+                    className="btn btn-sm btn-primary"
+                  >
+                    <FiDownload className="mr-1" />
+                    Refresh Data
+                  </button>
+                  <button onClick={clearCache} className="btn btn-sm btn-error">
+                    <FiTrash2 className="mr-1" />
+                    Clear Cache
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
+        {/* Rest of the component remains the same */}
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
           {/* Total Sales Card */}
@@ -769,12 +1014,12 @@ export default function SalesHistory({
               theme === "dark" ? "text-gray-400" : "text-gray-600"
             }`}
           >
-            Showing {filteredData.length} of {dailySalesData.length} records
+            Showing {displayedData.length} of {filteredData.length} records
             {groupedSales.length > 0 && ` across ${groupedSales.length} months`}
           </p>
 
           <div className="flex items-center space-x-4">
-            {filteredData.length > 0 && (
+            {displayedData.length > 0 && (
               <p
                 className={`text-sm font-medium ${
                   theme === "dark" ? "text-gray-300" : "text-gray-700"
@@ -807,7 +1052,7 @@ export default function SalesHistory({
           >
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
           </div>
-        ) : filteredData.length === 0 ? (
+        ) : displayedData.length === 0 ? (
           <div
             className={`rounded-xl shadow-lg p-8 text-center ${
               theme === "dark"
@@ -1088,6 +1333,52 @@ export default function SalesHistory({
                 </div>
               );
             })}
+
+            {/* Loading More Indicator */}
+            {hasMore && (
+              <div
+                ref={observerRef}
+                className={`flex justify-center items-center py-8 ${
+                  theme === "dark" ? "bg-gray-800" : "bg-white"
+                } rounded-xl border ${
+                  theme === "dark" ? "border-gray-700" : "border-gray-200"
+                }`}
+              >
+                {loadingMore ? (
+                  <div className="flex items-center space-x-2">
+                    <FiLoader className="animate-spin text-blue-500" />
+                    <span
+                      className={
+                        theme === "dark" ? "text-gray-300" : "text-gray-600"
+                      }
+                    >
+                      Loading more records...
+                    </span>
+                  </div>
+                ) : (
+                  <div className="text-center">
+                    <p
+                      className={
+                        theme === "dark" ? "text-gray-400" : "text-gray-500"
+                      }
+                    >
+                      Scroll down to load more records
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* End of Results */}
+            {!hasMore && displayedData.length > 0 && (
+              <div
+                className={`text-center py-6 ${
+                  theme === "dark" ? "text-gray-400" : "text-gray-500"
+                }`}
+              >
+                <p>All records loaded</p>
+              </div>
+            )}
           </div>
         )}
       </div>
