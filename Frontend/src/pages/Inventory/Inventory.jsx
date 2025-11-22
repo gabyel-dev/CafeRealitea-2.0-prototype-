@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import {
   FiPackage,
-  FiTrendingUp,
   FiAlertTriangle,
   FiFilter,
   FiRefreshCw,
@@ -12,7 +11,6 @@ import {
   FiChevronUp,
   FiBox,
   FiShoppingCart,
-  FiDollarSign,
   FiArchive,
   FiEye,
   FiEyeOff,
@@ -21,75 +19,82 @@ import {
   FiSave,
   FiX,
   FiMinus,
+  FiCheckCircle,
 } from "react-icons/fi";
 
-// Sample initial inventory data
+// Sample initial inventory data focused on café ingredients
 const initialInventory = [
   {
     id: 1,
     name: "Coffee Beans",
-    category: "Raw Materials",
-    currentStock: 50,
-    lowStockThreshold: 20,
+    category: "Coffee",
+    currentStock: 20, // 20% remaining
     unit: "kg",
-    cost: 450,
+    status: "low",
     lastUpdated: "2024-01-15",
-    status: "adequate",
   },
   {
     id: 2,
-    name: "Milk",
+    name: "Fresh Milk",
     category: "Dairy",
-    currentStock: 15,
-    lowStockThreshold: 25,
+    currentStock: 80, // 80% remaining
     unit: "liters",
-    cost: 85,
+    status: "adequate",
     lastUpdated: "2024-01-18",
-    status: "low",
   },
   {
     id: 3,
     name: "Sugar",
-    category: "Raw Materials",
-    currentStock: 0,
-    lowStockThreshold: 10,
+    category: "Sweeteners",
+    currentStock: 0, // 0% remaining
     unit: "kg",
-    cost: 60,
-    lastUpdated: "2024-01-20",
     status: "out",
+    lastUpdated: "2024-01-20",
   },
   {
     id: 4,
     name: "Paper Cups",
     category: "Packaging",
-    currentStock: 200,
-    lowStockThreshold: 100,
+    currentStock: 45, // 45% remaining
     unit: "pcs",
-    cost: 2,
-    lastUpdated: "2024-01-17",
     status: "adequate",
+    lastUpdated: "2024-01-17",
   },
   {
     id: 5,
     name: "Vanilla Syrup",
     category: "Flavorings",
-    currentStock: 8,
-    lowStockThreshold: 15,
+    currentStock: 15, // 15% remaining
     unit: "bottles",
-    cost: 120,
-    lastUpdated: "2024-01-19",
     status: "low",
+    lastUpdated: "2024-01-19",
   },
   {
     id: 6,
     name: "Chocolate Powder",
-    category: "Raw Materials",
-    currentStock: 25,
-    lowStockThreshold: 10,
+    category: "Flavorings",
+    currentStock: 60, // 60% remaining
     unit: "kg",
-    cost: 180,
-    lastUpdated: "2024-01-16",
     status: "adequate",
+    lastUpdated: "2024-01-16",
+  },
+  {
+    id: 7,
+    name: "Green Tea Powder",
+    category: "Tea",
+    currentStock: 30, // 30% remaining
+    unit: "kg",
+    status: "low",
+    lastUpdated: "2024-01-21",
+  },
+  {
+    id: 8,
+    name: "Ice Cubes",
+    category: "Essentials",
+    currentStock: 90, // 90% remaining
+    unit: "kg",
+    status: "adequate",
+    lastUpdated: "2024-01-22",
   },
 ];
 
@@ -102,7 +107,7 @@ export default function InventoryPage() {
   // Filters
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
-  const [stockFilter, setStockFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [sortConfig, setSortConfig] = useState({
     key: "name",
     direction: "ascending",
@@ -113,11 +118,9 @@ export default function InventoryPage() {
   const [editingItem, setEditingItem] = useState(null);
   const [formData, setFormData] = useState({
     name: "",
-    category: "",
-    currentStock: 0,
-    lowStockThreshold: 10,
-    unit: "pcs",
-    cost: 0,
+    category: "Coffee",
+    currentStock: 100,
+    unit: "kg",
   });
 
   const ITEMS_PER_PAGE = 12;
@@ -126,11 +129,13 @@ export default function InventoryPage() {
 
   // Categories for dropdown
   const categories = [
-    "Raw Materials",
+    "Coffee",
+    "Tea",
     "Dairy",
+    "Sweeteners",
     "Flavorings",
     "Packaging",
-    "Equipment",
+    "Essentials",
     "Other",
   ];
 
@@ -155,7 +160,7 @@ export default function InventoryPage() {
   // Apply filters automatically when any filter changes
   useEffect(() => {
     applyFilters();
-  }, [searchQuery, categoryFilter, stockFilter, inventory, sortConfig]);
+  }, [searchQuery, categoryFilter, statusFilter, inventory, sortConfig]);
 
   const applyFilters = () => {
     let result = [...inventory];
@@ -175,9 +180,9 @@ export default function InventoryPage() {
       result = result.filter((item) => item.category === categoryFilter);
     }
 
-    // Stock status filter
-    if (stockFilter !== "all") {
-      result = result.filter((item) => item.status === stockFilter);
+    // Status filter
+    if (statusFilter !== "all") {
+      result = result.filter((item) => item.status === statusFilter);
     }
 
     // Sorting
@@ -209,43 +214,23 @@ export default function InventoryPage() {
   const resetFilters = () => {
     setSearchQuery("");
     setCategoryFilter("all");
-    setStockFilter("all");
+    setStatusFilter("all");
     setSortConfig({ key: "name", direction: "ascending" });
   };
 
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat("en-PH", {
-      style: "currency",
-      currency: "PHP",
-      minimumFractionDigits: 2,
-    }).format(amount);
-  };
-
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString("en-PH", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  };
-
-  const getStockStatus = (item) => {
-    if (item.currentStock === 0) return "out";
-    if (item.currentStock <= item.lowStockThreshold) return "low";
+  const getStockStatus = (stockPercentage) => {
+    if (stockPercentage === 0) return "out";
+    if (stockPercentage <= 20) return "low";
+    if (stockPercentage <= 50) return "medium";
     return "adequate";
-  };
-
-  const updateItemStatus = (items) => {
-    return items.map((item) => ({
-      ...item,
-      status: getStockStatus(item),
-    }));
   };
 
   const getStatusColor = (status) => {
     switch (status) {
       case "adequate":
         return "bg-green-100 text-green-800 border-green-200";
+      case "medium":
+        return "bg-blue-100 text-blue-800 border-blue-200";
       case "low":
         return "bg-yellow-100 text-yellow-800 border-yellow-200";
       case "out":
@@ -258,6 +243,8 @@ export default function InventoryPage() {
   const getStatusIcon = (status) => {
     switch (status) {
       case "adequate":
+        return <FiCheckCircle className="inline mr-1" />;
+      case "medium":
         return <FiEye className="inline mr-1" />;
       case "low":
         return <FiAlertTriangle className="inline mr-1" />;
@@ -265,6 +252,21 @@ export default function InventoryPage() {
         return <FiEyeOff className="inline mr-1" />;
       default:
         return <FiBox className="inline mr-1" />;
+    }
+  };
+
+  const getStatusText = (status) => {
+    switch (status) {
+      case "adequate":
+        return "Good Stock";
+      case "medium":
+        return "Moderate";
+      case "low":
+        return "Low Stock";
+      case "out":
+        return "Out of Stock";
+      default:
+        return "Unknown";
     }
   };
 
@@ -278,38 +280,35 @@ export default function InventoryPage() {
   };
 
   const getCategoryIcon = (categoryName) => {
-    if (categoryName.includes("Raw Materials"))
+    if (categoryName.includes("Coffee"))
       return <FiCoffee className="text-lg" />;
-    if (categoryName.includes("Dairy"))
+    if (categoryName.includes("Tea"))
       return <FiShoppingBag className="text-lg" />;
-    if (categoryName.includes("Flavorings"))
-      return <FiTrendingUp className="text-lg" />;
+    if (categoryName.includes("Dairy"))
+      return <FiPackage className="text-lg" />;
     return <FiBox className="text-lg" />;
   };
 
   // Calculate inventory stats
   const totalItems = inventory.length;
   const lowStockItems = inventory.filter(
-    (item) => getStockStatus(item) === "low"
+    (item) => item.status === "low"
   ).length;
   const outOfStockItems = inventory.filter(
-    (item) => getStockStatus(item) === "out"
+    (item) => item.status === "out"
   ).length;
-  const totalInventoryValue = inventory.reduce(
-    (sum, item) => sum + item.cost * item.currentStock,
-    0
-  );
+  const adequateStockItems = inventory.filter(
+    (item) => item.status === "adequate"
+  ).length;
 
   // Modal functions
   const openAddModal = () => {
     setEditingItem(null);
     setFormData({
       name: "",
-      category: "Raw Materials",
-      currentStock: 0,
-      lowStockThreshold: 10,
-      unit: "pcs",
-      cost: 0,
+      category: "Coffee",
+      currentStock: 100,
+      unit: "kg",
     });
     setShowModal(true);
   };
@@ -320,9 +319,7 @@ export default function InventoryPage() {
       name: item.name,
       category: item.category,
       currentStock: item.currentStock,
-      lowStockThreshold: item.lowStockThreshold,
       unit: item.unit,
-      cost: item.cost,
     });
     setShowModal(true);
   };
@@ -335,11 +332,13 @@ export default function InventoryPage() {
   const handleFormSubmit = (e) => {
     e.preventDefault();
 
+    const status = getStockStatus(formData.currentStock);
+
     const newItem = {
       ...formData,
       id: editingItem ? editingItem.id : Date.now(),
+      status: status,
       lastUpdated: new Date().toISOString().split("T")[0],
-      status: getStockStatus(formData),
     };
 
     if (editingItem) {
@@ -347,10 +346,10 @@ export default function InventoryPage() {
       const updatedInventory = inventory.map((item) =>
         item.id === editingItem.id ? newItem : item
       );
-      setInventory(updateItemStatus(updatedInventory));
+      setInventory(updatedInventory);
     } else {
       // Add new item
-      setInventory((prev) => updateItemStatus([...prev, newItem]));
+      setInventory((prev) => [...prev, newItem]);
     }
 
     closeModal();
@@ -368,16 +367,40 @@ export default function InventoryPage() {
     setInventory((prev) => {
       const updated = prev.map((item) => {
         if (item.id === itemId) {
-          const newStock = Math.max(0, item.currentStock + change);
+          const newStock = Math.max(
+            0,
+            Math.min(100, item.currentStock + change)
+          );
+          const status = getStockStatus(newStock);
           return {
             ...item,
             currentStock: newStock,
+            status: status,
             lastUpdated: new Date().toISOString().split("T")[0],
           };
         }
         return item;
       });
-      return updateItemStatus(updated);
+      return updated;
+    });
+  };
+
+  const setStockPercentage = (itemId, percentage) => {
+    setInventory((prev) => {
+      const updated = prev.map((item) => {
+        if (item.id === itemId) {
+          const newStock = Math.max(0, Math.min(100, percentage));
+          const status = getStockStatus(newStock);
+          return {
+            ...item,
+            currentStock: newStock,
+            status: status,
+            lastUpdated: new Date().toISOString().split("T")[0],
+          };
+        }
+        return item;
+      });
+      return updated;
     });
   };
 
@@ -412,6 +435,13 @@ export default function InventoryPage() {
     }
   };
 
+  const getStockLevelColor = (percentage) => {
+    if (percentage === 0) return "bg-red-500";
+    if (percentage <= 20) return "bg-yellow-500";
+    if (percentage <= 50) return "bg-blue-500";
+    return "bg-green-500";
+  };
+
   return (
     <div className="lg:pt-4 lg:py-4 lg:px-4 bg-indigo-50 min-h-screen">
       {/* Add/Edit Modal */}
@@ -421,7 +451,7 @@ export default function InventoryPage() {
             <div className="p-6">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-semibold text-slate-700">
-                  {editingItem ? "Edit Item" : "Add New Item"}
+                  {editingItem ? "Update Stock Level" : "Add New Ingredient"}
                 </h3>
                 <button
                   onClick={closeModal}
@@ -434,7 +464,7 @@ export default function InventoryPage() {
               <form onSubmit={handleFormSubmit} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">
-                    Item Name *
+                    Ingredient Name *
                   </label>
                   <input
                     type="text"
@@ -443,60 +473,30 @@ export default function InventoryPage() {
                     onChange={handleInputChange}
                     required
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-slate-700"
-                    placeholder="Enter item name"
+                    placeholder="Enter ingredient name"
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
-                    Category *
-                  </label>
-                  <select
-                    name="category"
-                    value={formData.category}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-slate-700"
-                  >
-                    {categories.map((cat) => (
-                      <option key={cat} value={cat}>
-                        {cat}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">
-                      Current Stock
+                      Category *
                     </label>
-                    <input
-                      type="number"
-                      name="currentStock"
-                      value={formData.currentStock}
+                    <select
+                      name="category"
+                      value={formData.category}
                       onChange={handleInputChange}
-                      min="0"
+                      required
                       className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-slate-700"
-                    />
+                    >
+                      {categories.map((cat) => (
+                        <option key={cat} value={cat}>
+                          {cat}
+                        </option>
+                      ))}
+                    </select>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">
-                      Low Stock Alert
-                    </label>
-                    <input
-                      type="number"
-                      name="lowStockThreshold"
-                      value={formData.lowStockThreshold}
-                      onChange={handleInputChange}
-                      min="0"
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-slate-700"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">
                       Unit
@@ -507,30 +507,49 @@ export default function InventoryPage() {
                       onChange={handleInputChange}
                       className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-slate-700"
                     >
-                      <option value="pcs">Pieces</option>
                       <option value="kg">Kilograms</option>
                       <option value="g">Grams</option>
                       <option value="liters">Liters</option>
                       <option value="ml">Milliliters</option>
                       <option value="bottles">Bottles</option>
+                      <option value="pcs">Pieces</option>
                       <option value="boxes">Boxes</option>
                       <option value="packs">Packs</option>
                     </select>
                   </div>
+                </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">
-                      Unit Cost (₱)
-                    </label>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Stock Level: {formData.currentStock}%
+                  </label>
+                  <div className="relative pt-1">
                     <input
-                      type="number"
-                      name="cost"
-                      value={formData.cost}
+                      type="range"
+                      name="currentStock"
+                      value={formData.currentStock}
                       onChange={handleInputChange}
                       min="0"
-                      step="0.01"
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-slate-700"
+                      max="100"
+                      step="5"
+                      className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer"
                     />
+                    <div className="flex justify-between text-xs text-slate-500 mt-1">
+                      <span>0%</span>
+                      <span>25%</span>
+                      <span>50%</span>
+                      <span>75%</span>
+                      <span>100%</span>
+                    </div>
+                  </div>
+                  <div className="mt-2">
+                    <span
+                      className={`text-sm font-medium ${getStatusColor(
+                        getStockStatus(formData.currentStock)
+                      )} px-2 py-1 rounded`}
+                    >
+                      {getStatusText(getStockStatus(formData.currentStock))}
+                    </span>
                   </div>
                 </div>
 
@@ -547,7 +566,7 @@ export default function InventoryPage() {
                     className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center"
                   >
                     <FiSave className="mr-2" />
-                    {editingItem ? "Update" : "Add"} Item
+                    {editingItem ? "Update" : "Add"} Ingredient
                   </button>
                 </div>
               </form>
@@ -559,10 +578,10 @@ export default function InventoryPage() {
       <div className="w-full mb-6 flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold text-slate-700">
-            Inventory Management
+            Ingredient Status
           </h1>
           <p className="text-sm text-slate-500 mt-1">
-            Manually track and manage your inventory items
+            Monitor and update ingredient stock levels
           </p>
         </div>
         <button
@@ -571,12 +590,12 @@ export default function InventoryPage() {
         >
           <div className="flex items-center">
             <FiPlus className="mr-2" />
-            Add New Item
+            Add Ingredient
           </div>
         </button>
       </div>
 
-      {/* Inventory Stats Overview */}
+      {/* Status Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
         <div className="bg-white rounded-xl shadow-md p-5 border border-slate-200">
           <div className="flex items-center">
@@ -584,12 +603,31 @@ export default function InventoryPage() {
               <FiPackage className="text-xl text-blue-600" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-slate-600">Total Items</p>
+              <p className="text-sm font-medium text-slate-600">
+                Total Ingredients
+              </p>
               <h3 className="text-xl font-bold text-slate-800">{totalItems}</h3>
             </div>
           </div>
           <div className="mt-3 pt-3 border-t border-slate-100">
-            <p className="text-xs text-slate-500">All inventory items</p>
+            <p className="text-xs text-slate-500">All ingredients</p>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-md p-5 border border-slate-200">
+          <div className="flex items-center">
+            <div className="p-3 rounded-lg bg-green-50">
+              <FiCheckCircle className="text-xl text-green-600" />
+            </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium text-slate-600">Good Stock</p>
+              <h3 className="text-xl font-bold text-slate-800">
+                {adequateStockItems}
+              </h3>
+            </div>
+          </div>
+          <div className="mt-3 pt-3 border-t border-slate-100">
+            <p className="text-xs text-slate-500">Above 50%</p>
           </div>
         </div>
 
@@ -606,7 +644,7 @@ export default function InventoryPage() {
             </div>
           </div>
           <div className="mt-3 pt-3 border-t border-slate-100">
-            <p className="text-xs text-slate-500">Need restocking</p>
+            <p className="text-xs text-slate-500">Below 20%</p>
           </div>
         </div>
 
@@ -623,26 +661,7 @@ export default function InventoryPage() {
             </div>
           </div>
           <div className="mt-3 pt-3 border-t border-slate-100">
-            <p className="text-xs text-slate-500">Urgent attention needed</p>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl shadow-md p-5 border border-slate-200">
-          <div className="flex items-center">
-            <div className="p-3 rounded-lg bg-green-50">
-              <FiDollarSign className="text-xl text-green-600" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-slate-600">
-                Inventory Value
-              </p>
-              <h3 className="text-xl font-bold text-slate-800">
-                {formatCurrency(totalInventoryValue)}
-              </h3>
-            </div>
-          </div>
-          <div className="mt-3 pt-3 border-t border-slate-100">
-            <p className="text-xs text-slate-500">Total stock value</p>
+            <p className="text-xs text-slate-500">0% remaining</p>
           </div>
         </div>
       </div>
@@ -659,7 +678,7 @@ export default function InventoryPage() {
             <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
             <input
               type="text"
-              placeholder="Search inventory..."
+              placeholder="Search ingredients..."
               className="pl-10 pr-4 py-2 w-full text-slate-700 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -687,18 +706,19 @@ export default function InventoryPage() {
             </select>
           </div>
 
-          {/* Stock Status Filter */}
+          {/* Status Filter */}
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">
               Stock Status
             </label>
             <select
-              value={stockFilter}
-              onChange={(e) => setStockFilter(e.target.value)}
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
               className="w-full px-3 py-2 text-slate-700 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             >
               <option value="all">All Status</option>
-              <option value="adequate">Adequate Stock</option>
+              <option value="adequate">Good Stock</option>
+              <option value="medium">Moderate</option>
               <option value="low">Low Stock</option>
               <option value="out">Out of Stock</option>
             </select>
@@ -707,7 +727,8 @@ export default function InventoryPage() {
 
         <div className="flex justify-between items-center">
           <p className="text-sm text-slate-600">
-            Showing {displayedItems.length} of {filteredInventory.length} items
+            Showing {displayedItems.length} of {filteredInventory.length}{" "}
+            ingredients
           </p>
           <button
             onClick={resetFilters}
@@ -724,11 +745,11 @@ export default function InventoryPage() {
         <div className="bg-white rounded-xl shadow-lg p-8 text-center border border-slate-200">
           <FiPackage className="text-4xl text-slate-300 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-slate-700 mb-2">
-            No inventory items found
+            No ingredients found
           </h3>
           <p className="text-slate-500 mb-4">
             {inventory.length === 0
-              ? "Get started by adding your first inventory item!"
+              ? "Get started by adding your first ingredient!"
               : "Try adjusting your filters."}
           </p>
           {inventory.length === 0 && (
@@ -736,7 +757,7 @@ export default function InventoryPage() {
               onClick={openAddModal}
               className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
             >
-              Add Your First Item
+              Add Your First Ingredient
             </button>
           )}
         </div>
@@ -751,7 +772,7 @@ export default function InventoryPage() {
                     onClick={() => handleSort("name")}
                   >
                     <div className="flex items-center">
-                      Item Name
+                      Ingredient
                       {getSortIndicator("name")}
                     </div>
                   </th>
@@ -773,20 +794,11 @@ export default function InventoryPage() {
                       {getSortIndicator("currentStock")}
                     </div>
                   </th>
-                  <th
-                    className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer"
-                    onClick={() => handleSort("cost")}
-                  >
-                    <div className="flex items-center">
-                      Unit Cost
-                      {getSortIndicator("cost")}
-                    </div>
-                  </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                     Status
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
-                    Actions
+                    Quick Actions
                   </th>
                 </tr>
               </thead>
@@ -806,7 +818,8 @@ export default function InventoryPage() {
                             {item.name}
                           </div>
                           <div className="text-sm text-slate-500">
-                            Updated: {formatDate(item.lastUpdated)}
+                            {item.unit} • Updated:{" "}
+                            {new Date(item.lastUpdated).toLocaleDateString()}
                           </div>
                         </div>
                       </div>
@@ -817,33 +830,25 @@ export default function InventoryPage() {
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="flex items-center space-x-2">
-                        <div className="text-sm font-semibold text-slate-900 min-w-12">
-                          {item.currentStock} {item.unit}
+                      <div className="flex items-center space-x-3">
+                        <div className="flex-1">
+                          <div className="flex justify-between text-sm mb-1">
+                            <span className="font-medium text-slate-700">
+                              {item.currentStock}%
+                            </span>
+                            <span className="text-slate-500">
+                              {getStatusText(item.status)}
+                            </span>
+                          </div>
+                          <div className="w-full bg-slate-200 rounded-full h-2">
+                            <div
+                              className={`h-2 rounded-full ${getStockLevelColor(
+                                item.currentStock
+                              )}`}
+                              style={{ width: `${item.currentStock}%` }}
+                            ></div>
+                          </div>
                         </div>
-                        <div className="flex space-x-1">
-                          <button
-                            onClick={() => quickUpdateStock(item.id, -1)}
-                            className="p-1 text-red-600 hover:bg-red-50 rounded transition-colors"
-                            disabled={item.currentStock <= 0}
-                          >
-                            <FiMinus size={14} />
-                          </button>
-                          <button
-                            onClick={() => quickUpdateStock(item.id, 1)}
-                            className="p-1 text-green-600 hover:bg-green-50 rounded transition-colors"
-                          >
-                            <FiPlus size={14} />
-                          </button>
-                        </div>
-                      </div>
-                      <div className="text-xs text-slate-500 mt-1">
-                        Low stock alert: {item.lowStockThreshold}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-semibold text-slate-900">
-                        {formatCurrency(item.cost)}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -853,28 +858,34 @@ export default function InventoryPage() {
                         )}`}
                       >
                         {getStatusIcon(item.status)}
-                        {item.status === "adequate"
-                          ? "Adequate"
-                          : item.status === "low"
-                          ? "Low Stock"
-                          : "Out of Stock"}
+                        {getStatusText(item.status)}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      <div className="flex space-x-3">
+                      <div className="flex space-x-2">
                         <button
                           onClick={() => openEditModal(item)}
-                          className="text-indigo-600 hover:text-indigo-900 transition-colors"
+                          className="text-indigo-600 hover:text-indigo-900 transition-colors flex items-center"
                         >
-                          <FiEdit className="inline mr-1" />
-                          Edit
+                          <FiEdit className="mr-1" />
+                          Update
                         </button>
-                        <button
-                          onClick={() => deleteItem(item.id)}
-                          className="text-red-600 hover:text-red-900 transition-colors"
-                        >
-                          Delete
-                        </button>
+                        <div className="flex space-x-1">
+                          <button
+                            onClick={() => quickUpdateStock(item.id, -10)}
+                            className="p-1 text-red-600 hover:bg-red-50 rounded transition-colors"
+                            disabled={item.currentStock <= 0}
+                          >
+                            <FiMinus size={14} />
+                          </button>
+                          <button
+                            onClick={() => quickUpdateStock(item.id, 10)}
+                            className="p-1 text-green-600 hover:bg-green-50 rounded transition-colors"
+                            disabled={item.currentStock >= 100}
+                          >
+                            <FiPlus size={14} />
+                          </button>
+                        </div>
                       </div>
                     </td>
                   </tr>

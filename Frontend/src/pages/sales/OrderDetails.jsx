@@ -16,6 +16,7 @@ import {
 
 import { FaReceipt, FaStore } from "react-icons/fa";
 import DeleteModal from "./DeleteModal";
+import { useTheme } from "../../Main/ThemeContext";
 
 export default function OrderDetails({ setActiveTab, activeTab, orderID }) {
   const [orderDetails, setOrderDetails] = useState({ items: [] });
@@ -28,6 +29,7 @@ export default function OrderDetails({ setActiveTab, activeTab, orderID }) {
   const [visible, setVisible] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState();
   const [role, setRole] = useState("");
+  const { theme } = useTheme();
 
   useEffect(() => {
     axios
@@ -72,10 +74,26 @@ export default function OrderDetails({ setActiveTab, activeTab, orderID }) {
 
   if (loading) {
     return (
-      <div className="flex flex-col justify-center items-center h-screen bg-indigo-50">
+      <div
+        className={`flex flex-col justify-center items-center h-screen ${
+          theme === "dark" ? "bg-gray-900" : "bg-indigo-50"
+        }`}
+      >
         <div className="flex flex-col items-center">
-          <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mb-4"></div>
-          <p className="text-slate-700 font-medium">Loading order details...</p>
+          <div
+            className={`w-12 h-12 border-4 rounded-full animate-spin mb-4 ${
+              theme === "dark"
+                ? "border-gray-700 border-t-indigo-500"
+                : "border-indigo-200 border-t-indigo-600"
+            }`}
+          ></div>
+          <p
+            className={`font-medium ${
+              theme === "dark" ? "text-gray-300" : "text-slate-700"
+            }`}
+          >
+            Loading order details...
+          </p>
         </div>
       </div>
     );
@@ -83,13 +101,37 @@ export default function OrderDetails({ setActiveTab, activeTab, orderID }) {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-indigo-50 flex items-center justify-center">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md">
+      <div
+        className={`min-h-screen flex items-center justify-center ${
+          theme === "dark" ? "bg-gray-900" : "bg-indigo-50"
+        }`}
+      >
+        <div
+          className={`border rounded-lg p-6 max-w-md ${
+            theme === "dark"
+              ? "bg-red-900/20 border-red-800"
+              : "bg-red-50 border-red-200"
+          }`}
+        >
           <div className="flex items-center">
-            <div className="w-6 h-6 bg-red-100 rounded-full flex items-center justify-center mr-3">
-              <span className="text-red-600 text-sm">!</span>
+            <div
+              className={`w-6 h-6 rounded-full flex items-center justify-center mr-3 ${
+                theme === "dark" ? "bg-red-800" : "bg-red-100"
+              }`}
+            >
+              <span
+                className={`text-sm ${
+                  theme === "dark" ? "text-red-300" : "text-red-600"
+                }`}
+              >
+                !
+              </span>
             </div>
-            <span className="text-red-700">{error}</span>
+            <span
+              className={theme === "dark" ? "text-red-300" : "text-red-700"}
+            >
+              {error}
+            </span>
           </div>
         </div>
       </div>
@@ -104,17 +146,30 @@ export default function OrderDetails({ setActiveTab, activeTab, orderID }) {
           setVisible={setVisible}
           orderNumber={selectedOrder.order_id}
           setActiveTab={setActiveTab}
+          theme={theme}
         />
       )}
-      <div className="min-h-screen  bg-indigo-50 flex pt-0 lg:pt-0 ">
-        <div className="lg:pt-4 lg:py-4 lg:px-4  min-h-screen w-full">
+      <div
+        className={`min-h-screen flex pt-0 lg:pt-0 ${
+          theme === "dark" ? "bg-gray-900" : "bg-indigo-50"
+        }`}
+      >
+        <div className="lg:pt-4 lg:py-4 lg:px-4 min-h-screen w-full">
           {/* Header */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
             <div>
-              <h1 className="text-2xl font-bold text-slate-700">
+              <h1
+                className={`text-2xl font-bold ${
+                  theme === "dark" ? "text-white" : "text-slate-700"
+                }`}
+              >
                 Order Details
               </h1>
-              <p className="text-sm  mt-1 text-gray-500">
+              <p
+                className={`text-sm mt-1 ${
+                  theme === "dark" ? "text-gray-400" : "text-gray-500"
+                }`}
+              >
                 Complete information for order #{orderDetails.order_id}
               </p>
             </div>
@@ -122,7 +177,11 @@ export default function OrderDetails({ setActiveTab, activeTab, orderID }) {
               onClick={() => {
                 setActiveTab("Sales");
               }}
-              className="flex items-center px-4 py-2 border border-slate-300 rounded-lg text-slate-700 hover:bg-white hover:border-slate-400 transition-colors mt-4 sm:mt-0"
+              className={`flex items-center px-4 py-2 border rounded-lg transition-colors mt-4 sm:mt-0 ${
+                theme === "dark"
+                  ? "border-gray-600 text-gray-300 hover:bg-gray-800 hover:border-gray-500"
+                  : "border-slate-300 text-slate-700 hover:bg-white hover:border-slate-400"
+              }`}
             >
               <FiArrowLeft className="mr-2" />
               Back to Sales
@@ -132,16 +191,30 @@ export default function OrderDetails({ setActiveTab, activeTab, orderID }) {
           {/* Order Summary Cards */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             {/* Main Order Card */}
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+            <div
+              className={`rounded-xl shadow-sm border p-6 ${
+                theme === "dark"
+                  ? "bg-gray-800 border-gray-700"
+                  : "bg-white border-slate-200"
+              }`}
+            >
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-semibold text-slate-800 flex items-center">
+                <h2
+                  className={`text-xl font-semibold flex items-center ${
+                    theme === "dark" ? "text-white" : "text-slate-800"
+                  }`}
+                >
                   <FaReceipt className="text-indigo-600 mr-3" />
                   Order #{orderDetails.order_id}
                 </h2>
                 <span
                   className={`px-3 py-1 rounded-full text-sm font-medium ${
                     orderDetails.order_type === "Dine-in"
-                      ? "bg-indigo-100 text-indigo-800"
+                      ? theme === "dark"
+                        ? "bg-indigo-900/30 text-indigo-300"
+                        : "bg-indigo-100 text-indigo-800"
+                      : theme === "dark"
+                      ? "bg-purple-900/30 text-purple-300"
                       : "bg-purple-100 text-purple-800"
                   }`}
                 >
@@ -150,53 +223,123 @@ export default function OrderDetails({ setActiveTab, activeTab, orderID }) {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="flex items-center p-3 bg-slate-50 rounded-lg">
-                  <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center mr-3">
+                <div
+                  className={`flex items-center p-3 rounded-lg ${
+                    theme === "dark" ? "bg-gray-700" : "bg-slate-50"
+                  }`}
+                >
+                  <div
+                    className={`w-10 h-10 rounded-full flex items-center justify-center mr-3 ${
+                      theme === "dark" ? "bg-indigo-900/30" : "bg-indigo-100"
+                    }`}
+                  >
                     <FiUser className="text-indigo-600" size={18} />
                   </div>
                   <div>
-                    <p className="text-sm text-slate-600">Customer</p>
-                    <p className="font-semibold text-slate-800">
+                    <p
+                      className={`text-sm ${
+                        theme === "dark" ? "text-gray-400" : "text-slate-600"
+                      }`}
+                    >
+                      Customer
+                    </p>
+                    <p
+                      className={`font-semibold ${
+                        theme === "dark" ? "text-white" : "text-slate-800"
+                      }`}
+                    >
                       {orderDetails.customer_name}
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-center p-3 bg-slate-50 rounded-lg">
-                  <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mr-3">
+                <div
+                  className={`flex items-center p-3 rounded-lg ${
+                    theme === "dark" ? "bg-gray-700" : "bg-slate-50"
+                  }`}
+                >
+                  <div
+                    className={`w-10 h-10 rounded-full flex items-center justify-center mr-3 ${
+                      theme === "dark" ? "bg-purple-900/30" : "bg-purple-100"
+                    }`}
+                  >
                     <FiCreditCard className="text-purple-600" size={18} />
                   </div>
                   <div>
-                    <p className="text-sm text-slate-600">Payment Method</p>
-                    <p className="font-semibold text-slate-800">
+                    <p
+                      className={`text-sm ${
+                        theme === "dark" ? "text-gray-400" : "text-slate-600"
+                      }`}
+                    >
+                      Payment Method
+                    </p>
+                    <p
+                      className={`font-semibold ${
+                        theme === "dark" ? "text-white" : "text-slate-800"
+                      }`}
+                    >
                       {orderDetails.payment_method}
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-center p-3 bg-slate-50 rounded-lg">
-                  <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center mr-3">
+                <div
+                  className={`flex items-center p-3 rounded-lg ${
+                    theme === "dark" ? "bg-gray-700" : "bg-slate-50"
+                  }`}
+                >
+                  <div
+                    className={`w-10 h-10 rounded-full flex items-center justify-center mr-3 ${
+                      theme === "dark" ? "bg-emerald-900/30" : "bg-emerald-100"
+                    }`}
+                  >
                     <FiTag className="text-emerald-600" size={18} />
                   </div>
                   <div>
-                    <p className="text-sm text-slate-600">Total Amount</p>
-                    <p className="font-semibold text-slate-800">
+                    <p
+                      className={`text-sm ${
+                        theme === "dark" ? "text-gray-400" : "text-slate-600"
+                      }`}
+                    >
+                      Total Amount
+                    </p>
+                    <p
+                      className={`font-semibold ${
+                        theme === "dark" ? "text-white" : "text-slate-800"
+                      }`}
+                    >
                       ₱{orderDetails.total?.toFixed(2)}
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-center p-3 bg-slate-50 rounded-lg">
-                  <div className="w-10 h-10 bg-cyan-100 rounded-full flex items-center justify-center mr-3">
+                <div
+                  className={`flex items-center p-3 rounded-lg ${
+                    theme === "dark" ? "bg-gray-700" : "bg-slate-50"
+                  }`}
+                >
+                  <div
+                    className={`w-10 h-10 rounded-full flex items-center justify-center mr-3 ${
+                      theme === "dark" ? "bg-cyan-900/30" : "bg-cyan-100"
+                    }`}
+                  >
                     <FiUser className="text-cyan-600" size={18} />
                   </div>
                   <div>
-                    <p className="text-sm text-slate-600">
+                    <p
+                      className={`text-sm ${
+                        theme === "dark" ? "text-gray-400" : "text-slate-600"
+                      }`}
+                    >
                       {orderDetails.confirmed_by
                         ? "Confirmed By"
                         : "Created By"}
                     </p>
-                    <p className="font-semibold text-slate-800">
+                    <p
+                      className={`font-semibold ${
+                        theme === "dark" ? "text-white" : "text-slate-800"
+                      }`}
+                    >
                       {orderDetails.confirmed_by || orderDetails.created_by}
                     </p>
                   </div>
@@ -205,34 +348,84 @@ export default function OrderDetails({ setActiveTab, activeTab, orderID }) {
             </div>
 
             {/* Additional Info Card */}
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-              <h3 className="text-lg font-semibold text-slate-800 mb-4">
+            <div
+              className={`rounded-xl shadow-sm border p-6 ${
+                theme === "dark"
+                  ? "bg-gray-800 border-gray-700"
+                  : "bg-white border-slate-200"
+              }`}
+            >
+              <h3
+                className={`text-lg font-semibold mb-4 ${
+                  theme === "dark" ? "text-white" : "text-slate-800"
+                }`}
+              >
                 Additional Information
               </h3>
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                <div
+                  className={`flex items-center justify-between p-3 rounded-lg ${
+                    theme === "dark" ? "bg-gray-700" : "bg-slate-50"
+                  }`}
+                >
                   <div className="flex items-center">
-                    <FiCalendar className="text-slate-500 mr-3" size={18} />
-                    <span className="text-slate-700">Order Date</span>
+                    <FiCalendar
+                      className={`mr-3 ${
+                        theme === "dark" ? "text-gray-400" : "text-slate-500"
+                      }`}
+                      size={18}
+                    />
+                    <span
+                      className={
+                        theme === "dark" ? "text-gray-300" : "text-slate-700"
+                      }
+                    >
+                      Order Date
+                    </span>
                   </div>
-                  <span className="font-semibold text-slate-800">
+                  <span
+                    className={`font-semibold ${
+                      theme === "dark" ? "text-white" : "text-slate-800"
+                    }`}
+                  >
                     {orderDetails.order_time
                       ? new Date(orderDetails.order_time).toLocaleDateString()
                       : "N/A"}
                   </span>
                 </div>
 
-                <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                <div
+                  className={`flex items-center justify-between p-3 rounded-lg ${
+                    theme === "dark" ? "bg-gray-700" : "bg-slate-50"
+                  }`}
+                >
                   <div className="flex items-center">
-                    <FaStore className="text-slate-500 mr-3" size={18} />
-                    <span className="text-slate-700">Status</span>
+                    <FaStore
+                      className={`mr-3 ${
+                        theme === "dark" ? "text-gray-400" : "text-slate-500"
+                      }`}
+                      size={18}
+                    />
+                    <span
+                      className={
+                        theme === "dark" ? "text-gray-300" : "text-slate-700"
+                      }
+                    >
+                      Status
+                    </span>
                   </div>
                   <span
                     className={`px-2 py-1 rounded text-xs font-medium ${
                       orderDetails.status === "completed"
-                        ? "bg-green-100 text-green-800"
+                        ? theme === "dark"
+                          ? "bg-green-900/30 text-green-300"
+                          : "bg-green-100 text-green-800"
                         : orderDetails.status === "pending"
-                        ? "bg-yellow-100 text-yellow-800"
+                        ? theme === "dark"
+                          ? "bg-yellow-900/30 text-yellow-300"
+                          : "bg-yellow-100 text-yellow-800"
+                        : theme === "dark"
+                        ? "bg-blue-900/30 text-blue-300"
                         : "bg-blue-100 text-blue-800"
                     }`}
                   >
@@ -240,12 +433,31 @@ export default function OrderDetails({ setActiveTab, activeTab, orderID }) {
                   </span>
                 </div>
 
-                <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                <div
+                  className={`flex items-center justify-between p-3 rounded-lg ${
+                    theme === "dark" ? "bg-gray-700" : "bg-slate-50"
+                  }`}
+                >
                   <div className="flex items-center">
-                    <FiShoppingCart className="text-slate-500 mr-3" size={18} />
-                    <span className="text-slate-700">Items Count</span>
+                    <FiShoppingCart
+                      className={`mr-3 ${
+                        theme === "dark" ? "text-gray-400" : "text-slate-500"
+                      }`}
+                      size={18}
+                    />
+                    <span
+                      className={
+                        theme === "dark" ? "text-gray-300" : "text-slate-700"
+                      }
+                    >
+                      Items Count
+                    </span>
                   </div>
-                  <span className="font-semibold text-slate-800">
+                  <span
+                    className={`font-semibold ${
+                      theme === "dark" ? "text-white" : "text-slate-800"
+                    }`}
+                  >
                     {orderDetails.items.length} items
                   </span>
                 </div>
@@ -254,13 +466,27 @@ export default function OrderDetails({ setActiveTab, activeTab, orderID }) {
           </div>
 
           {/* Order Items */}
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+          <div
+            className={`rounded-xl shadow-sm border p-6 ${
+              theme === "dark"
+                ? "bg-gray-800 border-gray-700"
+                : "bg-white border-slate-200"
+            }`}
+          >
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-slate-800 flex items-center">
+              <h3
+                className={`text-lg font-semibold flex items-center ${
+                  theme === "dark" ? "text-white" : "text-slate-800"
+                }`}
+              >
                 <FiShoppingCart className="text-indigo-600 mr-2" />
                 Order Items
               </h3>
-              <div className="text-sm text-slate-600">
+              <div
+                className={`text-sm ${
+                  theme === "dark" ? "text-gray-400" : "text-slate-600"
+                }`}
+              >
                 Total: {orderDetails.items.length} items
               </div>
             </div>
@@ -268,17 +494,37 @@ export default function OrderDetails({ setActiveTab, activeTab, orderID }) {
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="bg-slate-100">
-                    <th className="text-left py-3 px-4 text-slate-700 font-semibold text-sm">
+                  <tr
+                    className={
+                      theme === "dark" ? "bg-gray-700" : "bg-slate-100"
+                    }
+                  >
+                    <th
+                      className={`text-left py-3 px-4 font-semibold text-sm ${
+                        theme === "dark" ? "text-gray-300" : "text-slate-700"
+                      }`}
+                    >
                       Item
                     </th>
-                    <th className="text-center py-3 px-4 text-slate-700 font-semibold text-sm">
+                    <th
+                      className={`text-center py-3 px-4 font-semibold text-sm ${
+                        theme === "dark" ? "text-gray-300" : "text-slate-700"
+                      }`}
+                    >
                       Price
                     </th>
-                    <th className="text-center py-3 px-4 text-slate-700 font-semibold text-sm">
+                    <th
+                      className={`text-center py-3 px-4 font-semibold text-sm ${
+                        theme === "dark" ? "text-gray-300" : "text-slate-700"
+                      }`}
+                    >
                       Quantity
                     </th>
-                    <th className="text-right py-3 px-4 text-slate-700 font-semibold text-sm">
+                    <th
+                      className={`text-right py-3 px-4 font-semibold text-sm ${
+                        theme === "dark" ? "text-gray-300" : "text-slate-700"
+                      }`}
+                    >
                       Subtotal
                     </th>
                   </tr>
@@ -287,42 +533,82 @@ export default function OrderDetails({ setActiveTab, activeTab, orderID }) {
                   {orderDetails.items.map((item, index) => (
                     <tr
                       key={index}
-                      className="border-b border-slate-100 hover:bg-slate-50 transition-colors"
+                      className={`border-b transition-colors ${
+                        theme === "dark"
+                          ? "border-gray-700 hover:bg-gray-750"
+                          : "border-slate-100 hover:bg-slate-50"
+                      }`}
                     >
                       <td className="py-4 px-4">
                         <div className="flex items-center">
-                          <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center mr-3">
+                          <div
+                            className={`w-8 h-8 rounded-lg flex items-center justify-center mr-3 ${
+                              theme === "dark"
+                                ? "bg-indigo-900/30"
+                                : "bg-indigo-100"
+                            }`}
+                          >
                             <FiCoffee className="text-indigo-600" size={14} />
                           </div>
                           <div>
-                            <div className="font-medium text-slate-800">
+                            <div
+                              className={`font-medium ${
+                                theme === "dark"
+                                  ? "text-white"
+                                  : "text-slate-800"
+                              }`}
+                            >
                               {item.name}
                             </div>
                             {item.description && (
-                              <div className="text-xs text-slate-500">
+                              <div
+                                className={`text-xs ${
+                                  theme === "dark"
+                                    ? "text-gray-400"
+                                    : "text-slate-500"
+                                }`}
+                              >
                                 {item.description}
                               </div>
                             )}
                           </div>
                         </div>
                       </td>
-                      <td className="text-center py-4 px-4 text-slate-700 font-medium">
+                      <td
+                        className={`text-center py-4 px-4 font-medium ${
+                          theme === "dark" ? "text-gray-300" : "text-slate-700"
+                        }`}
+                      >
                         ₱{item.price?.toFixed(2)}
                       </td>
-                      <td className="text-center py-4 px-4 text-slate-700 font-medium">
+                      <td
+                        className={`text-center py-4 px-4 font-medium ${
+                          theme === "dark" ? "text-gray-300" : "text-slate-700"
+                        }`}
+                      >
                         {item.quantity}
                       </td>
-                      <td className="text-right py-4 px-4 text-slate-800 font-semibold">
+                      <td
+                        className={`text-right py-4 px-4 font-semibold ${
+                          theme === "dark" ? "text-white" : "text-slate-800"
+                        }`}
+                      >
                         ₱{item.subtotal?.toFixed(2)}
                       </td>
                     </tr>
                   ))}
                 </tbody>
                 <tfoot>
-                  <tr className="bg-slate-100">
+                  <tr
+                    className={
+                      theme === "dark" ? "bg-gray-700" : "bg-slate-100"
+                    }
+                  >
                     <td
                       colSpan="3"
-                      className="text-right py-4 px-4 font-bold text-slate-800 text-lg"
+                      className={`text-right py-4 px-4 font-bold text-lg ${
+                        theme === "dark" ? "text-white" : "text-slate-800"
+                      }`}
                     >
                       Total Amount
                     </td>
@@ -337,7 +623,13 @@ export default function OrderDetails({ setActiveTab, activeTab, orderID }) {
 
           {/* Action Buttons */}
           <div className="flex items-center justify-center md:justify-end gap-3 mt-6">
-            <button className="flex items-center px-4 py-2 border border-slate-300 rounded-lg text-slate-700 cursor-pointer hover:bg-white hover:border-slate-400 transition-colors">
+            <button
+              className={`flex items-center px-4 py-2 border rounded-lg transition-colors ${
+                theme === "dark"
+                  ? "border-gray-600 text-gray-300 hover:bg-gray-800 hover:border-gray-500"
+                  : "border-slate-300 text-slate-700 hover:bg-white hover:border-slate-400"
+              }`}
+            >
               <FiDownload className="mr-2" />
               Export Receipt
             </button>
@@ -349,7 +641,15 @@ export default function OrderDetails({ setActiveTab, activeTab, orderID }) {
                 setVisible(true);
                 setSelectedOrder(orderDetails);
               }}
-              className="flex items-center px-4 py-2 border border-red-300 rounded-lg text-slate-100 bg-red-500 hover:bg-red-700 cursor-pointer  hover:border-red-400 transition-colors"
+              className={`flex items-center px-4 py-2 border rounded-lg transition-colors ${
+                theme === "dark"
+                  ? "border-red-700 bg-red-600 text-white hover:bg-red-700 hover:border-red-600"
+                  : "border-red-300 bg-red-500 text-white hover:bg-red-600 hover:border-red-400"
+              } ${
+                !["System Administrator"].includes(role)
+                  ? "opacity-50 cursor-not-allowed"
+                  : ""
+              }`}
             >
               <FiTrash className="mr-2" />
               Delete Order

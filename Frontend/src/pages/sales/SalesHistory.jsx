@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom";
 import {
   FiFilter,
   FiRefreshCw,
@@ -399,19 +398,23 @@ export default function SalesHistory({
 
   return (
     <>
-      <div className="lg:pt-4 lg:py-4 lg:px-4  min-h-screen">
+      <div
+        className={`lg:pt-4 lg:py-4 lg:px-4 min-h-screen ${
+          theme === "dark" ? "bg-gray-900" : "bg-indigo-50"
+        } `}
+      >
         <div className="w-full mb-6">
           <h1
             className={`${
               theme === "dark" ? "text-white" : "text-slate-700"
-            } text-2xl font-bold `}
+            } text-2xl font-bold`}
           >
             Sales History
           </h1>
           <p
             className={`${
               theme === "dark" ? "text-gray-400" : "text-gray-500"
-            } text-sm  mt-1`}
+            } text-sm mt-1`}
           >
             View and manage all sales records
           </p>
@@ -419,12 +422,13 @@ export default function SalesHistory({
 
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
+          {/* Total Sales Card */}
           <div
             className={`${
               theme === "dark"
-                ? "black-card text-color-black"
-                : "light-card text-slate-700"
-            } rounded-xl shadow-md p-5 `}
+                ? "bg-gray-800 text-white border-gray-700"
+                : "bg-white text-slate-700 border-gray-200"
+            } rounded-xl border shadow-md p-5 transition-colors duration-200`}
           >
             <div className="flex items-center">
               <div
@@ -438,23 +442,23 @@ export default function SalesHistory({
                 <p
                   className={`${
                     theme === "dark" ? "text-gray-400" : "text-gray-600"
-                  } text-sm font-medium `}
+                  } text-sm font-medium`}
                 >
                   Total Sales
                 </p>
                 <h3
-                  className={` text-xl font-bold ${
-                    theme === "dark" ? "text-gray-200" : "text-gray-800"
-                  } `}
+                  className={`text-xl font-bold ${
+                    theme === "dark" ? "text-white" : "text-gray-800"
+                  }`}
                 >
                   {formatCurrency(totalSales)}
                 </h3>
               </div>
             </div>
             <div
-              className={`mt-3 pt-3 border-t ${
-                theme === "dark" ? "border-slate-700" : "border-gray-100"
-              }`}
+              className={`mt-3 pt-3 ${
+                theme === "dark" ? "border-gray-700" : "border-gray-100"
+              } border-t`}
             >
               <p className="text-xs text-gray-500">
                 {totalOrders} transactions
@@ -462,12 +466,13 @@ export default function SalesHistory({
             </div>
           </div>
 
+          {/* Total Orders Card */}
           <div
             className={`${
               theme === "dark"
-                ? "black-card text-color-black"
-                : "light-card text-slate-700"
-            } rounded-xl shadow-md p-5 `}
+                ? "bg-gray-800 text-white border-gray-700"
+                : "bg-white text-slate-700 border-gray-200"
+            } rounded-xl border shadow-md p-5 transition-colors duration-200`}
           >
             <div className="flex items-center">
               <div
@@ -481,35 +486,36 @@ export default function SalesHistory({
                 <p
                   className={`${
                     theme === "dark" ? "text-gray-400" : "text-gray-600"
-                  } text-sm font-medium `}
+                  } text-sm font-medium`}
                 >
                   Total Orders
                 </p>
                 <h3
                   className={`text-xl font-bold ${
-                    theme === "dark" ? "text-gray-200" : "text-gray-800"
-                  } `}
+                    theme === "dark" ? "text-white" : "text-gray-800"
+                  }`}
                 >
                   {totalOrders}
                 </h3>
               </div>
             </div>
             <div
-              className={`mt-3 pt-3 border-t ${
-                theme === "dark" ? "border-slate-700" : "border-gray-100"
-              } flex justify-between`}
+              className={`mt-3 pt-3 ${
+                theme === "dark" ? "border-gray-700" : "border-gray-100"
+              } border-t flex justify-between`}
             >
               <p className="text-xs text-gray-500">{dineInOrders} Dine-in</p>
               <p className="text-xs text-gray-500">{deliveryOrders} Delivery</p>
             </div>
           </div>
 
+          {/* Payments Card */}
           <div
             className={`${
               theme === "dark"
-                ? "black-card text-color-black"
-                : "light-card text-slate-700"
-            } rounded-xl shadow-md p-5 `}
+                ? "bg-gray-800 text-white border-gray-700"
+                : "bg-white text-slate-700 border-gray-200"
+            } rounded-xl border shadow-md p-5 transition-colors duration-200`}
           >
             <div className="flex items-center">
               <div
@@ -523,35 +529,36 @@ export default function SalesHistory({
                 <p
                   className={`${
                     theme === "dark" ? "text-gray-400" : "text-gray-600"
-                  } text-sm font-medium `}
+                  } text-sm font-medium`}
                 >
                   Payments
                 </p>
                 <h3
                   className={`text-xl font-bold ${
-                    theme === "dark" ? "text-gray-200" : "text-gray-800"
-                  } `}
+                    theme === "dark" ? "text-white" : "text-gray-800"
+                  }`}
                 >
                   {cashPayments + gcashPayments}
                 </h3>
               </div>
             </div>
             <div
-              className={`mt-3 pt-3 border-t ${
-                theme === "dark" ? "border-slate-700" : "border-gray-100 "
-              } flex justify-between`}
+              className={`mt-3 pt-3 ${
+                theme === "dark" ? "border-gray-700" : "border-gray-100"
+              } border-t flex justify-between`}
             >
               <p className="text-xs text-gray-500">{cashPayments} Cash</p>
               <p className="text-xs text-gray-500">{gcashPayments} GCash</p>
             </div>
           </div>
 
+          {/* Delivery Orders Card */}
           <div
             className={`${
               theme === "dark"
-                ? "black-card text-color-black"
-                : "light-card text-slate-700"
-            } rounded-xl shadow-md p-5 `}
+                ? "bg-gray-800 text-white border-gray-700"
+                : "bg-white text-slate-700 border-gray-200"
+            } rounded-xl border shadow-md p-5 transition-colors duration-200`}
           >
             <div className="flex items-center">
               <div
@@ -565,23 +572,23 @@ export default function SalesHistory({
                 <p
                   className={`${
                     theme === "dark" ? "text-gray-400" : "text-gray-600"
-                  } text-sm font-medium `}
+                  } text-sm font-medium`}
                 >
                   Delivery Orders
                 </p>
                 <h3
                   className={`text-xl font-bold ${
-                    theme === "dark" ? "text-gray-200" : "text-gray-800"
-                  } `}
+                    theme === "dark" ? "text-white" : "text-gray-800"
+                  }`}
                 >
                   {deliveryOrders}
                 </h3>
               </div>
             </div>
             <div
-              className={`mt-3 pt-3 border-t ${
-                theme === "dark" ? "border-slate-700" : "border-gray-100 "
-              }`}
+              className={`mt-3 pt-3 ${
+                theme === "dark" ? "border-gray-700" : "border-gray-100"
+              } border-t`}
             >
               <p className="text-xs text-gray-500">
                 {totalOrders > 0
@@ -597,24 +604,22 @@ export default function SalesHistory({
         <div
           className={`${
             theme === "dark"
-              ? "black-card text-color-black"
-              : "light-card text-slate-700"
-          } rounded-xl shadow-md p-5   mb-6`}
+              ? "bg-gray-800 text-white border-gray-700"
+              : "bg-white text-slate-700 border-gray-200"
+          } rounded-xl border shadow-md p-5 mb-6 transition-colors duration-200`}
         >
-          <div className="flex flex-col md:flex-row md:items-center justify-between mb-5 ">
-            <h2 className="text-lg font-semibold text-gray-800 flex items-center">
+          <div className="flex flex-col md:flex-row md:items-center justify-between mb-5">
+            <h2 className="text-lg font-semibold flex items-center">
               <FiFilter
                 className={`${
                   theme === "dark" ? "text-gray-400" : "text-gray-600"
-                } text-sm font-medium  mr-2`}
+                } mr-2`}
               />
-              <h1
-                className={`${
-                  theme === "dark" ? "text-gray-200" : "text-gray-600"
-                }`}
+              <span
+                className={theme === "dark" ? "text-white" : "text-gray-800"}
               >
                 Filter
-              </h1>
+              </span>
             </h2>
 
             <div className="relative mt-3 md:mt-0 md:w-64">
@@ -622,7 +627,11 @@ export default function SalesHistory({
               <input
                 type="text"
                 placeholder="Search orders..."
-                className="pl-10 pr-4 py-2 w-full  text-slate-700 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className={`pl-10 pr-4 py-2 w-full rounded-lg border focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                  theme === "dark"
+                    ? "bg-gray-700 text-white border-gray-600 placeholder-gray-400"
+                    : "bg-white text-slate-700 border-gray-300 placeholder-gray-500"
+                }`}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -632,14 +641,22 @@ export default function SalesHistory({
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
             {/* Year Filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                className={`block text-sm font-medium mb-1 ${
+                  theme === "dark" ? "text-gray-300" : "text-gray-700"
+                }`}
+              >
                 Year
               </label>
               <select
                 name="year"
                 value={filters.year}
                 onChange={handleFilterChange}
-                className="w-full px-3 py-2  text-slate-700  rounded-lg border border-slate-300"
+                className={`w-full px-3 py-2 rounded-lg border ${
+                  theme === "dark"
+                    ? "bg-gray-700 text-white border-gray-600"
+                    : "bg-white text-slate-700 border-gray-300"
+                }`}
               >
                 <option value="all">All Years</option>
                 {availableYears.map((year) => (
@@ -652,14 +669,22 @@ export default function SalesHistory({
 
             {/* Month Filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                className={`block text-sm font-medium mb-1 ${
+                  theme === "dark" ? "text-gray-300" : "text-gray-700"
+                }`}
+              >
                 Month
               </label>
               <select
                 name="month"
                 value={filters.month}
                 onChange={handleFilterChange}
-                className="w-full px-3 py-2  text-slate-700  rounded-lg border border-slate-300"
+                className={`w-full px-3 py-2 rounded-lg border ${
+                  theme === "dark"
+                    ? "bg-gray-700 text-white border-gray-600"
+                    : "bg-white text-slate-700 border-gray-300"
+                }`}
                 disabled={filters.year === "all"}
               >
                 <option value="all">All Months</option>
@@ -673,14 +698,22 @@ export default function SalesHistory({
 
             {/* Order Type Filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                className={`block text-sm font-medium mb-1 ${
+                  theme === "dark" ? "text-gray-300" : "text-gray-700"
+                }`}
+              >
                 Order Type
               </label>
               <select
                 name="orderType"
                 value={orderTypeFilter}
                 onChange={(e) => setOrderTypeFilter(e.target.value)}
-                className="w-full px-3 py-2 border text-slate-700  rounded-lg focus:ring-2 border border-slate-300"
+                className={`w-full px-3 py-2 rounded-lg border ${
+                  theme === "dark"
+                    ? "bg-gray-700 text-white border-gray-600"
+                    : "bg-white text-slate-700 border-gray-300"
+                }`}
               >
                 <option value="all">All Orders</option>
                 <option value="Dine-in">Dine-in</option>
@@ -690,14 +723,22 @@ export default function SalesHistory({
 
             {/* Payment Method Filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                className={`block text-sm font-medium mb-1 ${
+                  theme === "dark" ? "text-gray-300" : "text-gray-700"
+                }`}
+              >
                 Payment Method
               </label>
               <select
                 name="paymentMethod"
                 value={paymentFilter}
                 onChange={(e) => setPaymentFilter(e.target.value)}
-                className="w-full px-3 py-2 border text-slate-700  border-slate-300 rounded-lg "
+                className={`w-full px-3 py-2 rounded-lg border ${
+                  theme === "dark"
+                    ? "bg-gray-700 text-white border-gray-600"
+                    : "bg-white text-slate-700 border-gray-300"
+                }`}
               >
                 <option value="all">All Methods</option>
                 <option value="Cash">Cash</option>
@@ -709,7 +750,11 @@ export default function SalesHistory({
           <div className="flex justify-end">
             <button
               onClick={resetFilters}
-              className="px-4 py-2 border border-slate-300  rounded-lg text-gray-700 hover:bg-gray-50 flex items-center transition-colors"
+              className={`px-4 py-2 rounded-lg border flex items-center transition-colors ${
+                theme === "dark"
+                  ? "border-gray-600 text-gray-300 hover:bg-gray-700"
+                  : "border-gray-300 text-gray-700 hover:bg-gray-50"
+              }`}
             >
               <FiRefreshCw className="mr-2" />
               Reset All
@@ -719,14 +764,22 @@ export default function SalesHistory({
 
         {/* Results Count and Controls */}
         <div className="mb-4 flex justify-between items-center">
-          <p className="text-sm text-gray-600">
+          <p
+            className={`text-sm ${
+              theme === "dark" ? "text-gray-400" : "text-gray-600"
+            }`}
+          >
             Showing {filteredData.length} of {dailySalesData.length} records
             {groupedSales.length > 0 && ` across ${groupedSales.length} months`}
           </p>
 
           <div className="flex items-center space-x-4">
             {filteredData.length > 0 && (
-              <p className="text-sm font-medium text-gray-700">
+              <p
+                className={`text-sm font-medium ${
+                  theme === "dark" ? "text-gray-300" : "text-gray-700"
+                }`}
+              >
                 Total: {formatCurrency(totalSales)}
               </p>
             )}
@@ -745,15 +798,25 @@ export default function SalesHistory({
 
         {/* Sales List with Collapsible Months */}
         {loading ? (
-          <div className="flex justify-center items-center h-64 bg-white rounded-xl shadow-md border border-gray-100">
+          <div
+            className={`flex justify-center items-center h-64 rounded-xl border shadow-md ${
+              theme === "dark"
+                ? "bg-gray-800 border-gray-700"
+                : "bg-white border-gray-200"
+            }`}
+          >
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
           </div>
         ) : filteredData.length === 0 ? (
-          <div className="bg-white rounded-xl shadow-lg p-8 text-center">
-            <FiCalendar className="text-4xl text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-700 mb-2">
-              No sales records found
-            </h3>
+          <div
+            className={`rounded-xl shadow-lg p-8 text-center ${
+              theme === "dark"
+                ? "bg-gray-800 text-white"
+                : "bg-white text-gray-700"
+            }`}
+          >
+            <FiCalendar className="text-4xl text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium mb-2">No sales records found</h3>
             <p className="text-gray-500">
               Try adjusting your filters or check back later.
             </p>
@@ -775,31 +838,59 @@ export default function SalesHistory({
               return (
                 <div
                   key={monthKey}
-                  className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden"
+                  className={`rounded-xl border shadow-md overflow-hidden ${
+                    theme === "dark"
+                      ? "bg-gray-800 border-gray-700"
+                      : "bg-white border-gray-200"
+                  }`}
                 >
                   {/* Month Header */}
                   <div
-                    className={`px-6 py-4 cursor-pointer transition-colors ${
+                    className={`px-6 py-4 cursor-pointer transition-colors border-b ${
                       theme === "dark"
-                        ? "bg-gray-800 hover:bg-gray-700"
-                        : "bg-gray-50 hover:bg-gray-100"
-                    } border-b border-gray-200`}
+                        ? "bg-gray-750 hover:bg-gray-700 border-gray-600"
+                        : "bg-gray-50 hover:bg-gray-100 border-gray-200"
+                    }`}
                     onClick={() => toggleMonth(monthKey)}
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
                         {isExpanded ? (
-                          <FiChevronDown className="text-gray-500 mr-3" />
+                          <FiChevronDown
+                            className={`mr-3 ${
+                              theme === "dark"
+                                ? "text-gray-400"
+                                : "text-gray-500"
+                            }`}
+                          />
                         ) : (
-                          <FiChevronRight className="text-gray-500 mr-3" />
+                          <FiChevronRight
+                            className={`mr-3 ${
+                              theme === "dark"
+                                ? "text-gray-400"
+                                : "text-gray-500"
+                            }`}
+                          />
                         )}
-                        <h3 className="text-lg font-semibold text-gray-800">
+                        <h3
+                          className={`text-lg font-semibold ${
+                            theme === "dark" ? "text-white" : "text-gray-800"
+                          }`}
+                        >
                           {monthData.displayName}
                         </h3>
                       </div>
-                      <div className="flex items-center space-x-6 text-sm text-gray-600">
+                      <div
+                        className={`flex items-center space-x-6 text-sm ${
+                          theme === "dark" ? "text-gray-400" : "text-gray-600"
+                        }`}
+                      >
                         <span>{monthData.orderCount} orders</span>
-                        <span className="font-semibold text-gray-800">
+                        <span
+                          className={`font-semibold ${
+                            theme === "dark" ? "text-white" : "text-gray-800"
+                          }`}
+                        >
                           {formatCurrency(monthData.total)}
                         </span>
                       </div>
@@ -810,65 +901,130 @@ export default function SalesHistory({
                   {isExpanded && (
                     <div className="overflow-x-auto">
                       <table className="w-full">
-                        <thead className="bg-gray-50">
+                        <thead
+                          className={
+                            theme === "dark" ? "bg-gray-750" : "bg-gray-50"
+                          }
+                        >
                           <tr>
                             <th
-                              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                              className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleSort("order_time");
                               }}
                             >
-                              <div className="flex items-center">
+                              <div
+                                className={`flex items-center ${
+                                  theme === "dark"
+                                    ? "text-gray-300"
+                                    : "text-gray-500"
+                                }`}
+                              >
                                 Date & Time
                                 {getSortIndicator("order_time")}
                               </div>
                             </th>
                             <th
-                              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                              className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleSort("id");
                               }}
                             >
-                              <div className="flex items-center">
+                              <div
+                                className={`flex items-center ${
+                                  theme === "dark"
+                                    ? "text-gray-300"
+                                    : "text-gray-500"
+                                }`}
+                              >
                                 Order ID
                                 {getSortIndicator("id")}
                               </div>
                             </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th
+                              className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${
+                                theme === "dark"
+                                  ? "text-gray-300"
+                                  : "text-gray-500"
+                              }`}
+                            >
                               Type
                             </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th
+                              className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${
+                                theme === "dark"
+                                  ? "text-gray-300"
+                                  : "text-gray-500"
+                              }`}
+                            >
                               Payment
                             </th>
                             <th
-                              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                              className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleSort("total");
                               }}
                             >
-                              <div className="flex items-center">
+                              <div
+                                className={`flex items-center ${
+                                  theme === "dark"
+                                    ? "text-gray-300"
+                                    : "text-gray-500"
+                                }`}
+                              >
                                 Amount
                                 {getSortIndicator("total")}
                               </div>
                             </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th
+                              className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${
+                                theme === "dark"
+                                  ? "text-gray-300"
+                                  : "text-gray-500"
+                              }`}
+                            >
                               Actions
                             </th>
                           </tr>
                         </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
+                        <tbody
+                          className={`divide-y ${
+                            theme === "dark"
+                              ? "divide-gray-700 bg-gray-800"
+                              : "divide-gray-200 bg-white"
+                          }`}
+                        >
                           {monthData.sales.map((sale) => (
-                            <tr key={sale.id} className="hover:bg-gray-50">
+                            <tr
+                              key={sale.id}
+                              className={`transition-colors ${
+                                theme === "dark"
+                                  ? "hover:bg-gray-700"
+                                  : "hover:bg-gray-50"
+                              }`}
+                            >
                               <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm text-gray-900">
+                                <div
+                                  className={`text-sm ${
+                                    theme === "dark"
+                                      ? "text-white"
+                                      : "text-gray-900"
+                                  }`}
+                                >
                                   {sale.order_time}
                                 </div>
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm font-medium text-gray-900">
+                                <div
+                                  className={`text-sm font-medium ${
+                                    theme === "dark"
+                                      ? "text-white"
+                                      : "text-gray-900"
+                                  }`}
+                                >
                                   #{sale.id}
                                 </div>
                               </td>
@@ -895,7 +1051,13 @@ export default function SalesHistory({
                                 </span>
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm font-semibold text-gray-900">
+                                <div
+                                  className={`text-sm font-semibold ${
+                                    theme === "dark"
+                                      ? "text-white"
+                                      : "text-gray-900"
+                                  }`}
+                                >
                                   {formatCurrency(sale.total)}
                                 </div>
                               </td>

@@ -19,6 +19,7 @@ import {
 } from "react-icons/fi";
 import { FaPlus } from "react-icons/fa";
 import ProductUpdate from "./product_update";
+import { useTheme } from "../../Main/ThemeContext";
 
 export default function ProductPage({ activeTab, setActiveTab }) {
   const navigate = useNavigate();
@@ -35,6 +36,7 @@ export default function ProductPage({ activeTab, setActiveTab }) {
   });
   const [visible, setVisible] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const { theme } = useTheme();
 
   const PRODUCTS_PER_PAGE = 10;
   const [page, setPage] = useState(1);
@@ -197,13 +199,28 @@ export default function ProductPage({ activeTab, setActiveTab }) {
           product_id={selectedProduct.id}
           product_name={selectedProduct.name}
           setVisible={setVisible}
+          theme={theme}
         />
       )}
-      <div className="lg:pt-4 lg:py-4 lg:px-4 bg-indigo-50 min-h-screen">
+      <div
+        className={`lg:pt-4 lg:py-4 lg:px-4 min-h-screen ${
+          theme === "dark" ? "bg-gray-900" : "bg-indigo-50"
+        }`}
+      >
         <div className="w-full mb-6 flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold text-gray-800">Product Menu</h1>
-            <p className="text-sm text-gray-500 mt-1">
+            <h1
+              className={`text-2xl font-bold ${
+                theme === "dark" ? "text-white" : "text-gray-800"
+              }`}
+            >
+              Product Menu
+            </h1>
+            <p
+              className={`text-sm mt-1 ${
+                theme === "dark" ? "text-gray-400" : "text-gray-500"
+              }`}
+            >
               Browse and manage all products in your menu
             </p>
           </div>
@@ -217,54 +234,140 @@ export default function ProductPage({ activeTab, setActiveTab }) {
 
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-6">
-          <div className="bg-white rounded-xl shadow-md p-5 ">
+          <div
+            className={`rounded-xl shadow-md p-5 ${
+              theme === "dark"
+                ? "bg-gray-800 text-white border border-gray-700"
+                : "bg-white text-gray-800"
+            }`}
+          >
             <div className="flex items-center">
-              <div className="p-3 rounded-lg bg-blue-50">
-                <FiBox className="text-xl text-blue-600" />
+              <div
+                className={`p-3 rounded-lg ${
+                  theme === "dark" ? "bg-blue-900/20" : "bg-blue-50"
+                }`}
+              >
+                <FiBox
+                  className={`text-xl ${
+                    theme === "dark" ? "text-blue-400" : "text-blue-600"
+                  }`}
+                />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">
+                <p
+                  className={`text-sm font-medium ${
+                    theme === "dark" ? "text-gray-400" : "text-gray-600"
+                  }`}
+                >
                   Total Products
                 </p>
-                <h3 className="text-xl font-bold text-gray-800">
+                <h3
+                  className={`text-xl font-bold ${
+                    theme === "dark" ? "text-white" : "text-gray-800"
+                  }`}
+                >
                   {totalProducts}
                 </h3>
               </div>
             </div>
-            <div className="mt-3 pt-3 border-t border-gray-100">
-              <p className="text-xs text-gray-500">
+            <div
+              className={`mt-3 pt-3 border-t ${
+                theme === "dark" ? "border-gray-700" : "border-gray-100"
+              }`}
+            >
+              <p
+                className={`text-xs ${
+                  theme === "dark" ? "text-gray-500" : "text-gray-500"
+                }`}
+              >
                 {uniqueCategories} categories
               </p>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-md p-5  ">
+          <div
+            className={`rounded-xl shadow-md p-5 ${
+              theme === "dark"
+                ? "bg-gray-800 text-white border border-gray-700"
+                : "bg-white text-gray-800"
+            }`}
+          >
             <div className="flex items-center">
-              <div className="p-3 rounded-lg bg-purple-50">
-                <FiShoppingCart className="text-xl text-purple-600" />
+              <div
+                className={`p-3 rounded-lg ${
+                  theme === "dark" ? "bg-purple-900/20" : "bg-purple-50"
+                }`}
+              >
+                <FiShoppingCart
+                  className={`text-xl ${
+                    theme === "dark" ? "text-purple-400" : "text-purple-600"
+                  }`}
+                />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Categories</p>
-                <h3 className="text-xl font-bold text-gray-800">
+                <p
+                  className={`text-sm font-medium ${
+                    theme === "dark" ? "text-gray-400" : "text-gray-600"
+                  }`}
+                >
+                  Categories
+                </p>
+                <h3
+                  className={`text-xl font-bold ${
+                    theme === "dark" ? "text-white" : "text-gray-800"
+                  }`}
+                >
                   {categories.length}
                 </h3>
               </div>
             </div>
-            <div className="mt-3 pt-3 border-t border-gray-100">
-              <p className="text-xs text-gray-500">Menu categories</p>
+            <div
+              className={`mt-3 pt-3 border-t ${
+                theme === "dark" ? "border-gray-700" : "border-gray-100"
+              }`}
+            >
+              <p
+                className={`text-xs ${
+                  theme === "dark" ? "text-gray-500" : "text-gray-500"
+                }`}
+              >
+                Menu categories
+              </p>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-md p-5 ">
+          <div
+            className={`rounded-xl shadow-md p-5 ${
+              theme === "dark"
+                ? "bg-gray-800 text-white border border-gray-700"
+                : "bg-white text-gray-800"
+            }`}
+          >
             <div className="flex items-center">
-              <div className="p-3 rounded-lg bg-orange-50">
-                <FiCoffee className="text-xl text-orange-600" />
+              <div
+                className={`p-3 rounded-lg ${
+                  theme === "dark" ? "bg-orange-900/20" : "bg-orange-50"
+                }`}
+              >
+                <FiCoffee
+                  className={`text-xl ${
+                    theme === "dark" ? "text-orange-400" : "text-orange-600"
+                  }`}
+                />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">
+                <p
+                  className={`text-sm font-medium ${
+                    theme === "dark" ? "text-gray-400" : "text-gray-600"
+                  }`}
+                >
                   Coffee Items
                 </p>
-                <h3 className="text-xl font-bold text-gray-800">
+                <h3
+                  className={`text-xl font-bold ${
+                    theme === "dark" ? "text-white" : "text-gray-800"
+                  }`}
+                >
                   {
                     allProducts.filter((p) => p.category.includes("Coffee"))
                       .length
@@ -272,17 +375,41 @@ export default function ProductPage({ activeTab, setActiveTab }) {
                 </h3>
               </div>
             </div>
-            <div className="mt-3 pt-3 border-t border-gray-100">
-              <p className="text-xs text-gray-500">Hot & Cold coffee</p>
+            <div
+              className={`mt-3 pt-3 border-t ${
+                theme === "dark" ? "border-gray-700" : "border-gray-100"
+              }`}
+            >
+              <p
+                className={`text-xs ${
+                  theme === "dark" ? "text-gray-500" : "text-gray-500"
+                }`}
+              >
+                Hot & Cold coffee
+              </p>
             </div>
           </div>
         </div>
 
         {/* Filters Section */}
-        <div className="bg-white rounded-xl shadow-md p-5 mb-6">
+        <div
+          className={`rounded-xl shadow-md p-5 mb-6 ${
+            theme === "dark"
+              ? "bg-gray-800 text-white border border-gray-700"
+              : "bg-white text-gray-800"
+          }`}
+        >
           <div className="flex flex-col md:flex-row md:items-center justify-between mb-5">
-            <h2 className="text-lg font-semibold text-gray-800 flex items-center">
-              <FiFilter className="mr-2 text-gray-500" />
+            <h2
+              className={`text-lg font-semibold flex items-center ${
+                theme === "dark" ? "text-white" : "text-gray-800"
+              }`}
+            >
+              <FiFilter
+                className={`mr-2 ${
+                  theme === "dark" ? "text-gray-400" : "text-gray-500"
+                }`}
+              />
               Filters
             </h2>
 
@@ -291,7 +418,11 @@ export default function ProductPage({ activeTab, setActiveTab }) {
               <input
                 type="text"
                 placeholder="Search products..."
-                className="pl-10 pr-4 py-2 w-full text-slate-700 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className={`pl-10 pr-4 py-2 w-full rounded-lg border focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                  theme === "dark"
+                    ? "bg-gray-700 text-white border-gray-600 placeholder-gray-400"
+                    : "bg-white text-slate-700 border-slate-300 placeholder-gray-500"
+                }`}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -301,14 +432,22 @@ export default function ProductPage({ activeTab, setActiveTab }) {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
             {/* Category Filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                className={`block text-sm font-medium mb-1 ${
+                  theme === "dark" ? "text-gray-300" : "text-gray-700"
+                }`}
+              >
                 Category
               </label>
               <select
                 name="category"
                 value={categoryFilter}
                 onChange={(e) => setCategoryFilter(e.target.value)}
-                className="w-full px-3 py-2 text-slate-700 rounded-lg border border-slate-300"
+                className={`w-full px-3 py-2 rounded-lg border ${
+                  theme === "dark"
+                    ? "bg-gray-700 text-white border-gray-600"
+                    : "bg-white text-slate-700 border-slate-300"
+                }`}
               >
                 <option value="all">All Categories</option>
                 {categories.map((category) => (
@@ -326,7 +465,11 @@ export default function ProductPage({ activeTab, setActiveTab }) {
           <div className="flex justify-end">
             <button
               onClick={resetFilters}
-              className="px-4 py-2 border border-slate-300 rounded-lg text-gray-700 hover:bg-gray-50 flex items-center transition-colors"
+              className={`px-4 py-2 border rounded-lg flex items-center transition-colors ${
+                theme === "dark"
+                  ? "border-gray-600 text-gray-300 hover:bg-gray-700"
+                  : "border-slate-300 text-gray-700 hover:bg-gray-50"
+              }`}
             >
               <FiRefreshCw className="mr-2" />
               Reset All
@@ -336,7 +479,11 @@ export default function ProductPage({ activeTab, setActiveTab }) {
 
         {/* Results Count */}
         <div className="mb-4 flex justify-between items-center">
-          <p className="text-sm text-gray-600">
+          <p
+            className={`text-sm ${
+              theme === "dark" ? "text-gray-400" : "text-gray-600"
+            }`}
+          >
             Showing {displayedProducts.length} of {allProducts.length} products
           </p>
 
@@ -350,15 +497,29 @@ export default function ProductPage({ activeTab, setActiveTab }) {
 
         {/* Product List */}
         {loading ? (
-          <div className="flex justify-center items-center h-64 bg-white rounded-xl shadow-md border border-gray-100">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+          <div
+            className={`flex justify-center items-center h-64 rounded-xl shadow-md border ${
+              theme === "dark"
+                ? "bg-gray-800 border-gray-700"
+                : "bg-white border-gray-100"
+            }`}
+          >
+            <div
+              className={`animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 ${
+                theme === "dark" ? "border-blue-400" : "border-blue-500"
+              }`}
+            ></div>
           </div>
         ) : displayedProducts.length === 0 ? (
-          <div className="bg-white rounded-xl shadow-lg p-8 text-center">
-            <FiBox className="text-4xl text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-700 mb-2">
-              No products found
-            </h3>
+          <div
+            className={`rounded-xl shadow-lg p-8 text-center ${
+              theme === "dark"
+                ? "bg-gray-800 text-white border border-gray-700"
+                : "bg-white text-gray-700"
+            }`}
+          >
+            <FiBox className="text-4xl text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium mb-2">No products found</h3>
             <p className="text-gray-500">
               Try adjusting your filters or add new products.
             </p>
@@ -372,95 +533,162 @@ export default function ProductPage({ activeTab, setActiveTab }) {
             )}
           </div>
         ) : (
-          <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
+          <div
+            className={`rounded-xl shadow-md overflow-hidden border ${
+              theme === "dark"
+                ? "bg-gray-800 border-gray-700"
+                : "bg-white border-gray-100"
+            }`}
+          >
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-50">
+                <thead
+                  className={theme === "dark" ? "bg-gray-700" : "bg-gray-50"}
+                >
                   <tr>
                     <th
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                      className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer"
                       onClick={() => handleSort("name")}
                     >
-                      <div className="flex items-center">
+                      <div
+                        className={`flex items-center ${
+                          theme === "dark" ? "text-gray-300" : "text-gray-500"
+                        }`}
+                      >
                         Product Name
                         {getSortIndicator("name")}
                       </div>
                     </th>
                     <th
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                      className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer"
                       onClick={() => handleSort("category")}
                     >
-                      <div className="flex items-center">
+                      <div
+                        className={`flex items-center ${
+                          theme === "dark" ? "text-gray-300" : "text-gray-500"
+                        }`}
+                      >
                         Category
                         {getSortIndicator("category")}
                       </div>
                     </th>
                     <th
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                      className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer"
                       onClick={() => handleSort("price")}
                     >
-                      <div className="flex items-center">
+                      <div
+                        className={`flex items-center ${
+                          theme === "dark" ? "text-gray-300" : "text-gray-500"
+                        }`}
+                      >
                         Price
                         {getSortIndicator("price")}
                       </div>
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th
+                      className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${
+                        theme === "dark" ? "text-gray-300" : "text-gray-500"
+                      }`}
+                    >
                       Actions
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody
+                  className={`divide-y ${
+                    theme === "dark"
+                      ? "divide-gray-700 bg-gray-800"
+                      : "divide-gray-200 bg-white"
+                  }`}
+                >
                   {displayedProducts.map((product) => (
-                    <>
-                      <tr key={product.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4">
-                          <div className="flex items-center">
-                            <div className="flex-shrink-0 h-10 w-10 bg-indigo-200 rounded-lg flex items-center justify-center">
-                              {getCategoryIcon(product.category)}
-                            </div>
-                            <div className="ml-4">
-                              <div className="text-sm font-medium text-gray-900">
-                                {product.name}
-                              </div>
-                              <div className="text-sm text-gray-500">
-                                ID: {product.id}
-                              </div>
-                            </div>
+                    <tr
+                      key={product.id}
+                      className={`transition-colors ${
+                        theme === "dark"
+                          ? "hover:bg-gray-750"
+                          : "hover:bg-gray-50"
+                      }`}
+                    >
+                      <td className="px-6 py-4">
+                        <div className="flex items-center">
+                          <div
+                            className={`flex-shrink-0 h-10 w-10 rounded-lg flex items-center justify-center ${
+                              theme === "dark"
+                                ? "bg-indigo-900/30"
+                                : "bg-indigo-200"
+                            }`}
+                          >
+                            {getCategoryIcon(product.category)}
                           </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                            {product.category}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-semibold text-gray-900">
-                            {formatCurrency(product.price)}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm">
-                          <div className="flex space-x-3">
-                            <button
-                              onClick={() => {
-                                setSelectedProduct(product); // 👈 save product
-                                setVisible(true); // 👈 show modal
-                              }}
-                              className="text-indigo-600 hover:text-indigo-900 transition-colors"
+                          <div className="ml-4">
+                            <div
+                              className={`text-sm font-medium ${
+                                theme === "dark"
+                                  ? "text-white"
+                                  : "text-gray-900"
+                              }`}
                             >
-                              <FiEdit className="inline mr-1" />
-                              Edit
-                            </button>
+                              {product.name}
+                            </div>
+                            <div
+                              className={`text-sm ${
+                                theme === "dark"
+                                  ? "text-gray-400"
+                                  : "text-gray-500"
+                              }`}
+                            >
+                              ID: {product.id}
+                            </div>
                           </div>
-                        </td>
-                      </tr>
-                    </>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span
+                          className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                            theme === "dark"
+                              ? "bg-blue-900/30 text-blue-300"
+                              : "bg-blue-100 text-blue-800"
+                          }`}
+                        >
+                          {product.category}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div
+                          className={`text-sm font-semibold ${
+                            theme === "dark" ? "text-white" : "text-gray-900"
+                          }`}
+                        >
+                          {formatCurrency(product.price)}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        <div className="flex space-x-3">
+                          <button
+                            onClick={() => {
+                              setSelectedProduct(product);
+                              setVisible(true);
+                            }}
+                            className="text-indigo-600 hover:text-indigo-900 transition-colors"
+                          >
+                            <FiEdit className="inline mr-1" />
+                            Edit
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
                   ))}
                 </tbody>
               </table>
               <div ref={loadMoreRef} className="h-4"></div>
               {displayedProducts.length < filteredProducts.length && (
                 <div className="flex justify-center py-4">
-                  <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+                  <div
+                    className={`animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 ${
+                      theme === "dark" ? "border-blue-400" : "border-blue-500"
+                    }`}
+                  ></div>
                 </div>
               )}
             </div>
@@ -469,24 +697,44 @@ export default function ProductPage({ activeTab, setActiveTab }) {
 
         {/* Category Cards View */}
         <div className="mt-8">
-          <h2 className="text-xl font-bold text-gray-800 mb-4">
+          <h2
+            className={`text-xl font-bold mb-4 ${
+              theme === "dark" ? "text-white" : "text-gray-800"
+            }`}
+          >
             Browse by Category
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
             {categories.map((category) => (
               <div
                 key={category.category_id}
-                className="bg-white rounded-xl shadow-md p-5 hover:shadow-lg transition-shadow"
+                className={`rounded-xl shadow-md p-5 hover:shadow-lg transition-shadow ${
+                  theme === "dark"
+                    ? "bg-gray-800 text-white border border-gray-700 hover:border-gray-600"
+                    : "bg-white text-gray-800 hover:shadow-lg"
+                }`}
               >
                 <div className="flex items-center mb-4">
-                  <div className="p-3 rounded-lg bg-blue-50">
+                  <div
+                    className={`p-3 rounded-lg ${
+                      theme === "dark" ? "bg-blue-900/20" : "bg-blue-50"
+                    }`}
+                  >
                     {getCategoryIcon(category.category_name)}
                   </div>
                   <div className="ml-4">
-                    <h3 className="font-semibold text-gray-800">
+                    <h3
+                      className={`font-semibold ${
+                        theme === "dark" ? "text-white" : "text-gray-800"
+                      }`}
+                    >
                       {category.category_name}
                     </h3>
-                    <p className="text-sm text-gray-500">
+                    <p
+                      className={`text-sm ${
+                        theme === "dark" ? "text-gray-400" : "text-gray-500"
+                      }`}
+                    >
                       {category.items.length} items
                     </p>
                   </div>
@@ -494,10 +742,18 @@ export default function ProductPage({ activeTab, setActiveTab }) {
                 <div className="space-y-2">
                   {category.items.slice(0, 3).map((item) => (
                     <div key={item.id} className="flex justify-between text-sm">
-                      <span className="text-gray-700 truncate">
+                      <span
+                        className={`truncate ${
+                          theme === "dark" ? "text-gray-300" : "text-gray-700"
+                        }`}
+                      >
                         {item.name}
                       </span>
-                      <span className="font-medium text-gray-900">
+                      <span
+                        className={`font-medium ${
+                          theme === "dark" ? "text-white" : "text-gray-900"
+                        }`}
+                      >
                         {formatCurrency(item.price)}
                       </span>
                     </div>
