@@ -357,6 +357,7 @@ function PackagingModal({ isOpen, onClose, onSave, category, costs, theme }) {
     "Coffee Hot": ["Cup", "Lid"],
     "Coffee Cold": ["Cup", "Straw"],
     "Fruit Soda": ["Cup", "Lid"],
+    pastil: ["Container", "Spoon"],
   };
 
   const handleChange = (item, value) => {
@@ -379,7 +380,7 @@ function PackagingModal({ isOpen, onClose, onSave, category, costs, theme }) {
         <h3 className="font-bold text-lg mb-4">{category} Packaging Costs</h3>
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 mb-6">
-            {itemsPerCategory[category]?.map((item) => (
+            {itemsPerCategory[category].map((item) => (
               <div key={item} className="form-control">
                 <label className="label">
                   <span className="label-text">{item} Cost (₱)</span>
@@ -646,6 +647,7 @@ export default function ViewAllData({ setActiveTab, activeTab, onDataUpdate }) {
     "Coffee Hot": { Cup: 6, Lid: 1.5 },
     "Coffee Cold": { Cup: 7, Straw: 2 },
     "Fruit Soda": { Cup: 5, Lid: 2 },
+    pastil: { Container: 8, Spoon: 1 },
   });
   const [netProfit, setNetProfit] = useState([]);
   const [loading, setLoading] = useState(false);

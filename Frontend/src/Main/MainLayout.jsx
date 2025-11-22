@@ -19,6 +19,7 @@ const Profile = lazy(() => import("../pages/profile/profile"));
 const MemberProfileWrapper = lazy(() =>
   import("../pages/profile/MemberProfileWrapper")
 );
+const InventoryPage = lazy(() => import("../pages/Inventory/Inventory"));
 import SalesDashboard from "../pages/sales/SalesDashboard";
 
 export default function MainLayout() {
@@ -176,6 +177,7 @@ export default function MainLayout() {
             {renderComponent("Orders", OrderManagementAdmin)}
             {renderComponent("Profile", Profile)}
             {renderComponent("Products", ProductPage)}
+            {renderComponent("Inventory", InventoryPage)}
           </Suspense>
           <MemberProfileWrapper
             activeTab={activeTab}
