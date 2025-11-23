@@ -14,7 +14,7 @@ const Dashboard = lazy(() => import("../pages/dashboard/MainDashboard"));
 const ViewAllData = lazy(() => import("../pages/dashboard/view_all_data"));
 const SalesHistory = lazy(() => import("../pages/sales/SalesHistory"));
 const OrderManagementAdmin = lazy(() => import("../pages/orders/orders"));
-const ProductPage = lazy(() => import("../pages/products/products"));
+const ProductMain = lazy(() => import("../pages/products/product_Main"));
 const Profile = lazy(() => import("../pages/profile/profile"));
 const MemberProfileWrapper = lazy(() =>
   import("../pages/profile/MemberProfileWrapper")
@@ -176,9 +176,10 @@ export default function MainLayout() {
             {renderComponent("View All", ViewAllData)}
             {renderComponent("Orders", OrderManagementAdmin)}
             {renderComponent("Profile", Profile)}
-            {renderComponent("Products", ProductPage)}
+
             {renderComponent("Inventory", InventoryPage)}
           </Suspense>
+          <ProductMain activeTab={activeTab} setActiveTab={setActiveTab} />
           <MemberProfileWrapper
             activeTab={activeTab}
             setActiveTab={setActiveTab}

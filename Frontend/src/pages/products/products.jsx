@@ -20,8 +20,10 @@ import {
 import { FaPlus } from "react-icons/fa";
 import ProductUpdate from "./product_update";
 import { useTheme } from "../../Main/ThemeContext";
+import { useProductDetailContext } from "../../Main/ProductDetailContext";
 
-export default function ProductPage({ activeTab, setActiveTab }) {
+export default function ProductPage({ setActiveTab, activeTab }) {
+  const { setProductID } = useProductDetailContext();
   const navigate = useNavigate();
   const [categories, setCategories] = useState([]);
   const [allProducts, setAllProducts] = useState([]);
@@ -609,6 +611,11 @@ export default function ProductPage({ activeTab, setActiveTab }) {
                           ? "hover:bg-gray-750"
                           : "hover:bg-gray-50"
                       }`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setProductID(product.id);
+                        setActiveTab("Product Detail");
+                      }}
                     >
                       <td className="px-6 py-4">
                         <div className="flex items-center">

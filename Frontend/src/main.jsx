@@ -5,13 +5,16 @@ import App from "./App.jsx";
 import { UserProvider } from "./Main/UserContext.jsx";
 import { ThemeContextProvider } from "./Main/ThemeContext.jsx";
 import { OrderContext } from "./Main/OrderDetailContext.jsx";
+import { ProductDetailProvider } from "./Main/ProductDetailContext.jsx";
 
 createRoot(document.getElementById("root")).render(
-  <OrderContext>
-    <ThemeContextProvider>
-      <UserProvider>
-        <App />
-      </UserProvider>
-    </ThemeContextProvider>
-  </OrderContext>
+  <ProductDetailProvider>
+    <OrderContext>
+      <ThemeContextProvider>
+        <UserProvider>
+          <App />
+        </UserProvider>
+      </ThemeContextProvider>
+    </OrderContext>
+  </ProductDetailProvider>
 );
