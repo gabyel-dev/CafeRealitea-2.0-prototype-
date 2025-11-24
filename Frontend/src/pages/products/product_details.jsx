@@ -14,6 +14,11 @@ import {
   FiClock,
   FiShoppingCart,
   FiBarChart2,
+  FiTrendingUp,
+  FiInfo,
+  FiLayers,
+  FiPercent,
+  FiShoppingBag,
 } from "react-icons/fi";
 import { useTheme } from "../../Main/ThemeContext";
 import { useProductDetailContext } from "../../Main/ProductDetailContext";
@@ -29,7 +34,6 @@ export default function ProductDetail({ setActiveTab, activeTab }) {
 
   function generateProductCode(productId, categoryName) {
     const prefix = categoryName?.slice(0, 3).toUpperCase();
-    // Make a simple numeric part based on productId + random
     const randomPart = Math.floor(1000 + ((productId * 7) % 9000));
     return `${prefix}-${randomPart}`;
   }
@@ -64,7 +68,6 @@ export default function ProductDetail({ setActiveTab, activeTab }) {
     setLoading(true);
     setError("");
     try {
-      // Replace with your actual API endpoint
       const res = await axios.get(
         `https://caferealitea.onrender.com/products/${productID}`
       );
@@ -88,17 +91,17 @@ export default function ProductDetail({ setActiveTab, activeTab }) {
   const getStatusBadge = (status) => {
     const statusConfig = {
       active: {
-        color: "bg-green-100 text-green-800",
+        color: "bg-emerald-500/10 text-emerald-700 border border-emerald-200",
         icon: FiCheckCircle,
         text: "Active",
       },
       inactive: {
-        color: "bg-red-100 text-red-800",
+        color: "bg-rose-500/10 text-rose-700 border border-rose-200",
         icon: FiAlertCircle,
         text: "Inactive",
       },
       low_stock: {
-        color: "bg-yellow-100 text-yellow-800",
+        color: "bg-amber-500/10 text-amber-700 border border-amber-200",
         icon: FiAlertCircle,
         text: "Low Stock",
       },
@@ -109,9 +112,9 @@ export default function ProductDetail({ setActiveTab, activeTab }) {
 
     return (
       <span
-        className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${config.color}`}
+        className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-semibold ${config.color}`}
       >
-        <IconComponent className="mr-1" size={14} />
+        <IconComponent className="mr-1.5" size={14} />
         {config.text}
       </span>
     );
@@ -137,14 +140,109 @@ export default function ProductDetail({ setActiveTab, activeTab }) {
     }
   };
 
+  // Loading Skeleton
   if (loading) {
     return (
       <div
-        className={`min-h-screen flex items-center justify-center ${
+        className={`min-h-screen ${
           theme === "dark" ? "bg-gray-900" : "bg-indigo-50"
         }`}
       >
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        <div className="max-w-7xl mx-auto px-0 md:px-3">
+          {/* Header Skeleton */}
+          <div className="flex items-center space-x-4 mb-8">
+            <div
+              className={`w-10 h-10 rounded-lg ${
+                theme === "dark" ? "bg-gray-700" : "bg-white"
+              }`}
+            ></div>
+            <div>
+              <div
+                className={`h-7 w-48 rounded ${
+                  theme === "dark" ? "bg-gray-700" : "bg-white"
+                } mb-2`}
+              ></div>
+              <div
+                className={`h-4 w-32 rounded ${
+                  theme === "dark" ? "bg-gray-700" : "bg-white"
+                }`}
+              ></div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Left Column Skeleton */}
+            <div className="lg:col-span-2 space-y-6">
+              {[1, 2].map((i) => (
+                <div
+                  key={i}
+                  className={`rounded-xl p-6 ${
+                    theme === "dark" ? "bg-gray-800" : "bg-white"
+                  }`}
+                >
+                  <div
+                    className={`h-6 w-40 rounded mb-6 ${
+                      theme === "dark" ? "bg-gray-700" : "bg-gray-200"
+                    }`}
+                  ></div>
+                  <div className="grid grid-cols-2 gap-4">
+                    {[1, 2, 3, 4].map((j) => (
+                      <div key={j}>
+                        <div
+                          className={`h-4 w-24 rounded mb-2 ${
+                            theme === "dark" ? "bg-gray-700" : "bg-gray-200"
+                          }`}
+                        ></div>
+                        <div
+                          className={`h-6 w-32 rounded ${
+                            theme === "dark" ? "bg-gray-700" : "bg-gray-200"
+                          }`}
+                        ></div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Right Column Skeleton */}
+            <div className="space-y-6">
+              {[1, 2].map((i) => (
+                <div
+                  key={i}
+                  className={`rounded-xl p-6 ${
+                    theme === "dark" ? "bg-gray-800" : "bg-white"
+                  }`}
+                >
+                  <div
+                    className={`h-6 w-32 rounded mb-6 ${
+                      theme === "dark" ? "bg-gray-700" : "bg-gray-200"
+                    }`}
+                  ></div>
+                  <div className="space-y-4">
+                    {[1, 2].map((j) => (
+                      <div
+                        key={j}
+                        className="flex justify-between items-center"
+                      >
+                        <div
+                          className={`h-4 w-20 rounded ${
+                            theme === "dark" ? "bg-gray-700" : "bg-gray-200"
+                          }`}
+                        ></div>
+                        <div
+                          className={`h-6 w-16 rounded ${
+                            theme === "dark" ? "bg-gray-700" : "bg-gray-200"
+                          }`}
+                        ></div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -154,19 +252,32 @@ export default function ProductDetail({ setActiveTab, activeTab }) {
       <div
         className={`min-h-screen flex items-center justify-center ${
           theme === "dark" ? "bg-gray-900" : "bg-indigo-50"
-        }`}
+        } py-3`}
       >
-        <div className="text-center">
-          <FiAlertCircle className="text-4xl text-red-500 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-            {error}
+        <div className="text-center max-w-md mx-auto p-8 ">
+          <div className="bg-rose-500/10 text-rose-600 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6">
+            <FiAlertCircle size={32} />
+          </div>
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
+            Unable to Load Product
           </h3>
-          <button
-            onClick={() => setActiveTab("Products")}
-            className="btn btn-primary"
-          >
-            Back to Products
-          </button>
+          <p className="text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
+            {error}. Please check your connection and try again.
+          </p>
+          <div className="flex space-x-3 justify-center">
+            <button
+              onClick={fetchProductDetails}
+              className="btn btn-primary px-6 py-2.5"
+            >
+              Retry
+            </button>
+            <button
+              onClick={() => setActiveTab("Products")}
+              className="btn btn-outline px-6 py-2.5"
+            >
+              Back to Products
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -177,18 +288,24 @@ export default function ProductDetail({ setActiveTab, activeTab }) {
       <div
         className={`min-h-screen flex items-center justify-center ${
           theme === "dark" ? "bg-gray-900" : "bg-indigo-50"
-        }`}
+        } py-3`}
       >
-        <div className="text-center">
-          <FiAlertCircle className="text-4xl text-yellow-500 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-            Product not found
+        <div className="text-center max-w-md mx-auto p-8">
+          <div className="bg-amber-500/10 text-amber-600 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6">
+            <FiPackage size={32} />
+          </div>
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
+            Product Not Found
           </h3>
+          <p className="text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
+            The product you're looking for doesn't exist or may have been
+            removed from our inventory.
+          </p>
           <button
             onClick={() => setActiveTab("Products")}
-            className="btn btn-primary"
+            className="btn btn-primary px-6 py-2.5"
           >
-            Back to Products
+            Browse Products
           </button>
         </div>
       </div>
@@ -197,185 +314,193 @@ export default function ProductDetail({ setActiveTab, activeTab }) {
 
   return (
     <div
-      className={`lg:pt-4 lg:py-4 lg:px-4 min-h-screen ${
+      className={`min-h-screen ${
         theme === "dark" ? "bg-gray-900" : "bg-indigo-50"
-      }`}
+      } py-3`}
     >
-      {/* Header */}
-      <div className="w-full mb-6">
-        <div className="flex justify-between items-start">
-          <div>
-            <div className="flex items-center mb-2">
+      <div className="max-w-7xl mx-auto px-0 md:px-3">
+        {/* Header Section */}
+        <div className="mb-8">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div className="flex items-start space-x-4">
               <button
                 onClick={() => setActiveTab("Products")}
-                className={`mr-3 p-2 rounded-lg transition-colors ${
+                className={`mt-1 p-2.5 rounded-xl transition-all duration-200 ${
                   theme === "dark"
-                    ? "text-gray-400 hover:text-white hover:bg-gray-700"
-                    : "text-gray-600 hover:text-gray-900 hover:bg-white"
+                    ? "text-gray-400 hover:text-white hover:bg-gray-800"
+                    : "text-gray-600 hover:text-gray-900 hover:bg-white shadow-sm"
                 }`}
               >
                 <FiArrowLeft size={20} />
               </button>
-              <h1
-                className={` ${
-                  theme === "dark" ? "text-white" : "text-slate-700"
-                }`}
-              >
-                <span className="text-2xl font-bold">
-                  {product?.product_name}
-                </span>
-              </h1>
-              <div className="ml-4">{getStatusBadge(product?.status)}</div>
-            </div>
-            <p
-              className={`text-sm ${
-                theme === "dark" ? "text-gray-400" : "text-gray-500"
-              } ml-12`}
-            >
-              Product details and information
-            </p>
-          </div>
-
-          {/* Action Buttons */}
-          {["System Administrator", "Admin"].includes(role) && (
-            <div className="flex space-x-2">
-              <button
-                onClick={handleEdit}
-                className="btn btn-primary flex items-center"
-              >
-                <FiEdit className="mr-2" />
-                Edit Product
-              </button>
-              <button
-                onClick={handleDelete}
-                className="btn btn-error flex items-center"
-              >
-                <FiTrash2 className="mr-2" />
-                Delete
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column - Product Information */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Basic Information Card */}
-          <div
-            className={`rounded-xl border shadow-md p-6 ${
-              theme === "dark"
-                ? "bg-gray-800 border-gray-700 text-white"
-                : "bg-white border-gray-200 text-slate-700"
-            }`}
-          >
-            <h2 className="text-lg font-semibold mb-4 flex items-center">
-              <FiPackage
-                className={`mr-2 ${
-                  theme === "dark" ? "text-gray-400" : "text-gray-600"
-                }`}
-              />
-              Basic Information
-            </h2>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label
-                  className={`block text-sm font-medium mb-1 ${
-                    theme === "dark" ? "text-gray-400" : "text-gray-600"
-                  }`}
-                >
-                  Product Name
-                </label>
-                <p className="text-lg font-semibold">{product?.product_name}</p>
-              </div>
-
-              <div>
-                <label
-                  className={`block text-sm font-medium mb-1 ${
-                    theme === "dark" ? "text-gray-400" : "text-gray-600"
-                  }`}
-                >
-                  Category
-                </label>
-                <div className="flex items-center">
-                  <FiTag className="mr-2 text-gray-400" size={16} />
-                  <span>{product?.category_name}</span>
+                <div className="flex items-center space-x-3 mb-2">
+                  <h1
+                    className={`text-2xl font-bold ${
+                      theme === "dark" ? "text-white" : "text-gray-900"
+                    }`}
+                  >
+                    {product?.product_name}
+                  </h1>
                 </div>
-              </div>
-
-              <div>
-                <label
-                  className={`block text-sm font-medium mb-1 ${
+                <p
+                  className={`text-sm ${
                     theme === "dark" ? "text-gray-400" : "text-gray-600"
                   }`}
                 >
-                  Product Code
-                </label>
-                <code
-                  className={`px-2 py-1 rounded text-sm ${
-                    theme === "dark"
-                      ? "bg-gray-700 text-gray-300"
-                      : "bg-gray-100 text-gray-700"
-                  }`}
-                >
+                  Product ID:{" "}
                   {generateProductCode(
                     product?.category_id,
                     product?.category_name
+                  )}{" "}
+                  • Last updated: Recently
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
+          {/* Left Column - Main Content */}
+          <div className="xl:col-span-3 space-y-6">
+            {/* Product Overview Card */}
+            <div
+              className={`rounded-2xl p-6 shadow-sm border ${
+                theme === "dark"
+                  ? "bg-gray-800 border-gray-700"
+                  : "bg-white border-gray-200"
+              }`}
+            >
+              <div className="flex flex-col lg:flex-row gap-6">
+                {/* Product Image */}
+                <div className="lg:w-1/3">
+                  <div
+                    className={`rounded-xl border-2 p-4 ${
+                      theme === "dark" ? "border-gray-700" : "border-gray-200"
+                    }`}
+                  >
+                    {product?.image_url ? (
+                      <img
+                        src={product?.image_url}
+                        alt={product?.product_name}
+                        className="w-full h-64 object-cover rounded-lg"
+                      />
+                    ) : (
+                      <div
+                        className={`w-full h-64 rounded-lg flex flex-col items-center justify-center ${
+                          theme === "dark" ? "bg-gray-700" : "bg-gray-100"
+                        }`}
+                      >
+                        <FiPackage
+                          className={`${
+                            theme === "dark" ? "text-gray-500" : "text-gray-400"
+                          } mb-3`}
+                          size={48}
+                        />
+                        <p
+                          className={`text-sm ${
+                            theme === "dark" ? "text-gray-400" : "text-gray-500"
+                          }`}
+                        >
+                          No image available
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Product Details */}
+                <div className="lg:w-2/3">
+                  <h2 className="text-lg font-semibold mb-4 flex items-center space-x-2">
+                    <FiPackage
+                      className={
+                        theme === "dark" ? "text-gray-400" : "text-gray-600"
+                      }
+                    />
+                    <span>Product Overview</span>
+                  </h2>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div>
+                      <label
+                        className={`block text-sm font-medium mb-1 ${
+                          theme === "dark" ? "text-gray-400" : "text-gray-600"
+                        }`}
+                      >
+                        Category
+                      </label>
+                      <div className="flex items-center space-x-2 p-2">
+                        <FiTag className="text-gray-500" size={16} />
+                        <span className="font-medium">
+                          {product?.category_name}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label
+                        className={`block text-sm font-medium mb-1 ${
+                          theme === "dark" ? "text-gray-400" : "text-gray-600"
+                        }`}
+                      >
+                        Product Code
+                      </label>
+                      <code
+                        className={`px-3 py-1.5 rounded-lg text-sm font-mono ${
+                          theme === "dark"
+                            ? "bg-gray-700 text-gray-300"
+                            : "bg-gray-100 text-gray-700"
+                        }`}
+                      >
+                        {generateProductCode(
+                          product?.category_id,
+                          product?.category_name
+                        )}
+                      </code>
+                    </div>
+                  </div>
+
+                  {product?.description && (
+                    <div>
+                      <label
+                        className={`block text-sm font-medium mb-2 ${
+                          theme === "dark" ? "text-gray-400" : "text-gray-600"
+                        }`}
+                      >
+                        Description
+                      </label>
+                      <p
+                        className={`text-sm leading-relaxed p-3 rounded-lg ${
+                          theme === "dark"
+                            ? "text-gray-300 bg-gray-700"
+                            : "text-gray-600 bg-gray-50"
+                        }`}
+                      >
+                        {product?.description}
+                      </p>
+                    </div>
                   )}
-                </code>
+                </div>
               </div>
             </div>
 
-            {product?.description && (
-              <div className="mt-4">
-                <label
-                  className={`block text-sm font-medium mb-1 ${
-                    theme === "dark" ? "text-gray-400" : "text-gray-600"
-                  }`}
-                >
-                  Description
-                </label>
-                <p
-                  className={`text-sm ${
-                    theme === "dark" ? "text-gray-300" : "text-gray-600"
-                  }`}
-                >
-                  {product?.description}
-                </p>
-              </div>
-            )}
-          </div>
-
-          {/* Pricing & Inventory Card */}
-          <div
-            className={`rounded-xl border shadow-md p-6 ${
-              theme === "dark"
-                ? "bg-gray-800 border-gray-700 text-white"
-                : "bg-white border-gray-200 text-slate-700"
-            }`}
-          >
-            <h2 className="text-lg font-semibold mb-4 flex items-center">
-              <FiDollarSign
-                className={`mr-2 ${
-                  theme === "dark" ? "text-gray-400" : "text-gray-600"
-                }`}
-              />
-              Pricing & Inventory
-            </h2>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Price Card */}
+            {/* Financial Metrics */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Selling Price */}
               <div
-                className={`p-4 rounded-lg ${
-                  theme === "dark" ? "bg-blue-900/20" : "bg-blue-50"
+                className={`rounded-2xl p-5 shadow-sm border ${
+                  theme === "dark"
+                    ? "bg-gray-800 border-gray-700"
+                    : "bg-white border-gray-200"
                 }`}
               >
-                <div className="flex items-center mb-2">
-                  <FiDollarSign className="text-blue-600 mr-2" />
+                <div className="flex items-center space-x-3 mb-3">
+                  <div className="p-2 bg-blue-500/10 rounded-lg">
+                    <FiDollarSign className="text-blue-600" size={20} />
+                  </div>
                   <span
                     className={`text-sm font-medium ${
-                      theme === "dark" ? "text-gray-300" : "text-gray-600"
+                      theme === "dark" ? "text-gray-400" : "text-gray-600"
                     }`}
                   >
                     Selling Price
@@ -383,24 +508,29 @@ export default function ProductDetail({ setActiveTab, activeTab }) {
                 </div>
                 <p
                   className={`text-2xl font-bold ${
-                    theme === "dark" ? "text-white" : "text-gray-800"
-                  }`}
+                    theme === "dark" ? "text-white" : "text-gray-900"
+                  } mb-1`}
                 >
                   {formatCurrency(product?.price)}
                 </p>
+                <p className="text-xs text-gray-500">Current market price</p>
               </div>
 
-              {/* Cost Card */}
+              {/* Cost Price */}
               <div
-                className={`p-4 rounded-lg ${
-                  theme === "dark" ? "bg-green-900/20" : "bg-green-50"
+                className={`rounded-2xl p-5 shadow-sm border ${
+                  theme === "dark"
+                    ? "bg-gray-800 border-gray-700"
+                    : "bg-white border-gray-200"
                 }`}
               >
-                <div className="flex items-center mb-2">
-                  <FiShoppingCart className="text-green-600 mr-2" />
+                <div className="flex items-center space-x-3 mb-3">
+                  <div className="p-2 bg-emerald-500/10 rounded-lg">
+                    <FiShoppingCart className="text-emerald-600" size={20} />
+                  </div>
                   <span
                     className={`text-sm font-medium ${
-                      theme === "dark" ? "text-gray-300" : "text-gray-600"
+                      theme === "dark" ? "text-gray-400" : "text-gray-600"
                     }`}
                   >
                     Cost Price
@@ -408,111 +538,165 @@ export default function ProductDetail({ setActiveTab, activeTab }) {
                 </div>
                 <p
                   className={`text-2xl font-bold ${
-                    theme === "dark" ? "text-white" : "text-gray-800"
-                  }`}
+                    theme === "dark" ? "text-white" : "text-gray-900"
+                  } mb-1`}
                 >
                   {formatCurrency(
                     Number(product?.packaging_cost) +
                       Number(product?.gross_profit)
                   )}
                 </p>
+                <p className="text-xs text-gray-500">Production cost</p>
               </div>
-            </div>
 
-            {/* Additional Pricing Info */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-              <div>
-                <label
-                  className={`block text-sm font-medium mb-1 ${
-                    theme === "dark" ? "text-gray-400" : "text-gray-600"
-                  }`}
-                >
-                  Profit Margin
-                </label>
-                <p className="text-lg font-semibold text-green-600">
+              {/* Profit Margin */}
+              <div
+                className={`rounded-2xl p-5 shadow-sm border ${
+                  theme === "dark"
+                    ? "bg-gray-800 border-gray-700"
+                    : "bg-white border-gray-200"
+                }`}
+              >
+                <div className="flex items-center space-x-3 mb-3">
+                  <div className="p-2 bg-indigo-500/10 rounded-lg">
+                    <FiTrendingUp className="text-indigo-600" size={20} />
+                  </div>
+                  <span
+                    className={`text-sm font-medium ${
+                      theme === "dark" ? "text-gray-400" : "text-gray-600"
+                    }`}
+                  >
+                    Profit Margin
+                  </span>
+                </div>
+                <p className={`text-2xl font-bold text-indigo-600 mb-1`}>
                   {product.profit_margin_percentage?.substring(0, 5)}%
                 </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Right Column - Stats & Actions */}
-        <div className="space-y-6">
-          {/* Quick Stats Card */}
-          <div
-            className={`rounded-xl border shadow-md p-6 ${
-              theme === "dark"
-                ? "bg-gray-800 border-gray-700 text-white"
-                : "bg-white border-gray-200 text-slate-700"
-            }`}
-          >
-            <h2 className="text-lg font-semibold mb-4 flex items-center">
-              <FiBarChart2
-                className={`mr-2 ${
-                  theme === "dark" ? "text-gray-400" : "text-gray-600"
-                }`}
-              />
-              Sales Performance
-            </h2>
-
-            <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <span
-                  className={`text-sm ${
-                    theme === "dark" ? "text-gray-400" : "text-gray-600"
-                  }`}
-                >
-                  Total Sold
-                </span>
-                <span className="font-semibold">
-                  {product?.total_quantity || 0}
-                </span>
-              </div>
-
-              <div className="flex justify-between items-center">
-                <span
-                  className={`text-sm ${
-                    theme === "dark" ? "text-gray-400" : "text-gray-600"
-                  }`}
-                >
-                  Revenue
-                </span>
-                <span className="font-semibold">
-                  {formatCurrency(product?.total_sales || 0)}
-                </span>
+                <p className="text-xs text-gray-500">Net profit percentage</p>
               </div>
             </div>
           </div>
 
-          {/* Product Image Card */}
-          <div
-            className={`rounded-xl border shadow-md p-6 ${
-              theme === "dark"
-                ? "bg-gray-800 border-gray-700 text-white"
-                : "bg-white border-gray-200 text-slate-700"
-            }`}
-          >
-            <h2 className="text-lg font-semibold mb-4">Product Image</h2>
-
-            <div className="flex justify-center">
-              {product?.image_url ? (
-                <img
-                  src={product?.image_url}
-                  alt={product?.name}
-                  className="w-48 h-48 object-cover rounded-lg border-2 border-gray-200 dark:border-gray-600"
+          {/* Right Column - Sidebar */}
+          <div className="space-y-6">
+            {/* Sales Performance */}
+            <div
+              className={`rounded-2xl p-6 shadow-sm border ${
+                theme === "dark"
+                  ? "bg-gray-800 border-gray-700"
+                  : "bg-white border-gray-200"
+              }`}
+            >
+              <h3 className="text-lg font-semibold mb-6 flex items-center space-x-2">
+                <FiBarChart2
+                  className={
+                    theme === "dark" ? "text-gray-400" : "text-gray-600"
+                  }
                 />
-              ) : (
+                <span>Sales Analytics</span>
+              </h3>
+
+              <div className="space-y-4">
                 <div
-                  className={`w-48 h-48 rounded-lg border-2 border-dashed flex items-center justify-center ${
-                    theme === "dark"
-                      ? "border-gray-600 text-gray-400"
-                      : "border-gray-300 text-gray-400"
+                  className={`flex justify-between items-center py-3 border-b ${
+                    theme === "dark" ? "border-gray-700" : "border-gray-200"
                   }`}
                 >
-                  <FiPackage size={48} />
+                  <div className="flex items-center space-x-2">
+                    <FiShoppingBag className="text-gray-500" size={16} />
+                    <span
+                      className={`text-sm ${
+                        theme === "dark" ? "text-gray-400" : "text-gray-600"
+                      }`}
+                    >
+                      Units Sold
+                    </span>
+                  </div>
+                  <span className="font-semibold text-lg">
+                    {product?.total_quantity || 0}
+                  </span>
                 </div>
-              )}
+
+                <div className="flex justify-between items-center py-3">
+                  <div className="flex items-center space-x-2">
+                    <FiDollarSign className="text-gray-500" size={16} />
+                    <span
+                      className={`text-sm ${
+                        theme === "dark" ? "text-gray-400" : "text-gray-600"
+                      }`}
+                    >
+                      Total Revenue
+                    </span>
+                  </div>
+                  <span className="font-semibold text-lg text-green-600">
+                    {formatCurrency(product?.total_sales || 0)}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            {["System Administrator", "Admin"].includes(role) && (
+              <div
+                className={`rounded-2xl p-6 shadow-sm border ${
+                  theme === "dark"
+                    ? "bg-gray-800 border-gray-700"
+                    : "bg-white border-gray-200"
+                }`}
+              >
+                <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
+                <div className="space-y-3">
+                  <button
+                    onClick={handleEdit}
+                    className="w-full btn btn-outline flex items-center space-x-2 justify-center py-2.5"
+                  >
+                    <FiEdit size={18} />
+                    <span>Edit Product</span>
+                  </button>
+                  <button
+                    onClick={handleDelete}
+                    className="w-full btn btn-error flex items-center space-x-2 justify-center py-2.5"
+                  >
+                    <FiTrash2 size={18} />
+                    <span>Delete Product</span>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Product Status */}
+            <div
+              className={`rounded-2xl p-6 shadow-sm border ${
+                theme === "dark"
+                  ? "bg-gray-800 border-gray-700"
+                  : "bg-white border-gray-200"
+              }`}
+            >
+              <h3 className="text-lg font-semibold mb-4">Product Status</h3>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <span
+                    className={`text-sm ${
+                      theme === "dark" ? "text-gray-400" : "text-gray-600"
+                    }`}
+                  >
+                    Status
+                  </span>
+                  {getStatusBadge(product?.status)}
+                </div>
+                <div className="flex justify-between items-center">
+                  <span
+                    className={`text-sm ${
+                      theme === "dark" ? "text-gray-400" : "text-gray-600"
+                    }`}
+                  >
+                    Visibility
+                  </span>
+                  <span className="text-sm font-medium text-green-600">
+                    Public
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
