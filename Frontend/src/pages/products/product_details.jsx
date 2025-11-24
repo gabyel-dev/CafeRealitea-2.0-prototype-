@@ -27,6 +27,13 @@ export default function ProductDetail({ setActiveTab, activeTab }) {
   const [role, setRole] = useState("");
   const { theme } = useTheme();
 
+  function generateProductCode(productId, categoryName) {
+    const prefix = categoryName?.slice(0, 3).toUpperCase();
+    // Make a simple numeric part based on productId + random
+    const randomPart = Math.floor(1000 + ((productId * 7) % 9000));
+    return `${prefix}-${randomPart}`;
+  }
+
   useEffect(() => {
     document.title = product
       ? `Café Realitea - ${product?.name}`
@@ -142,7 +149,7 @@ export default function ProductDetail({ setActiveTab, activeTab }) {
     );
   }
 
-  /* if (error) {
+  if (error) {
     return (
       <div
         className={`min-h-screen flex items-center justify-center ${
@@ -155,7 +162,7 @@ export default function ProductDetail({ setActiveTab, activeTab }) {
             {error}
           </h3>
           <button
-            onClick={() => navigate("/products")}
+            onClick={() => setActiveTab("Products")}
             className="btn btn-primary"
           >
             Back to Products
@@ -163,9 +170,9 @@ export default function ProductDetail({ setActiveTab, activeTab }) {
         </div>
       </div>
     );
-  } */
+  }
 
-  /* if (!product) {
+  if (!product) {
     return (
       <div
         className={`min-h-screen flex items-center justify-center ${
@@ -178,7 +185,7 @@ export default function ProductDetail({ setActiveTab, activeTab }) {
             Product not found
           </h3>
           <button
-            onClick={() => navigate("/products")}
+            onClick={() => setActiveTab("Products")}
             className="btn btn-primary"
           >
             Back to Products
@@ -186,7 +193,7 @@ export default function ProductDetail({ setActiveTab, activeTab }) {
         </div>
       </div>
     );
-  } */
+  }
 
   return (
     <div
@@ -210,11 +217,13 @@ export default function ProductDetail({ setActiveTab, activeTab }) {
                 <FiArrowLeft size={20} />
               </button>
               <h1
-                className={`text-2xl font-bold ${
+                className={` ${
                   theme === "dark" ? "text-white" : "text-slate-700"
                 }`}
               >
-                {product?.name}
+                <span className="text-2xl font-bold">
+                  {product?.product_name}
+                </span>
               </h1>
               <div className="ml-4">{getStatusBadge(product?.status)}</div>
             </div>
@@ -278,7 +287,7 @@ export default function ProductDetail({ setActiveTab, activeTab }) {
                 >
                   Product Name
                 </label>
-                <p className="text-lg font-semibold">{product?.name}</p>
+                <p className="text-lg font-semibold">{product?.product_name}</p>
               </div>
 
               <div>
@@ -291,7 +300,7 @@ export default function ProductDetail({ setActiveTab, activeTab }) {
                 </label>
                 <div className="flex items-center">
                   <FiTag className="mr-2 text-gray-400" size={16} />
-                  <span>{product?.category}</span>
+                  <span>{product?.category_name}</span>
                 </div>
               </div>
 
@@ -310,24 +319,11 @@ export default function ProductDetail({ setActiveTab, activeTab }) {
                       : "bg-gray-100 text-gray-700"
                   }`}
                 >
-                  {product?.code}
+                  {generateProductCode(
+                    product?.category_id,
+                    product?.category_name
+                  )}
                 </code>
-              </div>
-
-              <div>
-                <label
-                  className={`block text-sm font-medium mb-1 ${
-                    theme === "dark" ? "text-gray-400" : "text-gray-600"
-                  }`}
-                >
-                  Created Date
-                </label>
-                <div className="flex items-center">
-                  <FiClock className="mr-2 text-gray-400" size={16} />
-                  <span>
-                    {new Date(product?.created_at).toLocaleDateString()}
-                  </span>
-                </div>
               </div>
             </div>
 
@@ -415,7 +411,10 @@ export default function ProductDetail({ setActiveTab, activeTab }) {
                     theme === "dark" ? "text-white" : "text-gray-800"
                   }`}
                 >
-                  {formatCurrency(product?.cost_price)}
+                  {formatCurrency(
+                    Number(product?.packaging_cost) +
+                      Number(product?.gross_profit)
+                  )}
                 </p>
               </div>
             </div>
@@ -431,26 +430,7 @@ export default function ProductDetail({ setActiveTab, activeTab }) {
                   Profit Margin
                 </label>
                 <p className="text-lg font-semibold text-green-600">
-                  {(
-                    ((product?.price - product?.cost_price) /
-                      product?.cost_price) *
-                    100
-                  ).toFixed(1)}
-                  %
-                </p>
-              </div>
-              <div>
-                <label
-                  className={`block text-sm font-medium mb-1 ${
-                    theme === "dark" ? "text-gray-400" : "text-gray-600"
-                  }`}
-                >
-                  Stock Value
-                </label>
-                <p className="text-lg font-semibold">
-                  {formatCurrency(
-                    (product?.stock_quantity || 0) * (product?.cost_price || 0)
-                  )}
+                  {product.profit_margin_percentage?.substring(0, 5)}%
                 </p>
               </div>
             </div>
@@ -486,7 +466,7 @@ export default function ProductDetail({ setActiveTab, activeTab }) {
                   Total Sold
                 </span>
                 <span className="font-semibold">
-                  {product?.total_sold || 0}
+                  {product?.total_quantity || 0}
                 </span>
               </div>
 
@@ -499,22 +479,7 @@ export default function ProductDetail({ setActiveTab, activeTab }) {
                   Revenue
                 </span>
                 <span className="font-semibold">
-                  {formatCurrency(
-                    (product?.total_sold || 0) * (product?.price || 0)
-                  )}
-                </span>
-              </div>
-
-              <div className="flex justify-between items-center">
-                <span
-                  className={`text-sm ${
-                    theme === "dark" ? "text-gray-400" : "text-gray-600"
-                  }`}
-                >
-                  This Month
-                </span>
-                <span className="font-semibold">
-                  {product?.monthly_sold || 0}
+                  {formatCurrency(product?.total_sales || 0)}
                 </span>
               </div>
             </div>
@@ -548,54 +513,6 @@ export default function ProductDetail({ setActiveTab, activeTab }) {
                   <FiPackage size={48} />
                 </div>
               )}
-            </div>
-          </div>
-
-          {/* Additional Information */}
-          <div
-            className={`rounded-xl border shadow-md p-6 ${
-              theme === "dark"
-                ? "bg-gray-800 border-gray-700 text-white"
-                : "bg-white border-gray-200 text-slate-700"
-            }`}
-          >
-            <h2 className="text-lg font-semibold mb-4">Additional Info</h2>
-
-            <div className="space-y-3">
-              <div className="flex justify-between">
-                <span
-                  className={`text-sm ${
-                    theme === "dark" ? "text-gray-400" : "text-gray-600"
-                  }`}
-                >
-                  Last Updated
-                </span>
-                <span className="text-sm">
-                  {new Date(product?.updated_at).toLocaleDateString()}
-                </span>
-              </div>
-
-              <div className="flex justify-between">
-                <span
-                  className={`text-sm ${
-                    theme === "dark" ? "text-gray-400" : "text-gray-600"
-                  }`}
-                >
-                  Supplier
-                </span>
-                <span className="text-sm">{product?.supplier || "N/A"}</span>
-              </div>
-
-              <div className="flex justify-between">
-                <span
-                  className={`text-sm ${
-                    theme === "dark" ? "text-gray-400" : "text-gray-600"
-                  }`}
-                >
-                  Barcode
-                </span>
-                <span className="text-sm">{product?.barcode || "N/A"}</span>
-              </div>
             </div>
           </div>
         </div>

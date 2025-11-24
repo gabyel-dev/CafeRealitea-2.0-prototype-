@@ -16,6 +16,7 @@ import {
 import { useTheme } from "../../Main/ThemeContext";
 import Loader from "../../components/UI/loaders/Loader";
 import { useOrderContext } from "../../Main/OrderDetailContext";
+import { useProductDetailContext } from "../../Main/ProductDetailContext";
 
 const socket = io("https://caferealitea.onrender.com");
 
@@ -87,6 +88,7 @@ export default function Dashboard({
   const navigate = useNavigate();
 
   const { setOrderID, orderID } = useOrderContext();
+  const { setProductID, productID } = useProductDetailContext();
 
   // State variables
   const [timeRange, setTimeRange] = useState("monthly");
@@ -441,6 +443,11 @@ export default function Dashboard({
                 <div className="flex-1 space-y-4 pb-4">
                   {topItems.slice(0, 4).map((item, index) => (
                     <div
+                      onClick={() => {
+                        setProductID(item.item_id);
+
+                        setActiveTab("Product Detail");
+                      }}
                       key={item.item_id}
                       className="flex items-center justify-between p-3 rounded-lg hover:bg-base-200 transition-colors"
                     >
