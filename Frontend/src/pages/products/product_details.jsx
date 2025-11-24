@@ -583,14 +583,14 @@ export default function ProductDetail({ setActiveTab, activeTab }) {
                       <div
                         className={`p-4 rounded-xl border ${
                           theme === "dark"
-                            ? "bg-emerald-900/10 border-emerald-800"
-                            : "bg-emerald-50 border-emerald-200"
+                            ? "bg-red-900/10 border-red-800"
+                            : "bg-red-50 border-red-200"
                         }`}
                       >
                         <div className="flex items-center space-x-2 mb-3">
-                          <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
+                          <div className="p-2 bg-emerald-100 dark:bg-red-900/30 rounded-lg">
                             <FiShoppingCart
-                              className="text-emerald-600"
+                              className="text-red-600"
                               size={16}
                             />
                           </div>
