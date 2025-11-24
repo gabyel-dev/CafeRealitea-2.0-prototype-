@@ -1270,7 +1270,7 @@ export default function SalesHistory({
                                       : "text-gray-900"
                                   }`}
                                 >
-                                  #{sale.id}
+                                  #ORD-{sale.id}
                                 </div>
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">

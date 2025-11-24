@@ -5,8 +5,13 @@ export default function ProductUpdate({
   product_id,
   product_name,
   setVisible,
+  onPriceUpdate, // Add this prop
 }) {
   const [price, setPrice] = useState("");
+  const [formData, setFormData] = useState({
+    price: "",
+    status: "active",
+  });
   const [errorMsg, setErrorMsg] = useState(null);
   const [success, setSuccess] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -27,16 +32,16 @@ export default function ProductUpdate({
     setSuccess(null);
   }, [price]);
 
-  const updated_price = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     // Validation
-    if (!price.trim()) {
+    if (!formData.price.trim()) {
       setErrorMsg("Please enter a price");
       return;
     }
 
-    if (isNaN(price) || parseFloat(price) <= 0) {
+    if (isNaN(formData.price) || parseFloat(formData.price) <= 0) {
       setErrorMsg("Please enter a valid price (greater than 0)");
       return;
     }
@@ -46,15 +51,30 @@ export default function ProductUpdate({
     const api = import.meta.env.VITE_SERVER_API_NAME;
 
     try {
-      const res = await axios.post(`${api}/update/product/${product_id}`, {
-        price: parseFloat(price),
-      });
-      setSuccess(res.data.message || "Price updated successfully!");
+      const res = await axios
+        .post(`${api}/update/product/${product_id}`, formData, {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+        .then((res) => {
+          setSuccess(res.data.message);
+
+          // Call the onPriceUpdate prop with the new price
+          if (onPriceUpdate) {
+            onPriceUpdate(product_id, parseFloat(formData.price));
+          }
+        });
     } catch (err) {
-      setErrorMsg(err.response?.data?.message || "Update price failed");
+      setErrorMsg(err.response?.data?.message || "Update Failed");
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleOnChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleOverlayClick = (e) => {
@@ -146,30 +166,42 @@ export default function ProductUpdate({
         )}
 
         {/* Form */}
-        <form onSubmit={updated_price} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               New Price
             </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <span className="text-gray-500">P</span>
+            <div className="relative flex items-center space-x-2">
+              {/* Price input */}
+              <div className="relative flex-1">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <span className="text-gray-500">P</span>
+                </div>
+                <input
+                  type="text"
+                  name="price"
+                  value={formData.price}
+                  onChange={handleOnChange}
+                  placeholder="0.00"
+                  className="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200"
+                  disabled={isLoading}
+                  autoFocus
+                />
               </div>
-              <input
-                type="text"
-                name="price"
-                value={price}
-                onChange={(e) =>
-                  setPrice(e.target.value.replace(/[^0-9.]/g, ""))
-                }
-                placeholder="0.00"
-                className="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200"
-                disabled={isLoading}
-                autoFocus
-              />
+
+              {/* Status select */}
+              <select
+                name="status"
+                value={formData.status}
+                onChange={handleOnChange}
+                className="border border-gray-300 rounded-lg py-3 px-4 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-gray-700"
+              >
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
             </div>
             <p className="text-xs text-gray-500 mt-2">
-              Enter the new price for this product
+              Enter the new price and select the status for this product
             </p>
           </div>
 
@@ -185,7 +217,7 @@ export default function ProductUpdate({
             </button>
             <button
               type="submit"
-              disabled={isLoading || !price.trim()}
+              disabled={isLoading || formData.price < 1}
               className="px-6 py-2.5 bg-indigo-600 text-white hover:bg-indigo-700 rounded-lg font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
             >
               {isLoading ? (

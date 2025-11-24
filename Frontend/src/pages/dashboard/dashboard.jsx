@@ -445,7 +445,6 @@ export default function Dashboard({
                     <div
                       onClick={() => {
                         setProductID(item.item_id);
-
                         setActiveTab("Product Detail");
                       }}
                       key={item.item_id}

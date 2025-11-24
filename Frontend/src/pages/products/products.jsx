@@ -199,7 +199,7 @@ export default function ProductPage({ setActiveTab, activeTab }) {
       {selectedProduct && visible && (
         <ProductUpdate
           product_id={selectedProduct.id}
-          product_name={selectedProduct.name}
+          product_name={selectedProduct.product_name}
           setVisible={setVisible}
           theme={theme}
         />
@@ -674,13 +674,15 @@ export default function ProductPage({ setActiveTab, activeTab }) {
                         <div className="flex space-x-3">
                           <button
                             onClick={() => {
-                              setSelectedProduct(product);
-                              setVisible(true);
+                              /* setSelectedProduct(product); */
+                              /* setVisible(true); */
+                              setActiveTab("Product Detail");
+                              setProductID(product.id);
                             }}
-                            className="text-indigo-600 hover:text-indigo-900 transition-colors"
+                            className="text-white bg-indigo-500 px-5 py-1 rounded-md flex items-center justify-center hover:text-indigo-900 transition-colors"
                           >
                             <FiEdit className="inline mr-1" />
-                            Edit
+                            View Product
                           </button>
                         </div>
                       </td>

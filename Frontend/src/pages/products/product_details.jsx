@@ -22,6 +22,7 @@ import {
 } from "react-icons/fi";
 import { useTheme } from "../../Main/ThemeContext";
 import { useProductDetailContext } from "../../Main/ProductDetailContext";
+import ProductUpdate from "./product_update";
 
 export default function ProductDetail({ setActiveTab, activeTab }) {
   const { productID } = useProductDetailContext();
@@ -31,6 +32,24 @@ export default function ProductDetail({ setActiveTab, activeTab }) {
   const [error, setError] = useState("");
   const [role, setRole] = useState("");
   const { theme } = useTheme();
+  const [open, setEditOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+
+  const [updatedPrice, setUpdatedPrice] = useState(null);
+
+  const handlePriceUpdate = (productId, newPrice) => {
+    if (productId === productID) {
+      setUpdatedPrice(newPrice);
+    }
+  };
+
+  const getDisplayPrice = () => {
+    return updatedPrice !== null ? updatedPrice : product?.price;
+  };
+
+  useEffect(() => {
+    setUpdatedPrice(null);
+  }, [productID]);
 
   function generateProductCode(productId, categoryName) {
     const prefix = categoryName?.slice(0, 3).toUpperCase();
@@ -71,6 +90,7 @@ export default function ProductDetail({ setActiveTab, activeTab }) {
       const res = await axios.get(
         `https://caferealitea.onrender.com/products/${productID}`
       );
+      setSelectedProduct(res.data);
       setProduct(res.data);
     } catch (err) {
       console.error("Error fetching product details:", err);
@@ -118,11 +138,6 @@ export default function ProductDetail({ setActiveTab, activeTab }) {
         {config.text}
       </span>
     );
-  };
-
-  const handleEdit = () => {
-    setSelectedProductId(productID);
-    setActiveTab("Edit Product");
   };
 
   const handleDelete = async () => {
@@ -319,10 +334,19 @@ export default function ProductDetail({ setActiveTab, activeTab }) {
       } py-3`}
     >
       <div className="max-w-7xl mx-auto px-0 md:px-3">
+        {selectedProduct && open && (
+          <ProductUpdate
+            product_id={selectedProduct.product_id}
+            product_name={selectedProduct.product_name}
+            setVisible={setEditOpen}
+            onPriceUpdate={handlePriceUpdate}
+            theme={theme}
+          />
+        )}
         {/* Header Section */}
         <div className="mb-8">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div className="flex items-start space-x-4">
+            <div className="flex items-start space-x-4 w-full">
               <button
                 onClick={() => setActiveTab("Products")}
                 className={`mt-1 p-2.5 rounded-xl transition-all duration-200 ${
@@ -334,13 +358,14 @@ export default function ProductDetail({ setActiveTab, activeTab }) {
                 <FiArrowLeft size={20} />
               </button>
               <div>
-                <div className="flex items-center space-x-3 mb-2">
+                <div className="flex items-center space-x-3 mb-2 ">
                   <h1
                     className={`text-2xl font-bold ${
                       theme === "dark" ? "text-white" : "text-gray-900"
                     }`}
                   >
-                    {product?.product_name}
+                    <span className="mr-3">{product?.product_name}</span>
+                    {getStatusBadge(product?.product_status)}
                   </h1>
                 </div>
                 <p
@@ -511,7 +536,7 @@ export default function ProductDetail({ setActiveTab, activeTab }) {
                     theme === "dark" ? "text-white" : "text-gray-900"
                   } mb-1`}
                 >
-                  {formatCurrency(product?.price)}
+                  {formatCurrency(getDisplayPrice())}
                 </p>
                 <p className="text-xs text-gray-500">Current market price</p>
               </div>
@@ -647,7 +672,10 @@ export default function ProductDetail({ setActiveTab, activeTab }) {
                 <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
                 <div className="space-y-3">
                   <button
-                    onClick={handleEdit}
+                    onClick={() => {
+                      setEditOpen(true);
+                      setSelectedProduct(selectedProduct);
+                    }}
                     className="w-full btn btn-outline flex items-center space-x-2 justify-center py-2.5"
                   >
                     <FiEdit size={18} />
@@ -682,7 +710,7 @@ export default function ProductDetail({ setActiveTab, activeTab }) {
                   >
                     Status
                   </span>
-                  {getStatusBadge(product?.status)}
+                  {getStatusBadge(product?.product_status)}
                 </div>
                 <div className="flex justify-between items-center">
                   <span
