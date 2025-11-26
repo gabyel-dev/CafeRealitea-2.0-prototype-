@@ -10,21 +10,21 @@ export default function MemberProfileWrapper({ activeTab, setActiveTab }) {
   return (
     <div className="bg-indigo-50 w-full  ">
       <main>
-        {activeTab === "Members" && (
+        <div hidden={activeTab !== "Members"}>
           <UsersManagement
             setActiveTab={setActiveTab}
             activeTab={activeTab}
             setSelectedUserId={setSelectedUserId}
           />
-        )}
+        </div>
 
-        {activeTab === "member_profile" && (
+        <div hidden={activeTab !== "member_profile"}>
           <MemberProfile
             setActiveTab={setActiveTab}
             activeTab={activeTab}
             userId={selectedUserId}
           />
-        )}
+        </div>
       </main>
     </div>
   );

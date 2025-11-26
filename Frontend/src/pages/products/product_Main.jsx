@@ -7,17 +7,17 @@ export default function ProductMain({ activeTab, setActiveTab }) {
   return (
     <div className="bg-indigo-50 w-full  ">
       <main>
-        {activeTab === "Products" && (
+        <div hidden={activeTab !== "Products"}>
           <ProductPage setActiveTab={setActiveTab} activeTab={activeTab} />
-        )}
+        </div>
 
-        {activeTab === "Product Detail" && (
+        <div hidden={activeTab !== "Product Detail"}>
           <ProductDetail setActiveTab={setActiveTab} activeTab={activeTab} />
-        )}
+        </div>
 
-        {activeTab === "Product Rank" && (
+        <div hidden={activeTab !== "Product Rank"}>
           <ProductsPage setActiveTab={setActiveTab} activeTab={activeTab} />
-        )}
+        </div>
       </main>
     </div>
   );

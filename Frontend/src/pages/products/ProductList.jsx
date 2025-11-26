@@ -13,11 +13,14 @@ import {
 } from "react-icons/fi";
 import axios from "axios";
 import { useEffect, useMemo, useState } from "react";
+import { useProductDetailContext } from "../../Main/ProductDetailContext";
 
-export default function ProductsPage() {
+export default function ProductsPage({ setActiveTab }) {
   const [productData, setProductData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const { setProductID } = useProductDetailContext();
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -141,7 +144,13 @@ export default function ProductsPage() {
           {!isLoading && productData.length > 0 && (
             <>
               {/* 1st Place */}
-              <div className="relative bg-gradient-to-br from-yellow-50 to-amber-50 rounded-2xl shadow-lg border border-amber-200 p-6">
+              <div
+                className="relative cursor-pointer bg-gradient-to-br from-yellow-50 to-amber-50 rounded-2xl shadow-lg border border-amber-200 p-6"
+                onClick={() => {
+                  setActiveTab("Product Detail");
+                  setProductID(topThree[0]?.item_id);
+                }}
+              >
                 <div className="absolute -top-3 -left-3">
                   <div className="bg-yellow-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">
                     1
@@ -180,7 +189,13 @@ export default function ProductsPage() {
               </div>
 
               {/* 2nd Place */}
-              <div className="relative bg-gradient-to-br from-gray-50 to-slate-100 rounded-2xl shadow-lg border border-gray-200 p-6">
+              <div
+                className="relative cursor-pointer bg-gradient-to-br from-gray-50 to-slate-100 rounded-2xl shadow-lg border border-gray-200 p-6"
+                onClick={() => {
+                  setActiveTab("Product Detail");
+                  setProductID(topThree[1]?.item_id);
+                }}
+              >
                 <div className="absolute -top-3 -left-3">
                   <div className="bg-gray-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">
                     2
@@ -222,7 +237,13 @@ export default function ProductsPage() {
               </div>
 
               {/* 3rd Place */}
-              <div className="relative bg-gradient-to-br from-orange-50 to-amber-50 rounded-2xl shadow-lg border border-orange-200 p-6">
+              <div
+                className="relative bg-gradient-to-br cursor-pointer from-orange-50 to-amber-50 rounded-2xl shadow-lg border border-orange-200 p-6"
+                onClick={() => {
+                  setActiveTab("Product Detail");
+                  setProductID(topThree[2]?.item_id);
+                }}
+              >
                 <div className="absolute -top-3 -left-3">
                   <div className="bg-orange-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">
                     3
@@ -322,7 +343,12 @@ export default function ProductsPage() {
                   productData.slice(3, 20).map((res, index) => (
                     <tr
                       key={res.item_id ?? index}
-                      className="hover:bg-gray-50 transition-colors"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setProductID(res.item_id);
+                        setActiveTab("Product Detail");
+                      }}
+                      className="hover:bg-gray-50 transition-colors cursor-pointer"
                     >
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
