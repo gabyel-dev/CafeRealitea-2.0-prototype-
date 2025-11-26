@@ -488,7 +488,7 @@ export default function Dashboard({
               )}
 
               <button
-                onClick={() => setActiveTab("Products")}
+                onClick={() => setActiveTab("Product Rank")}
                 className="btn btn-primary btn-sm gap-2 mt-auto"
               >
                 View All Products

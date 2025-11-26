@@ -5,30 +5,26 @@ import Loading from "../../components/UI/loaders/Loading";
 import { default as Button } from "../../components/UI/buttons/button";
 import { useNavigate } from "react-router-dom";
 import { BsEye, BsEyeSlash } from "react-icons/bs";
+import { useForm } from "react-hook-form";
 
 const api_name = import.meta.env.VITE_SERVER_API_NAME;
 
 const LoginPage = () => {
-  const [credentials, setCredentials] = useState({
-    username: "",
-    password: "",
-  });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [isFocused, setIsFocused] = useState({ email: false, password: false });
   const nav = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
 
+  // Proper useForm implementation
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
+
   const showPass = (e) => {
     setShowPassword(!showPassword);
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setCredentials({
-      ...credentials,
-      [name]: value,
-    });
   };
 
   const handleFocus = (field) => {
@@ -39,17 +35,16 @@ const LoginPage = () => {
     setIsFocused({ ...isFocused, [field]: false });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  // This function will receive the form data automatically
+  const onSubmit = async (data) => {
     setIsLoading(true);
     setError("");
 
     try {
-      const response = await axios.post(`${api_name}/login`, credentials, {
+      const response = await axios.post(`${api_name}/login`, data, {
         withCredentials: true,
       });
 
-      // Handle successful login (redirect or state update)
       console.log("Login successful", response.data);
       nav("/dashboard");
     } catch (err) {
@@ -73,10 +68,8 @@ const LoginPage = () => {
         });
 
         if (response.data.logged_in && response.data.role !== "") {
-          // User is already authenticated, redirect to dashboard
           nav("/dashboard");
         }
-        // If not logged in, stay on login page
       } catch (error) {
         console.error("Auth check failed:", error);
       }
@@ -111,7 +104,8 @@ const LoginPage = () => {
         className="mt-8 sm:mx-auto sm:w-full sm:max-w-md"
       >
         <div className="bg-white/70 backdrop-blur-lg py-8 px-6 shadow-xl rounded-2xl border border-white/20">
-          <form className="space-y-5" onSubmit={handleSubmit}>
+          {/* Use handleSubmit from react-hook-form */}
+          <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
             <AnimatePresence>
               {error && (
                 <motion.div
@@ -146,25 +140,29 @@ const LoginPage = () => {
 
             <div className="space-y-2">
               <label
-                htmlFor="email"
+                htmlFor="username"
                 className="block text-sm font-medium text-gray-700"
               >
-                Email address
+                Username
               </label>
               <div className="relative mt-1">
                 <input
-                  id="email"
-                  name="username"
+                  id="username"
                   type="text"
                   autoComplete="username"
-                  required
-                  value={credentials.username}
-                  onChange={handleChange}
+                  {...register("username", {
+                    required: "Username is required",
+                  })}
                   onFocus={() => handleFocus("email")}
                   onBlur={() => handleBlur("email")}
                   className="block w-full px-4 py-3 bg-white/50 border border-gray-200 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-slate-700"
-                  placeholder="Enter your email"
+                  placeholder="Enter your username"
                 />
+                {errors.username && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.username.message}
+                  </p>
+                )}
               </div>
             </div>
 
@@ -187,12 +185,11 @@ const LoginPage = () => {
               <div className="relative mt-1 flex">
                 <input
                   id="password"
-                  name="password"
                   type={showPassword ? "text" : "password"}
                   autoComplete="current-password"
-                  required
-                  value={credentials.password}
-                  onChange={handleChange}
+                  {...register("password", {
+                    required: "Password is required",
+                  })}
                   onFocus={() => handleFocus("password")}
                   onBlur={() => handleBlur("password")}
                   className="block w-full px-4 py-3 bg-white/50 border border-gray-200 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-slate-700"
@@ -201,13 +198,18 @@ const LoginPage = () => {
 
                 <button
                   type="button"
-                  onClick={() => showPass()}
+                  onClick={showPass}
                   tabIndex={-1}
                   className="text-indigo-600 absolute right-3 top-[13px] text-lg font-bold px-3 py-1 hover:bg-indigo-50 cursor-pointer rounded-md"
                 >
                   {!showPassword ? <BsEye /> : <BsEyeSlash />}
                 </button>
               </div>
+              {errors.password && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.password.message}
+                </p>
+              )}
             </div>
 
             <div className="pt-2">

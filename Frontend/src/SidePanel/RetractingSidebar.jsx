@@ -14,6 +14,7 @@ import {
   FiUser,
   FiLogOut,
   FiBox,
+  FiStar,
 } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
@@ -274,6 +275,13 @@ const Sidebar2 = ({ activeTab, setActiveTab }) => {
           <Option
             Icon={FiShoppingCart}
             title="Products"
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            open={open}
+          />
+          <Option
+            Icon={FiStar}
+            title="Product Rank"
             activeTab={activeTab}
             setActiveTab={setActiveTab}
             open={open}
