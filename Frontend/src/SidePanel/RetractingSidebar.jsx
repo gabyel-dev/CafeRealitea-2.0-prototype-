@@ -264,6 +264,7 @@ const Sidebar2 = ({ activeTab, setActiveTab }) => {
             setActiveTab={setActiveTab}
             open={open}
             notifs={3}
+            disable={["Staff"].includes(role)}
           />
           <Option
             Icon={FiMonitor}
@@ -278,6 +279,7 @@ const Sidebar2 = ({ activeTab, setActiveTab }) => {
             activeTab={activeTab}
             setActiveTab={setActiveTab}
             open={open}
+            disable={["Staff"].includes(role)}
           />
           <Option
             Icon={FiStar}
@@ -285,6 +287,7 @@ const Sidebar2 = ({ activeTab, setActiveTab }) => {
             activeTab={activeTab}
             setActiveTab={setActiveTab}
             open={open}
+            disable={["Admin", "Staff"].includes(role)}
           />
           <Option
             Icon={FiBox}
@@ -292,6 +295,7 @@ const Sidebar2 = ({ activeTab, setActiveTab }) => {
             activeTab={activeTab}
             setActiveTab={setActiveTab}
             open={open}
+            disable={["Admin", "Staff"].includes(role)}
           />
           <Option
             Icon={FiUsers}
@@ -308,12 +312,15 @@ const Sidebar2 = ({ activeTab, setActiveTab }) => {
   );
 };
 
-const Option = ({ Icon, title, activeTab, setActiveTab, open }) => {
+const Option = ({ Icon, title, activeTab, setActiveTab, open, disable }) => {
   const { theme } = useTheme();
 
   // Base styles
-  const baseClasses =
-    "relative cursor-pointer flex h-10 w-full items-center rounded-md transition-colors px-2 py-1";
+  const baseClasses = `${`relative ${
+    disable
+      ? "cursor-not-allowed opacity-50 hover:bg-transparent"
+      : "cursor-pointer"
+  }  flex h-10 w-full items-center rounded-md transition-colors px-2 py-1`}`;
 
   // Active state
   const activeClasses =
@@ -333,7 +340,8 @@ const Option = ({ Icon, title, activeTab, setActiveTab, open }) => {
       onClick={() => setActiveTab(title)}
       className={`${baseClasses} ${
         activeTab === title ? activeClasses : inactiveClasses
-      }`}
+      } `}
+      disabled={disable}
     >
       <motion.div
         layout
@@ -351,6 +359,7 @@ const Option = ({ Icon, title, activeTab, setActiveTab, open }) => {
             exit={{ opacity: 0, x: -10 }}
             transition={{ duration: 0.15 }}
             className="text-xs font-medium"
+            disabled={disable}
           >
             {title}
           </motion.span>

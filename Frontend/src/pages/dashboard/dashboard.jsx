@@ -444,8 +444,10 @@ export default function Dashboard({
                   {topItems.slice(0, 4).map((item, index) => (
                     <div
                       onClick={() => {
-                        setProductID(item.item_id);
-                        setActiveTab("Product Detail");
+                        if (!["Staff"].includes(role)) {
+                          setProductID(item.item_id);
+                          setActiveTab("Product Detail");
+                        }
                       }}
                       key={item.item_id}
                       className="flex items-center justify-between p-3 rounded-lg hover:bg-base-200 transition-colors"
@@ -488,8 +490,16 @@ export default function Dashboard({
               )}
 
               <button
-                onClick={() => setActiveTab("Product Rank")}
-                className="btn btn-primary btn-sm gap-2 mt-auto"
+                onClick={() => {
+                  if (!["Staff"].includes(role)) {
+                    setActiveTab("Product Rank");
+                  }
+                }}
+                className={`btn  btn-sm gap-2 mt-auto ${
+                  !["Staff"].includes(role)
+                    ? "btn-primary"
+                    : "btn-disabled cursor-not-allowed"
+                }`}
               >
                 View All Products
                 <svg
@@ -635,7 +645,11 @@ export default function Dashboard({
               : "bg-gray-50 hover:bg-gray-100"
           }
         `}
-                onClick={() => setActiveTab("Products")}
+                onClick={() => {
+                  if (!["Staff"].includes(role)) {
+                    setActiveTab("Products");
+                  }
+                }}
               >
                 <span className="flex items-center gap-2">
                   <div

@@ -175,7 +175,11 @@ export default function OrderDetails({ setActiveTab, activeTab, orderID }) {
             </div>
             <button
               onClick={() => {
-                setActiveTab("Sales");
+                if (!["Staff"].includes(role)) {
+                  setActiveTab("Sales");
+                } else {
+                  setActiveTab("Dashboard");
+                }
               }}
               className={`flex items-center px-4 py-2 border rounded-lg transition-colors mt-4 sm:mt-0 ${
                 theme === "dark"
