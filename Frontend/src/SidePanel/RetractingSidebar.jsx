@@ -15,6 +15,8 @@ import {
   FiLogOut,
   FiBox,
   FiStar,
+  FiSun,
+  FiMoon,
 } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
@@ -394,7 +396,7 @@ const TitleSection = ({ open, setActiveTab }) => {
   const [loading, setLoading] = useState(false);
   const [id, setId] = useState();
   const { avatarVersion } = useUser();
-  const { theme } = useTheme();
+  const { theme, setTheme } = useTheme();
 
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
@@ -522,6 +524,33 @@ const TitleSection = ({ open, setActiveTab }) => {
             >
               <FiLogOut className="w-4 h-4" /> Logout
             </button>
+
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <label className="flex items-center gap-2 cursor-pointer">
+                {theme === "dark" ? (
+                  <FiMoon
+                    className={`w-4 h-4 ${
+                      theme === "dark" ? "text-blue-400" : "text-gray-400"
+                    }`}
+                  />
+                ) : (
+                  <FiSun
+                    className={`w-4 h-4 ${
+                      theme === "light" ? "text-amber-500" : "text-gray-400"
+                    }`}
+                  />
+                )}
+                <input
+                  type="checkbox"
+                  className="toggle toggle-primary toggle-sm"
+                  checked={theme === "dark"}
+                  onChange={(e) => {
+                    console.log("Toggle checked:", e.target.checked);
+                    setTheme(e.target.checked ? "dark" : "light");
+                  }}
+                />
+              </label>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

@@ -55,7 +55,6 @@ export const NotificationProvider = ({ children }) => {
 
       socket.on("connect", () => {
         console.log("SocketIO connected successfully");
-        setSocketConnected(true);
       });
 
       // Connect and register user
