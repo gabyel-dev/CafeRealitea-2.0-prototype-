@@ -75,7 +75,7 @@ export default function MainLayout() {
         });
 
         socket.on("order_cancelled", (data) => {
-          toast.success(`${data.message}`, {
+          toast.error(`${data.message}`, {
             position: "top-right",
             autoClose: 6000,
             hideProgressBar: false,
@@ -87,6 +87,7 @@ export default function MainLayout() {
         });
 
         socket.on("notification", (data) => {
+          setNotifLength((prev) => prev + 1);
           toast.error(`${data.message}`, {
             position: "top-right",
             autoClose: 6000,

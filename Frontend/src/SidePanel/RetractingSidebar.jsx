@@ -26,6 +26,7 @@ import { io } from "socket.io-client";
 import Loader from "../components/UI/loaders/Loader";
 import { useUser } from "../Main/UserContext";
 import { useTheme } from "../Main/ThemeContext";
+import { useNotificationContext } from "../Main/NotificationContext";
 
 export const Sidebar = ({ activeTab, setActiveTab }) => {
   return (
@@ -46,6 +47,7 @@ const Sidebar2 = ({ activeTab, setActiveTab }) => {
   const sidebarRef = useRef(null); // 👈 sidebar reference
   const socketRef = useRef(null);
   const { theme } = useTheme();
+  const { notifLength } = useNotificationContext();
 
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -263,7 +265,6 @@ const Sidebar2 = ({ activeTab, setActiveTab }) => {
             activeTab={activeTab}
             setActiveTab={setActiveTab}
             open={open}
-            notifs={3}
             disable={["Staff"].includes(role)}
           />
           <Option
@@ -272,6 +273,7 @@ const Sidebar2 = ({ activeTab, setActiveTab }) => {
             activeTab={activeTab}
             setActiveTab={setActiveTab}
             open={open}
+            notifs={notifLength}
           />
           <Option
             Icon={FiShoppingCart}
@@ -312,7 +314,15 @@ const Sidebar2 = ({ activeTab, setActiveTab }) => {
   );
 };
 
-const Option = ({ Icon, title, activeTab, setActiveTab, open, disable }) => {
+const Option = ({
+  Icon,
+  title,
+  notifs,
+  activeTab,
+  setActiveTab,
+  open,
+  disable,
+}) => {
   const { theme } = useTheme();
 
   // Base styles
@@ -320,7 +330,7 @@ const Option = ({ Icon, title, activeTab, setActiveTab, open, disable }) => {
     disable
       ? "cursor-not-allowed opacity-50 hover:bg-transparent"
       : "cursor-pointer"
-  }  flex h-10 w-full items-center rounded-md transition-colors px-2 py-1`}`;
+  } flex h-10 w-full items-center rounded-md transition-colors px-2 py-1`}`;
 
   // Active state
   const activeClasses =
@@ -362,6 +372,13 @@ const Option = ({ Icon, title, activeTab, setActiveTab, open, disable }) => {
             disabled={disable}
           >
             {title}
+
+            {/* SHOW NOTIFICATION ONLY FOR SALES */}
+            {title === "Orders" && (
+              <span className="absolute flex items-center shadow-md top-[10px] right-2  h-5 w-5 text-center justify-center rounded-full bg-red-500 text-[10px] text-white">
+                {notifs}
+              </span>
+            )}
           </motion.span>
         )}
       </AnimatePresence>

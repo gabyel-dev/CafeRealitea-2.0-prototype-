@@ -17,8 +17,7 @@ import { useTheme } from "../../Main/ThemeContext";
 import Loader from "../../components/UI/loaders/Loader";
 import { useOrderContext } from "../../Main/OrderDetailContext";
 import { useProductDetailContext } from "../../Main/ProductDetailContext";
-
-const socket = io("https://caferealitea.onrender.com");
+import { useNotificationContext } from "../../Main/NotificationContext";
 
 // Stat Card Component for better reusability
 function StatCard({ title, value, change, icon, theme }) {
@@ -89,6 +88,7 @@ export default function Dashboard({
 
   const { setOrderID, orderID } = useOrderContext();
   const { setProductID, productID } = useProductDetailContext();
+  const { notifLength } = useNotificationContext();
 
   // State variables
   const [timeRange, setTimeRange] = useState("monthly");
@@ -226,51 +226,6 @@ export default function Dashboard({
     };
 
     fetchDashboardData();
-  }, []);
-
-  //fetch pending order length
-  useEffect(() => {
-    const fetchInitialNotifications = async () => {
-      try {
-        const res = await fetch(
-          "https://caferealitea.onrender.com/pending-orders",
-          {
-            credentials: "include",
-          }
-        );
-        if (res.ok) {
-          const data = await res.json();
-          if (Array.isArray(data)) setPendingOrder(data.length);
-        }
-      } catch (err) {
-        console.error("Error fetching initial notifications:", err);
-      }
-    };
-
-    fetchInitialNotifications();
-
-    // Initialize socket
-    socketRef.current = io("https://caferealitea.onrender.com", {
-      withCredentials: true,
-    });
-
-    const updateNotifications = (data, increment = 0) => {
-      if (typeof data.count === "number") setPendingOrder(data.count);
-      else setNotifications((prev) => prev + increment);
-    };
-
-    socketRef.current.on("new_pending_order", (data) =>
-      updateNotifications(data, 1)
-    );
-    socketRef.current.on("order_cancelled", (data) =>
-      updateNotifications(data, -1)
-    );
-    socketRef.current.on("order_confirmed", (data) =>
-      updateNotifications(data, -1)
-    );
-
-    // Cleanup
-    return () => socketRef.current.disconnect();
   }, []);
 
   if (isLoading) {
@@ -738,7 +693,7 @@ export default function Dashboard({
                     theme === "dark" ? "text-cyan-300" : "text-cyan-600"
                   }`}
                 >
-                  {pendingOrder}
+                  {notifLength}
                 </span>
               </div>
             </div>
