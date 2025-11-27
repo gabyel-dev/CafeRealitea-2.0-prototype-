@@ -493,64 +493,88 @@ const TitleSection = ({ open, setActiveTab }) => {
             exit={{ opacity: 0, y: -5 }}
             className={`${
               open
-                ? "absolute translate-y-0 translate-x-20 mt-2 w-48  shadow-lg border-1 p-3 z-50 rounded-xl flex flex-col gap-2"
-                : "absolute translate-y-0 translate-x-0 mt-2 w-48  shadow-lg p-3 z-50 rounded-xl flex flex-col gap-2 "
+                ? "absolute translate-y-0 translate-x-20 mt-2 w-48 shadow-lg border-1 p-3 z-50 rounded-xl flex flex-col gap-2"
+                : "absolute translate-y-0 translate-x-0 mt-2 w-48 shadow-lg p-3 z-50 rounded-xl flex flex-col gap-2"
             } ${
               theme === "dark"
                 ? "dark-card border-slate-100"
                 : "bg-white border-slate-300"
             }`}
           >
-            <button
-              onClick={() => setActiveTab("Profile")}
-              className={`flex items-center gap-2 text-sm hover:text-indigo-600 ${
-                theme === "dark" ? "text-white" : "text-slate-700"
-              }`}
-            >
-              <FiUser className="w-4 h-4" /> Profile
-            </button>
-            <button
-              className={`flex items-center gap-2 text-sm hover:text-indigo-600 ${
-                theme === "dark" ? "text-white" : "text-slate-700"
-              }`}
-            >
-              <FiSettings className="w-4 h-4" /> Account Settings
-            </button>
-
-            <div className="flex items-center gap-2 w-full sm:w-auto">
-              <label className="flex items-center gap-2 cursor-pointer">
-                {theme === "dark" ? (
-                  <FiMoon
-                    className={`w-4 h-4 ${
-                      theme === "dark" ? "text-blue-400" : "text-gray-400"
-                    }`}
-                  />
-                ) : (
-                  <FiSun
-                    className={`w-4 h-4 ${
-                      theme === "light" ? "text-amber-500" : "text-gray-400"
-                    }`}
-                  />
-                )}
-                <input
-                  type="checkbox"
-                  className="toggle toggle-primary toggle-sm"
-                  checked={theme === "dark"}
-                  onChange={(e) => {
-                    console.log("Toggle checked:", e.target.checked);
-                    setTheme(e.target.checked ? "dark" : "light");
-                  }}
-                />
-              </label>
+            {/* User Section */}
+            <div className="flex flex-col gap-1">
+              <span
+                className={`text-xs font-medium pb-1 ${
+                  theme === "dark" ? "text-slate-300" : "text-slate-500"
+                }`}
+              >
+                Manage Profile
+              </span>
+              <button
+                onClick={() => setActiveTab("Profile")}
+                className={`flex pl-2 items-center gap-2 text-sm hover:text-indigo-600 ${
+                  theme === "dark" ? "text-white" : "text-slate-700"
+                }`}
+              >
+                <FiUser className="w-4 h-4" /> Profile
+              </button>
+              <button
+                className={`flex pl-2 items-center gap-2 text-sm hover:text-indigo-600 ${
+                  theme === "dark" ? "text-white" : "text-slate-700"
+                }`}
+              >
+                <FiSettings className="w-4 h-4" /> Account Settings
+              </button>
             </div>
-            <button
-              onClick={() => logout(navigate, setLoading)}
-              className={`flex items-center gap-2 text-sm hover:text-red-600 ${
-                theme === "dark" ? "text-white" : "text-slate-700"
-              }`}
-            >
-              <FiLogOut className="w-4 h-4" /> Logout
-            </button>
+
+            {/* Preferences Section */}
+            <div className="border-t  pt-2 mt-1 border-slate-200 ">
+              <div className="flex flex-col gap-2">
+                <span
+                  className={`text-xs font-medium ${
+                    theme === "dark" ? "text-slate-300" : "text-slate-500"
+                  }`}
+                >
+                  Theme
+                </span>
+                <label className="flex items-center gap-2 cursor-pointer pl-2">
+                  {theme === "dark" ? (
+                    <FiMoon
+                      className={`w-4 h-4 ${
+                        theme === "dark" ? "text-blue-400" : "text-gray-400"
+                      }`}
+                    />
+                  ) : (
+                    <FiSun
+                      className={`w-4 h-4 ${
+                        theme === "light" ? "text-amber-500" : "text-gray-400"
+                      }`}
+                    />
+                  )}
+                  <input
+                    type="checkbox"
+                    className="toggle toggle-primary toggle-sm "
+                    checked={theme === "dark"}
+                    onChange={(e) => {
+                      console.log("Toggle checked:", e.target.checked);
+                      setTheme(e.target.checked ? "dark" : "light");
+                    }}
+                  />
+                </label>
+              </div>
+            </div>
+
+            {/* Actions Section */}
+            <div className="border-t pt-2 mt-1 border-slate-200 ">
+              <button
+                onClick={() => logout(navigate, setLoading)}
+                className={`flex items-center gap-2 text-sm hover:text-red-600 ${
+                  theme === "dark" ? "text-white" : "text-slate-700"
+                }`}
+              >
+                <FiLogOut className="w-4 h-4" /> Logout
+              </button>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
