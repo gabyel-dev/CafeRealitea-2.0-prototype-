@@ -516,14 +516,6 @@ const TitleSection = ({ open, setActiveTab }) => {
             >
               <FiSettings className="w-4 h-4" /> Account Settings
             </button>
-            <button
-              onClick={() => logout(navigate, setLoading)}
-              className={`flex items-center gap-2 text-sm hover:text-red-600 ${
-                theme === "dark" ? "text-white" : "text-slate-700"
-              }`}
-            >
-              <FiLogOut className="w-4 h-4" /> Logout
-            </button>
 
             <div className="flex items-center gap-2 w-full sm:w-auto">
               <label className="flex items-center gap-2 cursor-pointer">
@@ -551,6 +543,14 @@ const TitleSection = ({ open, setActiveTab }) => {
                 />
               </label>
             </div>
+            <button
+              onClick={() => logout(navigate, setLoading)}
+              className={`flex items-center gap-2 text-sm hover:text-red-600 ${
+                theme === "dark" ? "text-white" : "text-slate-700"
+              }`}
+            >
+              <FiLogOut className="w-4 h-4" /> Logout
+            </button>
           </motion.div>
         )}
       </AnimatePresence>
